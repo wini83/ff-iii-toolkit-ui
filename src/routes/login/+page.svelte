@@ -1,30 +1,41 @@
 <script lang="ts">
-	let loginUser = "";
-	let loginPass = "";
-	let errorMsg = "";
+    let username = "";
+    let password = "";
+    let error = "";
 
-	async function handleLogin(e: Event) {
-		e.preventDefault();
-		errorMsg = "";
+	import { API_BASE } from "$lib/config";
 
-		try {
-			const res = await fetch("/api/login", {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ username: loginUser, password: loginPass })
-			});
+    async function login(e) {
+        e.preventDefault();
+        error = "";
 
-			if (!res.ok) {
-				errorMsg = "Invalid credentials";
-				return;
-			}
+        const response = await fetch(`${API_BASE}/auth/token`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            body: new URLSearchParams({
+                username,
+                password
+            })
+        });
 
-			// redirect — placeholder
-			window.location.href = "/dashboard";
-		} catch (err) {
-			errorMsg = "Network error";
-		}
-	}
+        if (!response.ok) {
+            error = "Nieprawidłowy login lub hasło";
+            return;
+        }
+
+        const data = await response.json();
+
+        // zapisujemy token tak jak wcześniej
+        localStorage.setItem("access_token", data.access_token);
+
+		// ustawiamy cookie od razu — BEZ przechodzenia do (app)
+		document.cookie = `access_token_client=${data.access_token}; Path=/;`;
+
+        // redirect na landing page
+        window.location.href = "/";   // możesz zmienić na '/'
+    }
 </script>
 
 <div class="min-h-screen bg-base-200 flex items-center">
@@ -59,14 +70,14 @@
 			<div class="py-24 px-10">
 				<h2 class="text-2xl font-semibold mb-2 text-center">Login</h2>
 
-				<form on:submit={handleLogin}>
+				<form on:submit={login}>
 					<div class="form-control w-full mt-4">
 						<label class="label">
 							<span class="label-text">Email Id</span>
 						</label>
 						<input
 							id="loginUser"
-							bind:value={loginUser}
+							bind:value={username}
 							placeholder="User"
 							class="input input-bordered w-full"
 						/>
@@ -79,7 +90,7 @@
 						<input
 							type="password"
 							id="loginPass"
-							bind:value={loginPass}
+							bind:value={password}
 							class="input input-bordered w-full"
 						/>
 					</div>
@@ -90,8 +101,8 @@
 						</a>
 					</div>
 
-					{#if errorMsg}
-						<p class="text-center text-error mt-6">{errorMsg}</p>
+					{#if error}
+						<p class="text-center text-error mt-6">{error}</p>
 					{/if}
 
 					<button type="submit" class="btn mt-6 w-full btn-primary">

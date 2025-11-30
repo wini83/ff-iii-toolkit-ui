@@ -1,12 +1,25 @@
 <script lang="ts">
  
     let drawerOpen = $state(false);
+    import { browser } from '$app/environment';
+
+    // przepisujemy token z localStorage → cookie
+	if (browser) {
+		const token = localStorage.getItem("access_token");
+
+		if (token && !document.cookie.includes("access_token_client=")) {
+			document.cookie = `access_token_client=${token}; Path=/;`;
+		}
+	}
 
     function toggle() {
         drawerOpen = !drawerOpen;
     }
 
     function logout() {
+
+        document.cookie = "access_token_client=; Path=/; Max-Age=0";
+
         localStorage.removeItem("access_token");
         window.location.href = "/login";
     }
