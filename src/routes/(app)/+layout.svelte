@@ -80,10 +80,6 @@
         <ul class="menu p-4 w-80 min-h-full bg-base-100 text-base-content">
             <li class="menu-title text-xl">Firefly Toolkit</li>
 
-            <li><a href="/upload">Upload pliku</a></li>
-            <li><a href="/file/demo">Podgląd pliku</a></li>
-            <li><a href="/match/demo">Matchowanie</a></li>
-
             <li>
                 <details open>
                     <summary class="cursor-pointer flex items-center gap-2">
@@ -97,7 +93,7 @@
 
                     <ul>
                         <li>
-                            <a href="/upload">
+                            <a href="/blik/upload">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none"
                                     viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
                                     class="h-6 w-6">
