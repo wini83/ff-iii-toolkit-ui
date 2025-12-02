@@ -1,6 +1,16 @@
 <script lang="ts">
+  import { afterUpdate } from "svelte";
+
   export let form; // dane zwrócone z server action
   let fileName = "";
+
+  afterUpdate(() => {
+    if (form?.id) {
+      setTimeout(() => {
+        window.location.href = `/blik/file/${form.id}`;
+      }, 800);
+    }
+  });
 </script>
 
 <div class="card w-full p-6 bg-base-100 shadow-xl mt-2">
@@ -18,7 +28,10 @@
         type="file"
         name="file"
         class="hidden"
-        on:change={(e) => fileName = e.target.files?.[0]?.name ?? ""}
+        on:change={(e) => {
+            const input = e.target as HTMLInputElement | null;
+            fileName = input?.files?.[0]?.name ?? "";
+        }}
       />
 
       {#if fileName}
