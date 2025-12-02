@@ -9,82 +9,95 @@
   }
 
   function formatAmount(v: number) {
-    if (v == null) return "";
-    return Number(v).toLocaleString('pl-PL', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    if (v == null) return '';
+    return Number(v).toLocaleString('pl-PL', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
   }
 </script>
 
-<div class="max-w-6xl mx-auto py-10 space-y-6">
-  <div class="flex items-start justify-between">
-    <div>
-      <h1 class="text-2xl font-bold">Podgląd pliku</h1>
-      <p class="text-sm text-gray-600">Nazwa: <span class="font-medium">{decoded_name || file_id}</span></p>
-      <p class="text-sm text-gray-500">Rozmiar: {size} bajtów</p>
-    </div>
+<!-- STEPS -->
+<div class="card bg-base-100 mt-2 w-full p-6 shadow-xl">
+  <ul class="steps hidden w-1/2 flex-none md:flex">
+    <li class="step step-primary"><a href="/blik/upload">Upload</a></li>
+    <li class="step step-primary"><a href="/blik/file/{file_id}">File Preview</a></li>
+    <li class="step"><a href="/blik/match/{file_id}">Match</a></li>
+    <li class="step">Update</li>
+  </ul>
+</div>
 
-    <div class="flex gap-3">
-      <button
-        class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
-        on:click={goToMatch}
-        disabled={!file_id}
-      >
-        Dopasuj transakcje
-      </button>
+<!-- TABLE -->
 
-      <a href="/blik/upload" class="px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200">Wróć</a>
+<div class="card bg-base-100 mt-2 w-full p-6 shadow-xl">
+  <div class="inline-block text-xl font-semibold">
+    Transactions in file {file_id}
+    <span class="badge badge-info">{size} records</span>
+    <div class="float-right inline-block">
+      <div class="float-right inline-block">
+        <div class="mr-4 inline-block">
+          <div class="input-group relative flex w-full flex-wrap items-stretch">
+            <input
+              type="search"
+              placeholder="Search"
+              class="input input-sm input-bordered w-full max-w-xs"
+              value=""
+            />
+          </div>
+        </div>
+        <button class="btn btn-sm btn-primary" on:click={goToMatch}
+          >Match Transactions ({content.length})</button
+        >
+      </div>
     </div>
   </div>
 
+  <div class="divider mt-2"></div>
+
   {#if error}
-    <div class="p-4 bg-red-50 border border-red-200 text-red-700 rounded">
+    <div class="rounded border border-red-200 bg-red-50 p-4 text-red-700">
       ⚠️ {error}
     </div>
   {/if}
 
   {#if content?.length === 0}
-    <div class="p-6 bg-yellow-50 border border-yellow-200 rounded text-yellow-800">
+    <div class="rounded border border-yellow-200 bg-yellow-50 p-6 text-yellow-800">
       Brak rekordów w przesłanym pliku.
     </div>
   {:else}
-    <div class="shadow rounded-lg overflow-auto border">
-      <table class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-gray-50">
-          <tr>
-            <th class="px-3 py-2 text-left text-xs font-semibold text-gray-700">Data</th>
-            <th class="px-3 py-2 text-left text-xs font-semibold text-gray-700">Kwota</th>
-            <th class="px-3 py-2 text-left text-xs font-semibold text-gray-700">Operacja (kwota)</th>
-            <th class="px-3 py-2 text-left text-xs font-semibold text-gray-700">Waluta</th>
-            <th class="px-3 py-2 text-left text-xs font-semibold text-gray-700">Nadawca</th>
-            <th class="px-3 py-2 text-left text-xs font-semibold text-gray-700">Odbiorca</th>
-            <th class="px-3 py-2 text-left text-xs font-semibold text-gray-700">Szczegóły</th>
-            <th class="px-3 py-2 text-left text-xs font-semibold text-gray-700">Nr konta nadawcy</th>
-            <th class="px-3 py-2 text-left text-xs font-semibold text-gray-700">Nr konta odbiorcy</th>
-          </tr>
-        </thead>
-        <tbody class="bg-white divide-y divide-gray-100">
-          {#each content as row, i}
-            <tr class="hover:bg-gray-50">
-              <td class="px-3 py-2 text-sm text-gray-800">{row.date}</td>
-              <td class="px-3 py-2 text-sm text-gray-800">{formatAmount(row.amount)}</td>
-              <td class="px-3 py-2 text-sm text-gray-800">{formatAmount(row.operation_amount)}</td>
-              <td class="px-3 py-2 text-sm text-gray-800">{row.operation_currency ?? row.account_currency}</td>
-              <td class="px-3 py-2 text-sm text-gray-800">{row.sender || "-"}</td>
-              <td class="px-3 py-2 text-sm text-gray-800">{row.recipient || "-"}</td>
-              <td class="px-3 py-2 text-sm text-gray-800 break-words max-w-xs">{row.details || "-"}</td>
-              <td class="px-3 py-2 text-sm text-gray-800">{row.sender_account || "-"}</td>
-              <td class="px-3 py-2 text-sm text-gray-800">{row.recipient_account || "-"}</td>
+    <div class="bg-base-100 h-full w-full pb-6">
+      <div class="w-full overflow-x-auto">
+        <table class="table w-full">
+          <thead>
+            <tr>
+              <th class="whitespace-nowrap">Date</th>
+              <th  class="whitespace-nowrap">Amount</th>
+              <th>Nadawca</th>
+              <th>Odbiorca</th>
+              <th>Szczegóły</th>
             </tr>
-          {/each}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {#each content as row, i}
+              <tr>
+                <td  class="whitespace-nowrap">{row.date}</td>
+                <td class="whitespace-nowrap">{formatAmount(row.amount)} {row.account_currency}<br>
+                <span class="italic">{formatAmount(row.operation_amount)} {row.operation_currency}</span></td>
+                <td class="whitespace-nowrap">{row.sender || '-'} <br>
+                <span class="italic">{row.sender_account || '-'}</span></td>
+                <td class="whitespace-nowrap">{row.recipient || '-'}<br>
+                <span class="italic">{row.recipient_account || '-'}</span></td>
+                <td>{row.details || '-'}</td>
+              </tr>
+            {/each}
+          </tbody>
+        </table>
+      </div>
     </div>
 
     <div class="flex justify-end pt-4">
-      <button
-        class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
-        on:click={goToMatch}
-      >
-        Dopasuj transakcje ({content.length})
+      <button class="btn btn-primary" on:click={goToMatch}>
+        Match Transactions ({content.length})
       </button>
     </div>
   {/if}
