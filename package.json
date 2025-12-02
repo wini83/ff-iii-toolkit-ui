@@ -1,7 +1,7 @@
 {
 	"name": "ff-iii-toolkit-ui",
 	"private": true,
-	"version": "0.0.1",
+	"version": "0.0.2",
 	"type": "module",
 	"scripts": {
 		"dev": "vite dev",
@@ -14,13 +14,11 @@
 		"lint": "prettier --check . && eslint .",
 		"commit": "cz"
 	},
-
 	"config": {
 		"commitizen": {
 			"path": "./node_modules/cz-conventional-changelog"
 		}
 	},
-	
 	"devDependencies": {
 		"@eslint/compat": "^1.4.0",
 		"@eslint/js": "^9.39.1",
