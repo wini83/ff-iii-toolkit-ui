@@ -1,4 +1,5 @@
 import type { PageServerLoad } from "./$types";
+import { API_BASE } from "$lib/config";
 
 interface ApiErrorDetail {
     msg: string;
@@ -14,7 +15,7 @@ export const load: PageServerLoad = async ({ params, cookies, fetch }) => {
     return { error: "Brak tokenu w cookies", file_id: id, decoded_name: "", size: 0, content: [] };
   }
 
-  const res = await fetch(`http://localhost:8000/api/file/${id}`, {
+  const res = await fetch(`${API_BASE}/api/file/${id}`, {
     headers: {
       Authorization: `Bearer ${token}`
     }

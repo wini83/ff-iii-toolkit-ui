@@ -5,7 +5,7 @@
 
   function goToMatch() {
     // przejdź do widoku match
-    window.location.href = `/blik/match/${file_id}`;
+    window.location.href = `/blik/file/${file_id}/match`;
   }
 
   function formatAmount(v: number) {
@@ -22,7 +22,7 @@
   <ul class="steps hidden w-1/2 flex-none md:flex">
     <li class="step step-primary"><a href="/blik/upload">Upload</a></li>
     <li class="step step-primary"><a href="/blik/file/{file_id}">File Preview</a></li>
-    <li class="step"><a href="/blik/match/{file_id}">Match</a></li>
+    <li class="step"><a href="/blik/file/{file_id}/match">Match</a></li>
     <li class="step">Update</li>
   </ul>
 </div>
