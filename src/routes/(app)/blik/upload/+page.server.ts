@@ -9,7 +9,7 @@ export const actions = {
       return { error: "Brak tokenu w cookies" };
     }
 
-    const res = await fetch(`${API_BASE}/api/upload-csv`, {
+    const res = await fetch(`${API_BASE}/api/blik_files`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`

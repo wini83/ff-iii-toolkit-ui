@@ -84,7 +84,7 @@
     if (!token) return goto('/login');
 
     try {
-      const resp = await fetch(`${API_BASE}/api/file/do-match/${fileId}`, {
+      const resp = await fetch(`${API_BASE}/api/blik_files/${fileId}/matches`, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
@@ -133,13 +133,13 @@
     }
 
     try {
-      const resp = await fetch(`${API_BASE}/api/file/apply_match/${fileId}`, {
+      const resp = await fetch(`${API_BASE}/api/blik_files/${fileId}/matches`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`
         },
-        body: JSON.stringify({ csv_indexes: ids })
+        body: JSON.stringify({ tx_indexes: ids })
       });
 
       if (!resp.ok) {

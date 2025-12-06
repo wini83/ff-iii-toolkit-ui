@@ -15,7 +15,7 @@ export const load: PageServerLoad = async ({ params, cookies, fetch }) => {
     return { error: "Brak tokenu w cookies", file_id: id, decoded_name: "", size: 0, content: [] };
   }
 
-  const res = await fetch(`${API_BASE}/api/file/${id}`, {
+  const res = await fetch(`${API_BASE}/api/blik_files/${id}`, {
     headers: {
       Authorization: `Bearer ${token}`
     }
