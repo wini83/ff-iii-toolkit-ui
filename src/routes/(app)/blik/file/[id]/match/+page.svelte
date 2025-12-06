@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { API_BASE } from '$lib/config';
+  import { blik } from '$lib/api/blik';
   import { onMount } from 'svelte';
   import { page } from '$app/stores';
   import { goto } from '$app/navigation';
@@ -42,7 +42,7 @@
     transactions_with_many_matches?: number;
     content: MatchRow[];
   };
-
+  import Steps from '$lib/components/Steps.svelte';
   // --- State ---
   let matchData: MatchData | null = null;
   let loading = true;
@@ -84,23 +84,21 @@
     if (!token) return goto('/login');
 
     try {
-      const resp = await fetch(`${API_BASE}/api/blik_files/${fileId}/matches`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const data = await blik.getMatches(fileId, token);
 
-      if (!resp.ok) {
-        const txt = await resp.text().catch(() => '');
-        throw new Error(`Server error ${resp.status} ${txt}`);
-      }
-
-      const json = await resp.json();
       matchData = {
-        ...json,
-        content: Array.isArray(json.content) ? json.content : []
-      } as MatchData;
-    } catch (e) {
+        file_id: data.file_id,
+        decoded_name: data.decoded_name,
+        records_in_file: data.records_in_file,
+        transactions_found: data.transactions_found,
+        transactions_not_matched: data.transactions_not_matched,
+        transactions_with_one_match: data.transactions_with_one_match,
+        transactions_with_many_matches: data.transactions_with_many_matches,
+        content: data.content
+      };
+    } catch (e: any) {
       console.error(e);
-      error = 'Nie udało się pobrać danych matchowania';
+      error = e.message ?? 'Nie udało się pobrać danych matchowania';
       matchData = null;
     } finally {
       loading = false;
@@ -121,7 +119,7 @@
     const token = localStorage.getItem('access_token');
     if (!token) return goto('/login');
 
-    const ids = Array.from(selected);
+    const ids = Array.from(selected).map(Number);
 
     if (!ids.length) {
       window.dispatchEvent(
@@ -133,45 +131,32 @@
     }
 
     try {
-      const resp = await fetch(`${API_BASE}/api/blik_files/${fileId}/matches`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({ tx_indexes: ids })
-      });
+      await blik.applyMatches(fileId, ids, token);
 
-      if (!resp.ok) {
-        const txt = await resp.text().catch(() => '');
-        throw new Error(`apply failed (${resp.status}) ${txt}`);
-      }
-
-      // oznacz lokalnie jako matched — i wymuś re-render
+      // Oznaczamy lokalnie
       for (const id of ids) {
-        const row = content.find((r) => String(r.tx.id) === String(id));
+        const row = content.find((r) => Number(r.tx.id) === id);
         if (row) row._matched = true;
       }
 
-      // wymuś re-render: shallow-copy tablicy i elementów
+      // wymuś re-render
       matchData = {
         ...matchData!,
         content: content.map((r) => ({ ...r }))
       };
 
-      // wyczyść zaznaczenia
       selected = new Set();
 
       window.dispatchEvent(
         new CustomEvent('toast', {
-          detail: { type: 'success', msg: `Transaction updated` }
+          detail: { type: 'success', msg: 'Transaction updated' }
         })
       );
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
       window.dispatchEvent(
         new CustomEvent('toast', {
-          detail: { type: 'error', msg: 'Nie udało się zapisać dopasowań' }
+          detail: { type: 'error', msg: e.message ?? 'Nie udało się zapisać dopasowań' }
         })
       );
     }
@@ -179,16 +164,17 @@
 </script>
 
 <!-- STEPS -->
-<div class="card bg-base-100 mt-2 w-full p-6 shadow-xl">
-  <ul class="steps hidden w-1/2 flex-none md:flex">
-    <li class="step step-primary"><a href="/blik/upload">Upload</a></li>
-    <li class="step step-primary"><a href="/blik/file/">Preview</a></li>
-    <li class="step step-primary"><a href="/blik/file/match">Match</a></li>
-  </ul>
-</div>
+<Steps
+  activeIndex={2}
+  steps={[
+    { label: 'Upload', href: '/blik/upload' },
+    { label: 'Preview', href: `/blik/file/${fileId}` },
+    { label: 'Match', href: `/blik/file/${fileId}/match` }
+  ]}
+/>
 
 <div class="card bg-base-100 mt-2 w-full p-6 shadow-xl">
-  <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+  <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
     <div>
       <div class="text-xl font-semibold">Matchowanie transakcji</div>
       <div class="text-sm opacity-60">Plik: {matchData?.decoded_name ?? '—'}</div>
@@ -196,23 +182,23 @@
 
     <!-- KPI WIDGET -->
     <div class="w-full md:w-1/2">
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <div class="p-3 rounded-lg border border-base-200 bg-base-100">
+      <div class="grid grid-cols-2 gap-3 md:grid-cols-4">
+        <div class="border-base-200 bg-base-100 rounded-lg border p-3">
           <div class="text-xs opacity-60">Jednoznaczne</div>
           <div class="text-lg font-semibold text-green-600">{oneMatches}</div>
         </div>
 
-        <div class="p-3 rounded-lg border border-base-200 bg-base-100">
+        <div class="border-base-200 bg-base-100 rounded-lg border p-3">
           <div class="text-xs opacity-60">Wieloznaczne</div>
           <div class="text-lg font-semibold text-yellow-600">{manyMatches}</div>
         </div>
 
-        <div class="p-3 rounded-lg border border-base-200 bg-base-100">
+        <div class="border-base-200 bg-base-100 rounded-lg border p-3">
           <div class="text-xs opacity-60">Brak</div>
           <div class="text-lg font-semibold text-gray-600">{noMatches}</div>
         </div>
 
-        <div class="p-3 rounded-lg border border-base-200 bg-base-100">
+        <div class="border-base-200 bg-base-100 rounded-lg border p-3">
           <div class="text-xs opacity-60">Zaznaczone</div>
           <div class="text-lg font-semibold">{selected.size}</div>
         </div>
@@ -275,7 +261,8 @@
                       {#each r.matches as m, i}
                         <div class="mb-3">
                           <b>{m.date}</b><br />
-                          Kwota: {m.operation_amount} {m.operation_currency}<br />
+                          Kwota: {m.operation_amount}
+                          {m.operation_currency}<br />
                           Szczegóły: {m.details}<br />
                           Nadawca: {m.sender}<br />
                           Odbiorca: {m.recipient}<br />

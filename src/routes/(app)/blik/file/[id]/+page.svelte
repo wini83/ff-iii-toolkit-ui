@@ -1,6 +1,8 @@
 <script lang="ts">
   export let data;
 
+  import Steps from '$lib/components/Steps.svelte';
+
   const { file_id, decoded_name, size, content, error } = data;
 
   function goToMatch() {
@@ -17,15 +19,14 @@
   }
 </script>
 
-<!-- STEPS -->
-<div class="card bg-base-100 mt-2 w-full p-6 shadow-xl">
-  <ul class="steps hidden w-1/2 flex-none md:flex">
-    <li class="step step-primary"><a href="/blik/upload">Upload</a></li>
-    <li class="step step-primary"><a href="/blik/file/{file_id}">File Preview</a></li>
-    <li class="step"><a href="/blik/file/{file_id}/match">Match</a></li>
-    <li class="step">Update</li>
-  </ul>
-</div>
+<Steps
+  activeIndex={1}
+  steps={[
+    { label: 'Upload', href: '/blik/upload' },
+    { label: 'Preview', href: `/blik/file/${file_id}` },
+    { label: 'Match', href: `/blik/file/${file_id}/match` }
+  ]}
+/>
 
 <!-- TABLE -->
 

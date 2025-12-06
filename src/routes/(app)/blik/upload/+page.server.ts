@@ -1,4 +1,5 @@
-import { api } from "$lib/api/client";
+import { blik } from "$lib/api/blik"; // jeśli eksportujemy default/namespace
+// lub: import * as blik from "$lib/api/blik";
 
 export const actions = {
   default: async ({ request, cookies }) => {
@@ -9,24 +10,11 @@ export const actions = {
       return { error: "Brak tokenu w cookies" };
     }
 
-    const { data, error } = await api.POST("/api/blik_files", {
-      // openapi-typescript nie wspiera poprawnie multipart,
-      // dlatego multipart wrzucamy jako `never`.
-      body: formData as unknown as never,
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    });
-
-    if (error) {
-      const msg =
-        Array.isArray(error.detail) && error.detail.length > 0
-          ? error.detail[0].msg
-          : "Upload failed";
-
-      return { error: msg };
+    try {
+      const data = await blik.uploadCsv(formData, token);
+      return data; // UploadResponse
+    } catch (e: any) {
+      return { error: e.message ?? "Upload failed" };
     }
-
-    return data;
   }
 };
