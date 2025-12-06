@@ -1,7 +1,7 @@
-import { API_BASE } from "$lib/config";
+import { api } from "$lib/api/client";
 
 export const actions = {
-  default: async ({ request, cookies, fetch }) => {
+  default: async ({ request, cookies }) => {
     const formData = await request.formData();
 
     const token = cookies.get("access_token_client");
@@ -9,15 +9,24 @@ export const actions = {
       return { error: "Brak tokenu w cookies" };
     }
 
-    const res = await fetch(`${API_BASE}/api/blik_files`, {
-      method: "POST",
+    const { data, error } = await api.POST("/api/blik_files", {
+      // openapi-typescript nie wspiera poprawnie multipart,
+      // dlatego multipart wrzucamy jako `never`.
+      body: formData as unknown as never,
       headers: {
         Authorization: `Bearer ${token}`
-      },
-      body: formData
+      }
     });
 
-    const data = await res.json();
+    if (error) {
+      const msg =
+        Array.isArray(error.detail) && error.detail.length > 0
+          ? error.detail[0].msg
+          : "Upload failed";
+
+      return { error: msg };
+    }
+
     return data;
   }
 };
