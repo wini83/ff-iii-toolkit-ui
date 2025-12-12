@@ -12,17 +12,22 @@
 
   async function upload(e) {
     e.preventDefault();
-
     if (!file) return;
 
     const fd = new FormData();
     fd.append('file', file);
 
-    const res = await fetch('/blik/upload', {
+    const res = await fetch('/api/blik/upload', {
       method: 'POST',
-      body: fd,
-      credentials: 'include'
+      body: fd
     });
+
+    if (!res.ok) {
+      const text = await res.text();
+      console.error('UPLOAD ERROR:', res.status, text);
+      form = { error: text || `Upload failed (${res.status})` };
+      return;
+    }
 
     const data = await res.json();
 
