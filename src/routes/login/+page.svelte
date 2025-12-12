@@ -1,14 +1,25 @@
 <script lang="ts">
+  export let data;
+  const API_BASE = data.API_BASE;
+  let configError = '';
+  import SystemStatus from '$lib/components/SystemStatus.svelte';
+
+  if (!API_BASE) {
+    configError = 'Konfiguracja aplikacji nie została poprawnie załadowana.';
+    console.warn('⚠️ API_BASE jest null — login działa, ale backend nieosiągalny.');
+  }
+
   let username = '';
   let password = '';
-  let error = '';
+  let error: string = '';
 
-  import { API_BASE } from '$lib/config';
-
-  async function login(e) {
+  async function login(e: SubmitEvent) {
     e.preventDefault();
     error = '';
-
+    if (!API_BASE) {
+      error = 'System nie jest poprawnie skonfigurowany (brak API_BASE).';
+      return;
+    }
     const response = await fetch(`${API_BASE}/auth/token`, {
       method: 'POST',
       headers: {
@@ -26,15 +37,9 @@
     }
 
     const data = await response.json();
-
-    // zapisujemy token tak jak wcześniej
     localStorage.setItem('access_token', data.access_token);
-
-    // ustawiamy cookie od razu — BEZ przechodzenia do (app)
     document.cookie = `access_token_client=${data.access_token}; Path=/;`;
-
-    // redirect na landing page
-    window.location.href = '/'; // możesz zmienić na '/'
+    window.location.href = '/';
   }
 </script>
 
@@ -49,7 +54,11 @@
               <h1 class="text-3xl font-bold">Firefly III Toolkit</h1>
 
               <div class="mt-12">
-                <img src="/android-chrome-192x192.png" alt="Alior2Firefly" class="inline-block w-48" />
+                <img
+                  src="/android-chrome-192x192.png"
+                  alt="Alior2Firefly"
+                  class="inline-block w-48"
+                />
               </div>
 
               <h1 class="mt-8 text-2xl font-bold">Features:</h1>
@@ -116,6 +125,7 @@
             <a href="/login" class="text-primary hover:underline"> Register </a>
           </div>
         </form>
+        <SystemStatus />
       </div>
     </div>
   </div>

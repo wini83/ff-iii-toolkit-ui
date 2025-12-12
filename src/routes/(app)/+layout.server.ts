@@ -1,28 +1,31 @@
-import { redirect } from '@sveltejs/kit';
+import { redirect } from "@sveltejs/kit";
 import { decodeJwt } from "$lib/jwt";
 
-export const load = async ({ cookies }) => {
-	const token = cookies.get("access_token_client");
+export const load = async ({ cookies, request }) => {
+  const token = cookies.get("access_token_client");
 
-	if (!token) {
-		// brak tokena → wywal do logowania
-		throw redirect(302, "/login");
-	}
+  if (!token) {
+    // Dla POST nie wolno redirectować → Chrome blokuje → 403
+    if (request.method !== "GET") {
+      return new Response("Unauthorized", { status: 401 });
+    }
 
-	const payload = decodeJwt(token);
+    throw redirect(302, "/login");
+  }
 
-	if (!payload) {
-		throw redirect(302, "/login");
-	}
+  const payload = decodeJwt(token);
+  if (!payload) {
+    if (request.method !== "GET") return new Response("Unauthorized", { status: 401 });
+    throw redirect(302, "/login");
+  }
 
-	const now = Math.floor(Date.now() / 1000);
+  const now = Math.floor(Date.now() / 1000);
+  if (payload.exp && payload.exp < now) {
+    cookies.delete("access_token_client", { path: "/" });
 
-	if (payload.exp && payload.exp < now) {
-		// wygasły token → wyczyść cookie
-		cookies.delete("access_token_client", { path: "/" });
-		throw redirect(302, "/login");
-	}
+    if (request.method !== "GET") return new Response("Unauthorized", { status: 401 });
+    throw redirect(302, "/login");
+  }
 
-	// token OK → przepuszczamy w głąb aplikacji
-	return {};
+  return {};
 };

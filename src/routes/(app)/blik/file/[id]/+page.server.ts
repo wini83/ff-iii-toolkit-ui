@@ -1,7 +1,7 @@
 import type { PageServerLoad } from "./$types";
-import { blik } from "$lib/api/blik";
 
-export const load: PageServerLoad = async ({ params, cookies }) => {
+
+export const load: PageServerLoad = async ({ params, cookies, fetch }) => {
   const id = params.id;
   const token = cookies.get("access_token_client");
 
@@ -15,9 +15,10 @@ export const load: PageServerLoad = async ({ params, cookies }) => {
     };
   }
 
-  try {
-    const data = await blik.getPreview(id, token);
+  const res = await fetch(`/blik/file/${id}`);
+  const data = await res.json();
 
+  if (res.ok && !data.error) {
     return {
       error: null,
       file_id: data.file_id,
@@ -25,13 +26,13 @@ export const load: PageServerLoad = async ({ params, cookies }) => {
       size: data.size,
       content: data.content
     };
-  } catch (e: any) {
-    return {
-      error: e.message ?? "Błąd API",
-      file_id: id,
-      decoded_name: "",
-      size: 0,
-      content: []
-    };
   }
+
+  return {
+    error: data.error ?? "Błąd API",
+    file_id: id,
+    decoded_name: "",
+    size: 0,
+    content: []
+  };
 };

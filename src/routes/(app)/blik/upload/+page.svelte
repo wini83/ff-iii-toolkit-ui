@@ -1,27 +1,38 @@
 <script lang="ts">
-  type PageData = {
-    file_id?: string;
-  };
-
   import { Icon } from '@steeze-ui/svelte-icon';
-    import * as icons from '@steeze-ui/heroicons';
+  import * as icons from '@steeze-ui/heroicons';
   import Steps from '$lib/components/Steps.svelte';
-  import { afterUpdate } from 'svelte';
 
-  export let form;
   let fileName = '';
 
-  afterUpdate(() => {
-    if (form?.id) {
-      localStorage.setItem('lastFileId', form.id);
-      setTimeout(() => {
-        window.location.href = `/blik/file/${form.id}`;
-      }, 3000);
+  import { onMount } from 'svelte';
+
+  let file: File | null = null;
+  export let form;
+
+  async function upload(e) {
+    e.preventDefault();
+
+    if (!file) return;
+
+    const fd = new FormData();
+    fd.append('file', file);
+
+    const res = await fetch('/blik/upload', {
+      method: 'POST',
+      body: fd,
+      credentials: 'include'
+    });
+
+    const data = await res.json();
+
+    if (data.id) {
+      localStorage.setItem('lastFileId', data.id);
+      window.location.href = `/blik/file/${data.id}`;
+    } else {
+      form = { error: data.error };
     }
-  });
-
-
-
+  }
 </script>
 
 <Steps
@@ -37,7 +48,7 @@
   <div class="card-body">
     <h2 class="card-title">Wyślij plik Alior BLIK (.csv)</h2>
 
-    <form method="post" enctype="multipart/form-data" class="space-y-4">
+    <form on:submit={upload} enctype="multipart/form-data" class="space-y-4">
       <!-- File picker -->
       <div class="form-control">
         <legend class="fieldset-legend">
@@ -50,7 +61,8 @@
           class="file-input file-input-bordered w-full"
           on:change={(e) => {
             const input = e.target as HTMLInputElement | null;
-            fileName = input?.files?.[0]?.name ?? '';
+            file = input?.files?.[0] ?? null; // ← BRAKOWAŁO
+            fileName = file?.name ?? '';
           }}
         />
 
@@ -58,7 +70,7 @@
 
         {#if fileName}
           <div role="alert" class="alert alert-info">
-            <Icon src={icons.InformationCircle} class="w-6 h-6" />
+            <Icon src={icons.InformationCircle} class="h-6 w-6" />
             <span><b>Wybrano: </b> <i>{fileName}</i></span>
           </div>
         {/if}
@@ -73,7 +85,7 @@
     <!-- Error -->
     {#if form?.error}
       <div class="alert alert-error mt-4">
-        <Icon src={icons.ExclamationTriangle} class="w-6 h-6" />
+        <Icon src={icons.ExclamationTriangle} class="h-6 w-6" />
         <span>{form.error}</span>
       </div>
     {/if}
@@ -81,7 +93,7 @@
     <!-- Success -->
     {#if form?.id}
       <div class="alert alert-success mt-4">
-        <Icon src={icons.CheckCircle} class="w-6 h-6" />
+        <Icon src={icons.CheckCircle} class="h-6 w-6" />
         <span>
           <strong>{form.message}</strong> <br />
           <strong>File ID: </strong>{form.id}

@@ -1,0 +1,38 @@
+version: "3.9"
+
+services:
+  backend:
+    image: wini35337/ff-iii-toolkit-api:latest
+    container_name: backend
+    env_file:
+      - .env
+    networks:
+      - internal
+    expose:
+      - "8000"
+
+  frontend:
+    build: .
+    container_name: frontend
+    environment:
+      API_BASE: "http://backend:8000"
+    networks:
+      - internal
+    expose:
+      - "3000"
+
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: reverse-proxy
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - "8080:80"
+    depends_on:
+      - frontend
+    networks:
+      - internal
+
+networks:
+  internal:
+    driver: bridge

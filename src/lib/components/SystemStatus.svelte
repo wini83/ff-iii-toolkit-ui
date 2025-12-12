@@ -33,3 +33,32 @@
     return () => clearInterval(intervalId);
   });
 </script>
+
+<div class="flex items-center gap-3">
+  {#if health === "loading"}
+    <div class="flex items-center gap-2">
+      <span class="loading loading-spinner loading-xs"></span>
+      <span class="text-sm opacity-60">Checking backend…</span>
+    </div>
+  {:else if health === "ok"}
+    <div class="flex items-center gap-2">
+      <div class="inline-grid *:[grid-area:1/1]">
+        <div class="status status-sm status-success animate-ping"></div>
+        <div class="status status-sm status-success"></div>
+      </div>
+      <span class="text-sm text-success">Server is up</span>
+    </div>
+  {:else}
+    <div class="flex items-center gap-2">
+      <div class="inline-grid *:[grid-area:1/1]">
+        <div class="status status-sm status-error animate-ping"></div>
+        <div class="status status-sm status-error"></div>
+      </div>
+      <span class="text-sm text-error">Server is down</span>
+    </div>
+  {/if}
+
+  {#if version}
+    <span class="badge badge-soft badge-sm badge-primary">{version}</span>
+  {/if}
+</div>
