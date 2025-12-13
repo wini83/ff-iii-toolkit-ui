@@ -27,7 +27,7 @@ export const actions: Actions = {
        * - dokładnie ten sam kontrakt co w browserze
        */
       //const res = await fetch('/api/auth/token', {
-      const res = await fetch('http://ff-iii-toolkit-api:8000/auth/token', {
+      const res = await fetch('http://ff-iii-toolkit-api:8000/api/auth/token', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded'
