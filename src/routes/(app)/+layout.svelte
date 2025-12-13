@@ -112,7 +112,7 @@
     <label for="app-drawer" class="drawer-overlay"></label>
 
     <ul class="menu bg-base-100 text-base-content min-h-full w-80 p-4">
-      <li class="mb-2 font-semibold text-xl"><a href="/app/welcome"><img class="mask mask-squircle w-10" src="/logo_b.png" alt="Firefly Toolkit">Firefly Toolkit</a> </li>
+      <li class="mb-2 font-semibold text-xl"><a href="/"><img class="mask mask-squircle w-10" src="/logo_b.png" alt="Firefly Toolkit">Firefly Toolkit</a> </li>
 
       <li>
         <details open>

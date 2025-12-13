@@ -5,6 +5,7 @@
   import { Icon } from '@steeze-ui/svelte-icon';
   import * as icons from '@steeze-ui/heroicons';
   import Steps from '$lib/components/Steps.svelte';
+  import TableSkeleton from '$lib/components/TableSkeleton.svelte';
 
   let file_id = '';
   let decoded_name = '';
@@ -109,12 +110,7 @@
   <div class="divider mt-2"></div>
 
   {#if loading}
-    <div class="skeleton mt-2 mb-2 h-8 w-full"></div>
-    <div class="skeleton mt-2 mb-2 h-8 w-full"></div>
-    <div class="skeleton mt-2 mb-2 h-8 w-full"></div>
-    <div class="skeleton mt-2 mb-2 h-8 w-full"></div>
-    <div class="skeleton mt-2 mb-2 h-8 w-full"></div>
-    <div class="skeleton mt-2 mb-2 h-8 w-full"></div>
+    <TableSkeleton rows={8} cols={5} />
   {:else if error}
     <div role="alert" class="alert alert-error">
       <Icon src={icons.ExclamationTriangle} class="h-6 w-6" />

@@ -3,6 +3,7 @@
   import { onMount } from 'svelte';
   import { page } from '$app/stores';
   import { goto } from '$app/navigation';
+  import TableSkeleton from '$lib/components/TableSkeleton.svelte';
 
   // --- Typy (prosty, praktyczny model dla UI) ---
   type SimplifiedTx = {
@@ -209,7 +210,7 @@
   <div class="divider mt-2"></div>
 
   {#if loading}
-    <div class="alert alert-info">Ładowanie…</div>
+    <TableSkeleton rows={8} cols={4} />
   {:else if error}
     <div class="alert alert-error">{error}</div>
   {:else if content.length === 0}
