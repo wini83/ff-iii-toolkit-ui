@@ -9,7 +9,7 @@
     colWidths?.[i] ?? ['w-16', 'w-32', 'w-24', 'w-20'][i % 4];
 </script>
 
-<div class="overflow-x-auto rounded-box border border-base-300">
+<div class="w-full overflow-x-auto">
   <table class="table w-full">
     <thead>
       <tr>
