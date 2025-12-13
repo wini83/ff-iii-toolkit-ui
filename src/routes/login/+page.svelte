@@ -1,44 +1,19 @@
 <script lang="ts">
+  import { browser } from '$app/environment';
   export let data;
-  const API_BASE = data.API_BASE;
-  let configError = '';
-  import SystemStatus from '$lib/components/SystemStatus.svelte';
-
-  if (!API_BASE) {
-    configError = 'Konfiguracja aplikacji nie została poprawnie załadowana.';
-    console.warn('⚠️ API_BASE jest null — login działa, ale backend nieosiągalny.');
-  }
-
+  export let form;
+ 
   let username = '';
   let password = '';
-  let error: string = '';
+  let error: string = form?.error ?? '';
 
-  async function login(e: SubmitEvent) {
-    e.preventDefault();
-    error = '';
-    if (!API_BASE) {
-      error = 'System nie jest poprawnie skonfigurowany (brak API_BASE).';
-      return;
-    }
-    const response = await fetch(`${API_BASE}/auth/token`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      body: new URLSearchParams({
-        username,
-        password
-      })
-    });
+  $: if (form?.error) {
+    error = form.error;
+  }
 
-    if (!response.ok) {
-      error = 'Nieprawidłowy login lub hasło';
-      return;
-    }
-
-    const data = await response.json();
-    localStorage.setItem('access_token', data.access_token);
-    document.cookie = `access_token_client=${data.access_token}; Path=/;`;
+  $: if (browser && form?.success && form.token) {
+    localStorage.setItem('access_token', form.token);
+    document.cookie = `access_token_client=${form.token}; Path=/;`;
     window.location.href = '/';
   }
 </script>
@@ -83,13 +58,14 @@
       <div class="px-10 py-24">
         <h2 class="mb-2 text-center text-2xl font-semibold">Login</h2>
 
-        <form on:submit={login}>
+        <form method="POST">
           <div class="form-control mt-4 w-full">
             <label class="label" for="loginUser">
               <span class="label-text">Login</span>
             </label>
             <input
               id="loginUser"
+              name="username"
               bind:value={username}
               placeholder="User"
               class="input input-bordered w-full"
@@ -103,6 +79,7 @@
             <input
               type="password"
               id="loginPass"
+              name="password"
               bind:value={password}
               class="input input-bordered w-full"
             />
@@ -125,7 +102,6 @@
             <a href="/login" class="text-primary hover:underline"> Register </a>
           </div>
         </form>
-        <SystemStatus />
       </div>
     </div>
   </div>

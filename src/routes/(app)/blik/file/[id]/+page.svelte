@@ -1,13 +1,66 @@
 <script lang="ts">
-  export let data;
-
+  import { onMount } from 'svelte';
+  import { page } from '$app/stores';
+  import { goto } from '$app/navigation';
+  import { Icon } from '@steeze-ui/svelte-icon';
+  import * as icons from '@steeze-ui/heroicons';
   import Steps from '$lib/components/Steps.svelte';
 
-  const { file_id, decoded_name, size, content, error } = data;
+  let file_id = '';
+  let decoded_name = '';
+  let size = 0;
+  let content: any[] = [];
+
+  let loading = true;
+  let error = '';
+
+  // ID z URL
+  const unsubscribe = page.subscribe((p) => {
+    file_id = p.params.id ?? '';
+  });
+
+  onMount(() => {
+    loadPreview();
+    return () => unsubscribe();
+  });
+
+  async function loadPreview() {
+    loading = true;
+    error = '';
+
+    const token = localStorage.getItem('access_token');
+    if (!token) {
+      goto('/login');
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/blik_files/${file_id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text || `Błąd API (${res.status})`);
+      }
+
+      const data = await res.json();
+
+      decoded_name = data.decoded_name;
+      size = data.size;
+      content = data.content ?? [];
+    } catch (e: any) {
+      console.error(e);
+      error = e.message ?? 'Nie udało się pobrać podglądu pliku';
+    } finally {
+      loading = false;
+    }
+  }
 
   function goToMatch() {
-    // przejdź do widoku match
-    window.location.href = `/blik/file/${file_id}/match`;
+    goto(`/blik/file/${file_id}/match`);
   }
 
   function formatAmount(v: number) {
@@ -55,13 +108,19 @@
 
   <div class="divider mt-2"></div>
 
-  {#if error}
-    <div class="rounded border border-red-200 bg-red-50 p-4 text-red-700">
-      ⚠️ {error}
+  {#if loading}
+    <div class="skeleton mt-2 mb-2 h-8 w-full"></div>
+    <div class="skeleton mt-2 mb-2 h-8 w-full"></div>
+    <div class="skeleton mt-2 mb-2 h-8 w-full"></div>
+    <div class="skeleton mt-2 mb-2 h-8 w-full"></div>
+    <div class="skeleton mt-2 mb-2 h-8 w-full"></div>
+    <div class="skeleton mt-2 mb-2 h-8 w-full"></div>
+  {:else if error}
+    <div role="alert" class="alert alert-error">
+      <Icon src={icons.ExclamationTriangle} class="h-6 w-6" />
+      <span>{error}</span>
     </div>
-  {/if}
-
-  {#if content?.length === 0}
+  {:else if content.length === 0}
     <div class="rounded border border-yellow-200 bg-yellow-50 p-6 text-yellow-800">
       Brak rekordów w przesłanym pliku.
     </div>
@@ -72,7 +131,7 @@
           <thead>
             <tr>
               <th class="whitespace-nowrap">Date</th>
-              <th  class="whitespace-nowrap">Amount</th>
+              <th class="whitespace-nowrap">Amount</th>
               <th>Nadawca</th>
               <th>Odbiorca</th>
               <th>Szczegóły</th>
@@ -81,13 +140,22 @@
           <tbody>
             {#each content as row, i}
               <tr>
-                <td  class="whitespace-nowrap">{row.date}</td>
-                <td class="whitespace-nowrap">{formatAmount(row.amount)} {row.account_currency}<br>
-                <span class="italic">{formatAmount(row.operation_amount)} {row.operation_currency}</span></td>
-                <td class="whitespace-nowrap">{row.sender || '-'} <br>
-                <span class="italic">{row.sender_account || '-'}</span></td>
-                <td class="whitespace-nowrap">{row.recipient || '-'}<br>
-                <span class="italic">{row.recipient_account || '-'}</span></td>
+                <td class="whitespace-nowrap">{row.date}</td>
+                <td class="whitespace-nowrap"
+                  >{formatAmount(row.amount)}
+                  {row.account_currency}<br />
+                  <span class="italic"
+                    >{formatAmount(row.operation_amount)} {row.operation_currency}</span
+                  ></td
+                >
+                <td class="whitespace-nowrap"
+                  >{row.sender || '-'} <br />
+                  <span class="italic">{row.sender_account || '-'}</span></td
+                >
+                <td class="whitespace-nowrap"
+                  >{row.recipient || '-'}<br />
+                  <span class="italic">{row.recipient_account || '-'}</span></td
+                >
                 <td>{row.details || '-'}</td>
               </tr>
             {/each}

@@ -3,42 +3,62 @@
   import * as icons from '@steeze-ui/heroicons';
   import Steps from '$lib/components/Steps.svelte';
 
-  let fileName = '';
-
-  import { onMount } from 'svelte';
-
   let file: File | null = null;
-  export let form;
+  let fileName = '';
+  let error = '';
+  let loading = false;
 
-  async function upload(e) {
+  async function upload(e: SubmitEvent) {
     e.preventDefault();
+    error = '';
+
     if (!file) return;
 
-    const fd = new FormData();
-    fd.append('file', file);
-
-    const res = await fetch('/api/blik/upload', {
-      method: 'POST',
-      body: fd
-    });
-
-    if (!res.ok) {
-      const text = await res.text();
-      console.error('UPLOAD ERROR:', res.status, text);
-      form = { error: text || `Upload failed (${res.status})` };
+    const token = localStorage.getItem('access_token');
+    if (!token) {
+      error = 'Brak autoryzacji — zaloguj się ponownie.';
       return;
     }
 
-    const data = await res.json();
+    const formData = new FormData();
+    formData.append('file', file);
 
-    if (data.id) {
+    loading = true;
+
+    try {
+      const res = await fetch('/api/blik_files', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`
+        },
+        body: formData
+      });
+
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text || `Upload failed (${res.status})`);
+      }
+
+      const data = await res.json();
+
+      if (!data?.id) {
+        throw new Error('Nieprawidłowa odpowiedź backendu');
+      }
+
+      // opcjonalnie — zapamiętanie ostatniego pliku
       localStorage.setItem('lastFileId', data.id);
+
+      // redirect do preview
       window.location.href = `/blik/file/${data.id}`;
-    } else {
-      form = { error: data.error };
+    } catch (e: any) {
+      console.error('UPLOAD ERROR', e);
+      error = e.message ?? 'Błąd podczas uploadu';
+    } finally {
+      loading = false;
     }
   }
 </script>
+
 
 <Steps
   activeIndex={0}
@@ -88,15 +108,15 @@
     </form>
 
     <!-- Error -->
-    {#if form?.error}
+    {#if error}
       <div class="alert alert-error mt-4">
         <Icon src={icons.ExclamationTriangle} class="h-6 w-6" />
-        <span>{form.error}</span>
+        <span>{error}</span>
       </div>
     {/if}
 
     <!-- Success -->
-    {#if form?.id}
+    <!-- {#if form?.id}
       <div class="alert alert-success mt-4">
         <Icon src={icons.CheckCircle} class="h-6 w-6" />
         <span>
@@ -106,6 +126,6 @@
           Przekierowanie…
         </span>
       </div>
-    {/if}
+    {/if} -->
   </div>
 </div>
