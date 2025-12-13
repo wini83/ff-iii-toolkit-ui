@@ -30,5 +30,5 @@ COPY static/config.template.json ./build/client/config.template.json
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 EXPOSE 3000
-ENTRYPOINT ["/entrypoint.sh"]
+
 CMD ["node", "build/index.js"]

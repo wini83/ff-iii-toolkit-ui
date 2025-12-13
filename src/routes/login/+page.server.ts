@@ -1,4 +1,5 @@
-import { fail, type Actions, type PageServerLoad } from '@sveltejs/kit';
+import { fail, type Actions} from '@sveltejs/kit';
+import type { PageServerLoad } from './$types';
 
 /**
  * Nie sprawdzamy żadnej konfiguracji runtime.
@@ -14,6 +15,7 @@ export const actions: Actions = {
     const formData = await request.formData();
     const username = formData.get('username');
     const password = formData.get('password');
+    const API_INTERNAL = process.env.INTERNAL_API_BASE ?? 'http://localhost:8000';
 
     if (typeof username !== 'string' || typeof password !== 'string') {
       return fail(400, { error: 'Podaj login i hasło' });
@@ -27,7 +29,7 @@ export const actions: Actions = {
        * - dokładnie ten sam kontrakt co w browserze
        */
       //const res = await fetch('/api/auth/token', {
-      const res = await fetch('http://ff-iii-toolkit-api:8000/api/auth/token', {
+      const res = await fetch(`${API_INTERNAL}/api/auth/token`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded'
