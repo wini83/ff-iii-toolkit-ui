@@ -61,6 +61,18 @@ export async function uploadCsv(formData: FormData, token: string) {
   return data;
 }
 
+export async function getStats(token: string) {
+  const api = await getApi();
+  const { data, error } = await api.GET("/api/blik_files/statistics", {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  });
+
+  if (error) throw normalizeApiError(error);
+  return data;
+}
+
 function normalizeApiError(error: any): Error {
   if (Array.isArray(error?.detail)) {
     const msg = error.detail.map((d: any) => d.msg).join("; ");
@@ -73,5 +85,6 @@ export const blik = {
   getPreview,
   getMatches,
   applyMatches,
-  uploadCsv
+  uploadCsv,
+  getStats
 };

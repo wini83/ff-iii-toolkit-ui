@@ -4,7 +4,7 @@
  */
 
 export interface paths {
-    "/auth/token": {
+    "/api/auth/token": {
         parameters: {
             query?: never;
             header?: never;
@@ -14,7 +14,24 @@ export interface paths {
         get?: never;
         put?: never;
         /** Login For Access Token */
-        post: operations["login_for_access_token_auth_token_post"];
+        post: operations["login_for_access_token_api_auth_token_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/blik_files/statistics": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Statistics */
+        get: operations["get_statistics_api_blik_files_statistics_get"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -154,8 +171,8 @@ export interface components {
             /** Tx Indexes */
             tx_indexes: number[];
         };
-        /** Body_login_for_access_token_auth_token_post */
-        Body_login_for_access_token_auth_token_post: {
+        /** Body_login_for_access_token_api_auth_token_post */
+        Body_login_for_access_token_api_auth_token_post: {
             /** Grant Type */
             grant_type?: string | null;
             /** Username */
@@ -316,6 +333,29 @@ export interface components {
             /** Category */
             category: string;
         };
+        /** StatisticsResponse */
+        StatisticsResponse: {
+            /** Total Transactions */
+            total_transactions: number;
+            /** Single Part Transactions */
+            single_part_transactions: number;
+            /** Uncategorized Transactions */
+            uncategorized_transactions: number;
+            /** Filtered By Description Exact */
+            filtered_by_description_exact: number;
+            /** Filtered By Description Partial */
+            filtered_by_description_partial: number;
+            /** Not Processed Transactions */
+            not_processed_transactions: number;
+            /** Not Processed By Month */
+            not_processed_by_month: {
+                [key: string]: number;
+            };
+            /** Inclomplete Procesed By Month */
+            inclomplete_procesed_by_month: {
+                [key: string]: number;
+            };
+        };
         /** Token */
         Token: {
             /** Access Token */
@@ -360,7 +400,7 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
-    login_for_access_token_auth_token_post: {
+    login_for_access_token_api_auth_token_post: {
         parameters: {
             query?: never;
             header?: never;
@@ -369,7 +409,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/x-www-form-urlencoded": components["schemas"]["Body_login_for_access_token_auth_token_post"];
+                "application/x-www-form-urlencoded": components["schemas"]["Body_login_for_access_token_api_auth_token_post"];
             };
         };
         responses: {
@@ -389,6 +429,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_statistics_api_blik_files_statistics_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StatisticsResponse"];
                 };
             };
         };
