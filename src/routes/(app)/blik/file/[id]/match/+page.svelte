@@ -1,246 +1,325 @@
 <script lang="ts">
-  import { onMount, onDestroy } from 'svelte';
-  import { goto } from '$app/navigation';
-  import {
-    Chart,
-    BarController,
-    BarElement,
-    LineController,
-    LineElement,
-    PointElement,
-    CategoryScale,
-    LinearScale,
-    Tooltip,
-    Legend,
-    Filler
-  } from 'chart.js';
-
   import { blik } from '$lib/api/blik';
-  import type { components } from '$lib/api/schema';
+  import { onMount } from 'svelte';
+  import { page } from '$app/stores';
+  import { goto } from '$app/navigation';
 
-  Chart.register(
-    BarController,
-    BarElement,
-    LineController,
-    LineElement,
-    PointElement,
-    CategoryScale,
-    LinearScale,
-    Tooltip,
-    Legend,
-    Filler
-  );
+  // --- Typy (prosty, praktyczny model dla UI) ---
+  type SimplifiedTx = {
+    id: string;
+    date: string;
+    amount: number;
+    description?: string;
+    tags?: string[];
+    notes?: string;
+  };
 
-  /* ===== TYPES ===== */
-  type StatisticsResponse =
-    components['schemas']['StatisticsResponse'];
+  type SimplifiedRecord = {
+    date: string;
+    amount?: number;
+    operation_amount?: number;
+    operation_currency?: string;
+    details?: string;
+    sender?: string;
+    recipient?: string;
+    sender_account?: string;
+    recipient_account?: string;
+  };
 
-  /* ===== STATE ===== */
-  let data: StatisticsResponse | null = null;
+  type MatchRow = {
+    tx: SimplifiedTx;
+    matches: SimplifiedRecord[];
+    _matched?: boolean;
+  };
+
+  type MatchData = {
+    file_id?: string;
+    decoded_name?: string;
+    records_in_file?: number;
+    transactions_found?: number;
+    transactions_not_matched?: number;
+    transactions_with_one_match?: number;
+    transactions_with_many_matches?: number;
+    content: MatchRow[];
+  };
+  import Steps from '$lib/components/Steps.svelte';
+  // --- State ---
+  let matchData: MatchData | null = null;
   let loading = true;
-  let error: string | null = null;
+  let error = '';
+  let selected: Set<string> = new Set();
 
-  let processedRatio = 0;
+  // traktujemy ID jako string, dajemy fallback dla undefined
+  let fileId: string = '';
 
-  /* ===== CHART REFS ===== */
-  let notProcessedCanvas: HTMLCanvasElement | null = null;
-  let incompleteCanvas: HTMLCanvasElement | null = null;
+  // poprawna subskrypcja store 'page' z fallbackiem
+  const unsubscribe = page.subscribe((p) => {
+    fileId = (p.params?.id as string) ?? '';
+  });
 
-  let notProcessedChart: Chart | null = null;
-  let incompleteChart: Chart | null = null;
+  onMount(() => {
+    loadData();
+    return () => unsubscribe();
+  });
 
-  function toChartData(obj: Record<string, number>) {
-    return {
-      labels: Object.keys(obj),
-      values: Object.values(obj)
-    };
-  }
+  // --- Derived safe content for template (avoids "possibly null" TS errors) ---
+  // $: makes these reactive so UI updates automatically
+  $: content = (matchData?.content ?? []) as MatchRow[];
+  $: oneMatches =
+    matchData?.transactions_with_one_match ??
+    content.filter((r) => (r.matches?.length ?? 0) === 1).length;
+  $: manyMatches =
+    matchData?.transactions_with_many_matches ??
+    content.filter((r) => (r.matches?.length ?? 0) > 1).length;
+  $: noMatches =
+    matchData?.transactions_not_matched ??
+    content.filter((r) => (r.matches?.length ?? 0) === 0).length;
 
-  onMount(async () => {
+  // --- Functions ---
+  async function loadData() {
+    loading = true;
+    error = '';
+
+    const token = localStorage.getItem('access_token');
+    if (!token) return goto('/login');
+
     try {
-      const token = localStorage.getItem('access_token');
-      if (!token) {
-        goto('/login');
-        return;
-      }
+      const data = await blik.getMatches(fileId, token);
 
-      data = await blik.getStats(token);
-
-      processedRatio = Math.round(
-        (data.single_part_transactions / data.total_transactions) * 100
-      );
-
-      const notProcessed = toChartData(
-        data.not_processed_by_month
-      );
-      const incomplete = toChartData(
-        data.inclomplete_procesed_by_month
-      );
-
-      if (notProcessedCanvas && notProcessed.labels.length) {
-        notProcessedChart = new Chart(notProcessedCanvas, {
-          type: 'bar',
-          data: {
-            labels: notProcessed.labels,
-            datasets: [
-              {
-                label: 'Not processed',
-                data: notProcessed.values,
-                backgroundColor: '#f87171'
-              }
-            ]
-          },
-          options: {
-            responsive: true,
-            plugins: { legend: { display: false } }
-          }
-        });
-      }
-
-      if (incompleteCanvas && incomplete.labels.length) {
-        incompleteChart = new Chart(incompleteCanvas, {
-          type: 'line',
-          data: {
-            labels: incomplete.labels,
-            datasets: [
-              {
-                label: 'Incomplete',
-                data: incomplete.values,
-                borderColor: '#3b82f6',
-                backgroundColor: 'rgba(59,130,246,0.25)',
-                tension: 0.3,
-                fill: true,
-                pointRadius: 3
-              }
-            ]
-          },
-          options: {
-            responsive: true,
-            plugins: { legend: { display: false } }
-          }
-        });
-      }
+      matchData = {
+        file_id: data.file_id,
+        decoded_name: data.decoded_name,
+        records_in_file: data.records_in_file,
+        transactions_found: data.transactions_found,
+        transactions_not_matched: data.transactions_not_matched,
+        transactions_with_one_match: data.transactions_with_one_match,
+        transactions_with_many_matches: data.transactions_with_many_matches,
+        content: data.content
+      };
     } catch (e: any) {
-      error = e?.message ?? 'Failed to load statistics';
+      console.error(e);
+      error = e.message ?? 'Nie udało się pobrać danych matchowania';
+      matchData = null;
     } finally {
       loading = false;
     }
-  });
+  }
 
-  onDestroy(() => {
-    notProcessedChart?.destroy();
-    incompleteChart?.destroy();
-  });
+  function toggle(id: string) {
+    if (selected.has(id)) {
+      selected.delete(id);
+      selected = new Set(selected); // reasignacja by Svelte wykrył zmianę
+    } else {
+      selected.add(id);
+      selected = new Set(selected);
+    }
+  }
+
+  async function applyMatches() {
+    const token = localStorage.getItem('access_token');
+    if (!token) return goto('/login');
+
+    const ids = Array.from(selected).map(Number);
+
+    if (!ids.length) {
+      window.dispatchEvent(
+        new CustomEvent('toast', {
+          detail: { type: 'info', msg: 'Brak zaznaczonych transakcji' }
+        })
+      );
+      return;
+    }
+
+    try {
+      await blik.applyMatches(fileId, ids, token);
+
+      // Oznaczamy lokalnie
+      for (const id of ids) {
+        const row = content.find((r) => Number(r.tx.id) === id);
+        if (row) row._matched = true;
+      }
+
+      // wymuś re-render
+      matchData = {
+        ...matchData!,
+        content: content.map((r) => ({ ...r }))
+      };
+
+      selected = new Set();
+
+      window.dispatchEvent(
+        new CustomEvent('toast', {
+          detail: { type: 'success', msg: 'Transaction updated' }
+        })
+      );
+    } catch (e: any) {
+      console.error(e);
+      window.dispatchEvent(
+        new CustomEvent('toast', {
+          detail: { type: 'error', msg: e.message ?? 'Nie udało się zapisać dopasowań' }
+        })
+      );
+    }
+  }
 </script>
 
-{#if loading}
-  <div class="space-y-4">
-    <div class="skeleton h-8 w-64"></div>
-    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
-      <div class="skeleton h-28"></div>
-      <div class="skeleton h-28"></div>
-      <div class="skeleton h-28"></div>
-      <div class="skeleton h-28"></div>
+<!-- STEPS -->
+<Steps
+  activeIndex={2}
+  steps={[
+    { label: 'Upload', href: '/blik/upload' },
+    { label: 'Preview', href: `/blik/file/${fileId}` },
+    { label: 'Match', href: `/blik/file/${fileId}/match` }
+  ]}
+/>
+
+<div class="card bg-base-100 mt-2 w-full p-6 shadow-xl">
+  <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+    <div>
+      <div class="text-xl font-semibold">Matchowanie transakcji</div>
+      <div class="text-sm opacity-60">Plik: {matchData?.decoded_name ?? '—'}</div>
     </div>
-    <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
-      <div class="skeleton h-64"></div>
-      <div class="skeleton h-64"></div>
+
+    <!-- KPI WIDGET -->
+    <div class="w-full md:w-1/2">
+      <div class="grid grid-cols-2 gap-3 md:grid-cols-4">
+        <div class="border-base-200 bg-base-100 rounded-lg border p-3">
+          <div class="text-xs opacity-60">Jednoznaczne</div>
+          <div class="text-lg font-semibold text-green-600">{oneMatches}</div>
+        </div>
+
+        <div class="border-base-200 bg-base-100 rounded-lg border p-3">
+          <div class="text-xs opacity-60">Wieloznaczne</div>
+          <div class="text-lg font-semibold text-yellow-600">{manyMatches}</div>
+        </div>
+
+        <div class="border-base-200 bg-base-100 rounded-lg border p-3">
+          <div class="text-xs opacity-60">Brak</div>
+          <div class="text-lg font-semibold text-gray-600">{noMatches}</div>
+        </div>
+
+        <div class="border-base-200 bg-base-100 rounded-lg border p-3">
+          <div class="text-xs opacity-60">Zaznaczone</div>
+          <div class="text-lg font-semibold">{selected.size}</div>
+        </div>
+      </div>
     </div>
   </div>
 
-{:else if error}
-  <div class="alert alert-error">
-    <span>{error}</span>
-  </div>
+  <div class="divider mt-2"></div>
 
-{:else if data}
-  <div class="space-y-6">
+  {#if loading}
+    <div class="alert alert-info">Ładowanie…</div>
+  {:else if error}
+    <div class="alert alert-error">{error}</div>
+  {:else if content.length === 0}
+    <div class="alert alert-warning">Brak danych do matchowania.</div>
+  {:else}
+    <form class="space-y-4">
+      <div class="bg-base-100 h-full w-full pb-6">
+        <div class="overflow-x-auto">
+          <table class="table w-full">
+            <thead>
+              <tr>
+                <th>Firefly TX</th>
+                <th>Dopasowania CSV</th>
+                <th>Status</th>
+                <th>Akcja</th>
+              </tr>
+            </thead>
+            <tbody>
+              {#each content as r (r.tx.id)}
+                <tr
+                  class="hover:bg-base-200 text-sm"
+                  class:bg-green-50={r._matched}
+                  class:opacity-50={r._matched}
+                >
+                  <td>
+                    <b>{r.tx.date}</b><br />
+                    ID: {r.tx.id}<br />
+                    Kwota: {r.tx.amount} PLN<br />
+                    Opis: {r.tx.description}<br />
 
-    <!-- HEADER -->
-    <div class="flex items-center justify-between">
-      <h1 class="text-2xl font-bold">BLIK · Processing Stats</h1>
-      <div class="badge badge-outline">
-        Total: {data.total_transactions}
-      </div>
-    </div>
+                    <div class="mt-2 flex flex-wrap gap-2">
+                      {#each r.tx.tags ?? [] as t}
+                        <div
+                          class="bg-base-200 border-base-300 max-w-[160px] overflow-hidden rounded-full border px-2 py-0.5 text-xs text-ellipsis"
+                          title={t}
+                        >
+                          {t}
+                        </div>
+                      {/each}
+                    </div>
 
-    <!-- KPI -->
-    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
-      <div class="card bg-base-100 shadow">
-        <div class="card-body">
-          <div class="text-sm opacity-70">Total transactions</div>
-          <div class="text-3xl font-bold">{data.total_transactions}</div>
+                    <span class="text-xs opacity-70">{r.tx.notes}</span>
+                  </td>
+
+                  <td>
+                    {#if !r.matches || r.matches.length === 0}
+                      -
+                    {:else}
+                      {#each r.matches as m, i}
+                        <div class="mb-3">
+                          <b>{m.date}</b><br />
+                          Kwota: {m.operation_amount}
+                          {m.operation_currency}<br />
+                          Szczegóły: {m.details}<br />
+                          Nadawca: {m.sender}<br />
+                          Odbiorca: {m.recipient}<br />
+                          <span class="text-xs opacity-70">
+                            {m.sender_account}<br />
+                            {m.recipient_account}
+                          </span>
+                        </div>
+                        {#if i < r.matches.length - 1}
+                          <hr class="my-2" />
+                        {/if}
+                      {/each}
+                    {/if}
+                  </td>
+
+                  <td
+                    class={r._matched
+                      ? 'font-semibold text-green-700'
+                      : r.matches.length === 1
+                        ? 'font-semibold text-green-600'
+                        : r.matches.length > 1
+                          ? 'font-semibold text-yellow-600'
+                          : 'text-gray-500'}
+                  >
+                    {#if r._matched}
+                      Zmatchowano
+                    {:else if r.matches.length === 0}
+                      Brak dopasowania
+                    {:else if r.matches.length === 1}
+                      ✔ 1 dopasowanie
+                    {:else}
+                      {r.matches.length} możliwych dopasowań
+                    {/if}
+                  </td>
+
+                  <td class="text-center">
+                    {#if r._matched}
+                      <span title="Zmatchowano">✔</span>
+                    {:else if r.matches.length === 1}
+                      <input
+                        type="checkbox"
+                        class="checkbox checkbox-primary"
+                        checked={selected.has(String(r.tx.id))}
+                        on:change={() => toggle(String(r.tx.id))}
+                      />
+                    {/if}
+                  </td>
+                </tr>
+              {/each}
+            </tbody>
+          </table>
         </div>
       </div>
 
-      <div class="card bg-base-100 shadow">
-        <div class="card-body">
-          <div class="text-sm opacity-70">Single-part</div>
-          <div class="text-success text-3xl font-bold">
-            {data.single_part_transactions}
-          </div>
-          <div class="text-xs opacity-60">
-            {processedRatio}% processed cleanly
-          </div>
-        </div>
-      </div>
-
-      <div class="card bg-base-100 shadow">
-        <div class="card-body">
-          <div class="text-sm opacity-70">Uncategorized</div>
-          <div class="text-warning text-3xl font-bold">
-            {data.uncategorized_transactions}
-          </div>
-        </div>
-      </div>
-
-      <div class="card bg-base-100 shadow">
-        <div class="card-body">
-          <div class="text-sm opacity-70">Not processed</div>
-          <div class="text-error text-3xl font-bold">
-            {data.not_processed_transactions}
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- FILTERS -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <div class="card bg-base-100 shadow">
-        <div class="card-body">
-          <div class="text-sm opacity-70">Filtered (exact)</div>
-          <div class="text-2xl font-bold">
-            {data.filtered_by_description_exact}
-          </div>
-        </div>
-      </div>
-
-      <div class="card bg-base-100 shadow">
-        <div class="card-body">
-          <div class="text-sm opacity-70">Filtered (partial)</div>
-          <div class="text-2xl font-bold">
-            {data.filtered_by_description_partial}
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- CHARTS -->
-    <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
-      <div class="card bg-base-100 shadow">
-        <div class="card-body">
-          <h2 class="card-title">Not processed by month</h2>
-          <canvas bind:this={notProcessedCanvas}></canvas>
-        </div>
-      </div>
-
-      <div class="card bg-base-100 shadow">
-        <div class="card-body">
-          <h2 class="card-title">Incomplete processed · trend</h2>
-          <canvas bind:this={incompleteCanvas}></canvas>
-        </div>
-      </div>
-    </div>
-
-  </div>
-{/if}
+      <button type="button" class="btn btn-primary mt-4" on:click={applyMatches}>
+        ✔ Zastosuj dopasowania
+      </button>
+    </form>
+  {/if}
+</div>
