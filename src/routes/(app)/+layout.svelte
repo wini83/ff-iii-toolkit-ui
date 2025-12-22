@@ -145,6 +145,13 @@
                 Match & Update
               </a>
             </li>
+             <li>
+              <a href="/blik/stats">
+                <!-- icon -->
+                <Icon src={icons.ChartPie} class="w-5 h-5" />
+                Stats
+              </a>
+            </li>
           </ul>
         </details>
       </li>

@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { Icon } from '@steeze-ui/svelte-icon';
+  import * as icons from '@steeze-ui/heroicons';
   import { onMount, onDestroy, tick } from 'svelte';
   import { goto } from '$app/navigation';
   import {
@@ -94,17 +96,6 @@
       // ⏸️ CZEKAMY aż Svelte wyrenderuje canvas
       await tick();
 
-      // 🧪 DIAGNOSTYKA – TO WKLEJ
-      console.log('--- CHART DEBUG ---');
-      console.log('notProcessedCanvas:', notProcessedCanvas);
-      console.log('notProcessed.labels:', notProcessed.labels);
-      console.log('notProcessed.values:', notProcessed.values);
-
-      console.log('incompleteCanvas:', incompleteCanvas);
-      console.log('incomplete.labels:', incomplete.labels);
-      console.log('incomplete.values:', incomplete.values);
-      console.log('-------------------');
-
       // 🔹 BAR CHART
       if (notProcessedCanvas && notProcessed.labels.length) {
         notProcessedChart = new Chart(notProcessedCanvas, {
@@ -129,26 +120,23 @@
         });
       }
 
-      // 🔹 LINE CHART
+      // 🔹 BAR CHART (INCOMPLETE)
       if (incompleteCanvas && incomplete.labels.length) {
         incompleteChart = new Chart(incompleteCanvas, {
-          type: 'line',
+          type: 'bar',
           data: {
             labels: incomplete.labels,
             datasets: [
               {
                 label: 'Incomplete',
                 data: incomplete.values,
-                borderColor: '#3b82f6',
-                backgroundColor: 'rgba(59,130,246,0.25)',
-                tension: 0.3,
-                fill: true,
-                pointRadius: 3
+                backgroundColor: '#3b82f6'
               }
             ]
           },
           options: {
             responsive: true,
+            maintainAspectRatio: false,
             plugins: {
               legend: { display: false }
             }
@@ -191,73 +179,82 @@
 {:else if data}
   {@const d = data}
 
-  <div class="space-y-6">
-    <!-- HEADER -->
-    <div class="flex items-center justify-between">
-      <h1 class="text-2xl font-bold">BLIK · Processing Stats</h1>
-      <div class="badge badge-outline">
-        Total: {d.total_transactions}
+  <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+    <div class=""></div>
+    <div class="text-right">
+      <button class="btn btn-ghost btn-sm normal-case">
+        <Icon src={icons.ArrowPath} class="inline-block h-5 w-5 stroke-current" />
+        Refresh Data
+      </button>
+      <button class="btn btn-ghost btn-sm ml-2 normal-case">
+        <Icon src={icons.Share} class="inline-block h-5 w-5 stroke-current" />
+        Share
+      </button>
+      <div class="dropdown dropdown-bottom dropdown-end ml-2">
+        <!-- TRIGGER -->
+        <button
+          type="button"
+          class="btn btn-ghost btn-sm btn-square normal-case"
+          aria-label="More actions"
+        >
+          <Icon src={icons.EllipsisVertical} class="inline-block h-5 w-5 stroke-current" />
+        </button>
+
+        <!-- MENU -->
+        <ul class="dropdown-content menu menu-compact bg-base-100 rounded-box w-52 p-2 shadow">
+          <li>
+            <button type="button" class="flex items-center gap-2">
+              <Icon src={icons.ArrowDownTray} class="inline-block h-5 w-5 stroke-current" />
+              Download
+            </button>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="mt-2 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+
+    <div class="stats bg-base-100 shadow rounded-box">
+      <div class="stat">
+        <div class="stat-figure text-primary">
+          <Icon src={icons.CircleStack} class="inline-block h-8 w-8 stroke-current" />
+        </div>
+        <div class="stat-title text-primary">Total transactions</div>
+        <div class="stat-value text-primary">{d.total_transactions}</div>
+        <div class="stat-desc">Single-part:  {d.single_part_transactions} </div>
       </div>
     </div>
 
-    <!-- KPI -->
-    <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-      <div class="card bg-base-100 shadow">
-        <div class="card-body">
-          <div class="text-sm opacity-70">Total transactions</div>
-          <div class="text-3xl font-bold">{d.total_transactions}</div>
-        </div>
-      </div>
 
-      <div class="card bg-base-100 shadow">
-        <div class="card-body">
-          <div class="text-sm opacity-70">Single-part</div>
-          <div class="text-success text-3xl font-bold">
-            {d.single_part_transactions}
-          </div>
-          <div class="text-xs opacity-60">
-            {processedRatio}% processed cleanly
-          </div>
+    <div class="stats bg-base-100 shadow rounded-box">
+      <div class="stat">
+        <div class="stat-figure text-secondary">
+          <Icon src={icons.CircleStack} class="inline-block h-8 w-8 stroke-current" />
         </div>
-      </div>
-
-      <div class="card bg-base-100 shadow">
-        <div class="card-body">
-          <div class="text-sm opacity-70">Uncategorized</div>
-          <div class="text-warning text-3xl font-bold">
-            {d.uncategorized_transactions}
-          </div>
-        </div>
-      </div>
-
-      <div class="card bg-base-100 shadow">
-        <div class="card-body">
-          <div class="text-sm opacity-70">Not processed</div>
-          <div class="text-error text-3xl font-bold">
-            {d.not_processed_transactions}
-          </div>
-        </div>
+        <div class="stat-title text-secondary">Uncategorized</div>
+        <div class="stat-value  text-secondary">{d.uncategorized_transactions}</div>
       </div>
     </div>
 
-    <!-- FILTERS -->
-    <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-      <div class="card bg-base-100 shadow">
-        <div class="card-body">
-          <div class="text-sm opacity-70">Filtered (exact)</div>
-          <div class="text-2xl font-bold">
-            {d.filtered_by_description_exact}
-          </div>
+    <div class="stats bg-base-100 shadow rounded-box">
+      <div class="stat">
+        <div class="stat-figure text-warning">
+          <Icon src={icons.CircleStack} class="inline-block h-8 w-8 stroke-current" />
         </div>
+        <div class="stat-title text-warning">Not processed (TAG)</div>
+        <div class="stat-value text-warning">{d.not_processed_transactions}</div>
+        <div class="stat-desc text-warning">by description:  {d.filtered_by_description_exact} </div>
       </div>
+    </div>
 
-      <div class="card bg-base-100 shadow">
-        <div class="card-body">
-          <div class="text-sm opacity-70">Filtered (partial)</div>
-          <div class="text-2xl font-bold">
-            {d.filtered_by_description_partial}
-          </div>
+    <div class="stats bg-base-100 shadow rounded-box">
+      <div class="stat">
+        <div class="stat-figure">
+          <Icon src={icons.CircleStack} class="inline-block h-8 w-8 stroke-current" />
         </div>
+        <div class="stat-title">Incomplete processed</div>
+        <div class="stat-value">{d.filtered_by_description_partial}</div>
       </div>
     </div>
 
@@ -265,22 +262,46 @@
   </div>
 {/if}
 
-<div class="card bg-base-100 shadow">
-  <div class="card-body">
-    <h2 class="card-title">Not processed by month</h2>
+<!-- CHART: NOT PROCESSED -->
+<div class="card bg-base-100 mt-6 w-full p-6 shadow-xl">
+  
+    <div class="text-xl font-semibold ">Not processed by month</div>
+
+    <div class="divider mt-2 mb-2"></div>
 
     <div class="relative h-64">
-      <canvas bind:this={notProcessedCanvas}></canvas>
+      {#if loading}
+        <div class="skeleton absolute inset-0 z-10"></div>
+      {/if}
+
+      <canvas
+        class:opacity-0={loading}
+        class:opacity-100={!loading}
+        class="transition-opacity duration-300"
+        bind:this={notProcessedCanvas}
+      ></canvas>
     </div>
-  </div>
+ 
 </div>
 
-<div class="card bg-base-100 shadow">
-  <div class="card-body">
-    <h2 class="card-title">Incomplete processed · trend</h2>
+<!-- CHART: INCOMPLETE -->
+<div class="card bg-base-100 mt-2 w-full p-6 shadow-xl">
+ 
+    <h2 class="text-xl font-semibold">Incomplete processed by month</h2>
+
+    <div class="divider mt-2 mb-2"></div>
 
     <div class="relative h-64">
-      <canvas bind:this={incompleteCanvas}></canvas>
+      {#if loading}
+        <div class="skeleton absolute inset-0 z-10"></div>
+      {/if}
+
+      <canvas
+        class:opacity-0={loading}
+        class:opacity-100={!loading}
+        class="transition-opacity duration-300"
+        bind:this={incompleteCanvas}
+      ></canvas>
     </div>
-  </div>
+  
 </div>
