@@ -179,15 +179,15 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/tx/next": {
+    "/api/tx/screening": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Get Tx */
-        get: operations["get_tx_api_tx_next_get"];
+        /** Get Screening Month */
+        get: operations["get_screening_month_api_tx_screening_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -323,9 +323,16 @@ export interface components {
             /** Matches */
             matches: components["schemas"]["SimplifiedRecord"][];
         };
-        /** ScreeningResponse */
-        ScreeningResponse: {
-            tx: components["schemas"]["SimplifiedTx"];
+        /** ScreeningMonthResponse */
+        ScreeningMonthResponse: {
+            /** Year */
+            year: number;
+            /** Month */
+            month: number;
+            /** Remaining */
+            remaining: number;
+            /** Transactions */
+            transactions: components["schemas"]["SimplifiedTx"][];
             /** Categories */
             categories: components["schemas"]["SimplifiedCategory"][];
         };
@@ -707,11 +714,11 @@ export interface operations {
             };
         };
     };
-    get_tx_api_tx_next_get: {
+    get_screening_month_api_tx_screening_get: {
         parameters: {
-            query?: {
-                order?: "asc" | "desc";
-                after_id?: number | null;
+            query: {
+                year: number;
+                month: number;
             };
             header?: never;
             path?: never;
@@ -719,17 +726,24 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Next transaction for screening */
+            /** @description Uncategorized transactions for given month */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ScreeningResponse"];
+                    "application/json": components["schemas"]["ScreeningMonthResponse"];
                 };
             };
-            /** @description No more transactions to screen */
+            /** @description No uncategorized transactions in this month */
             204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid year or month */
+            400: {
                 headers: {
                     [name: string]: unknown;
                 };

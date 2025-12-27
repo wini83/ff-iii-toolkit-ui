@@ -1,27 +1,24 @@
 import { createApiClient } from './client';
 import { normalizeApiError } from '$lib/api/errors';
+import type { operations } from '$lib/api/schema';
 
 async function getApi() {
   return await createApiClient();
 }
 
-export type GetNextTxParams = {
-  order?: 'asc' | 'desc';
-  after_id?: number | null;
-};
+type ScreeningMonthResponse =
+  operations['get_screening_month_api_tx_screening_get']['responses'][200]['content']['application/json'];
 
-export async function getNextTx(
-  params: GetNextTxParams,
+export async function getScreeningMonth(
+  year: number,
+  month: number,
   token: string
-) {
+): Promise<ScreeningMonthResponse | null> {
   const api = await getApi();
 
-  const { data, error, response } = await api.GET('/api/tx/next', {
+  const { data, error, response } = await api.GET('/api/tx/screening', {
     params: {
-      query: {
-        order: params.order ?? 'asc',
-        after_id: params.after_id ?? null,
-      },
+      query: { year, month },
     },
     headers: {
       Authorization: `Bearer ${token}`,
@@ -29,16 +26,17 @@ export async function getNextTx(
   });
 
   if (response.status === 204) {
+    // miesiąc zamknięty – expected outcome
     return null;
   }
 
   if (error) {
     throw normalizeApiError(error);
   }
-  type _Debug = typeof data;
-  // ✅ data to JUŻ payload
+
   return data ?? null;
 }
+
 
 export async function assignCategory(
   txId: number,
