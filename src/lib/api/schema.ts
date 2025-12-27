@@ -28,10 +28,27 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get Statistics */
-        get: operations["get_statistics_api_blik_files_statistics_get"];
+        /** Get Stats */
+        get: operations["get_stats_api_blik_files_statistics_get"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/blik_files/statistics/refresh": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Refresh Stats */
+        post: operations["refresh_stats_api_blik_files_statistics_refresh_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -162,6 +179,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/tx/next": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Tx */
+        get: operations["get_tx_api_tx_next_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/tx/{tx_id}/category/{category_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Apply Category */
+        post: operations["apply_category_api_tx__tx_id__category__category_id__post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -271,6 +322,19 @@ export interface components {
             tx: components["schemas"]["SimplifiedTx"];
             /** Matches */
             matches: components["schemas"]["SimplifiedRecord"][];
+        };
+        /** ScreeningResponse */
+        ScreeningResponse: {
+            tx: components["schemas"]["SimplifiedTx"];
+            /** Categories */
+            categories: components["schemas"]["SimplifiedCategory"][];
+        };
+        /** SimplifiedCategory */
+        SimplifiedCategory: {
+            /** Id */
+            id: string;
+            /** Name */
+            name: string;
         };
         /** SimplifiedRecord */
         SimplifiedRecord: {
@@ -433,7 +497,27 @@ export interface operations {
             };
         };
     };
-    get_statistics_api_blik_files_statistics_get: {
+    get_stats_api_blik_files_statistics_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StatisticsResponse"];
+                };
+            };
+        };
+    };
+    refresh_stats_api_blik_files_statistics_refresh_post: {
         parameters: {
             query?: never;
             header?: never;
@@ -619,6 +703,82 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["VersionResponse"];
+                };
+            };
+        };
+    };
+    get_tx_api_tx_next_get: {
+        parameters: {
+            query?: {
+                order?: "asc" | "desc";
+                after_id?: number | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Next transaction for screening */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScreeningResponse"];
+                };
+            };
+            /** @description No more transactions to screen */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Firefly error */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    apply_category_api_tx__tx_id__category__category_id__post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                tx_id: number;
+                category_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
