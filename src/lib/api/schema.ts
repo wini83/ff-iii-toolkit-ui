@@ -213,6 +213,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/tx/{tx_id}/tag/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Apply Tag */
+        post: operations["apply_tag_api_tx__tx_id__tag__post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -434,6 +451,11 @@ export interface components {
             /** Token Type */
             token_type: string;
         };
+        /**
+         * TxTag
+         * @enum {string}
+         */
+        TxTag: "blik_done" | "allegro_done" | "rule_potential" | "action_req";
         /** UploadResponse */
         UploadResponse: {
             /** Message */
@@ -774,6 +796,37 @@ export interface operations {
             path: {
                 tx_id: number;
                 category_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    apply_tag_api_tx__tx_id__tag__post: {
+        parameters: {
+            query: {
+                tag: components["schemas"]["TxTag"];
+            };
+            header?: never;
+            path: {
+                tx_id: number;
             };
             cookie?: never;
         };

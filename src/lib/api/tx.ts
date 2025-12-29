@@ -1,10 +1,12 @@
 import { createApiClient } from './client';
 import { normalizeApiError } from '$lib/api/errors';
-import type { operations } from '$lib/api/schema';
+import type { operations, components } from '$lib/api/schema';
 
 async function getApi() {
   return await createApiClient();
 }
+
+type TxTag = components['schemas']['TxTag'];
 
 type ScreeningMonthResponse =
   operations['get_screening_month_api_tx_screening_get']['responses'][200]['content']['application/json'];
@@ -71,3 +73,41 @@ export async function assignCategory(
   throw new Error('Unexpected response from assignCategory');
 }
 
+/* -----------------------------
+ * NEW: Apply Tag
+ * ----------------------------- */
+
+export async function applyTag(
+  txId: number,
+  tag: TxTag,
+  token: string
+): Promise<void> {
+  const api = await getApi();
+
+  const { error, response } = await api.POST(
+    '/api/tx/{tx_id}/tag/',
+    {
+      params: {
+        path: {
+          tx_id: txId,
+        },
+        query: {
+          tag,
+        },
+      },
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  if (response.status === 204) {
+    return;
+  }
+
+  if (error) {
+    throw normalizeApiError(error);
+  }
+
+  throw new Error('Unexpected response from applyTag');
+}
