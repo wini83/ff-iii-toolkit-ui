@@ -224,6 +224,9 @@
         >
           Apply
         </button>
+        
+      </div>
+      <div class="join mt-4">
         <button class="btn join-item"> Action Required </button>
         <button class="btn join-item"> Rule Potential </button>
       </div>
