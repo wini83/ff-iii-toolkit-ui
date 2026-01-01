@@ -1,10 +1,6 @@
-import { createApiClient } from './client';
+import { apiRequest } from './auth';
 import { normalizeApiError } from '$lib/api/errors';
 import type { operations, components } from '$lib/api/schema';
-
-async function getApi() {
-  return await createApiClient();
-}
 
 type TxTag = components['schemas']['TxTag'];
 
@@ -16,16 +12,16 @@ export async function getScreeningMonth(
   month: number,
   token: string
 ): Promise<ScreeningMonthResponse | null> {
-  const api = await getApi();
-
-  const { data, error, response } = await api.GET('/api/tx/screening', {
-    params: {
-      query: { year, month },
-    },
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+  const { data, error, response } = await apiRequest(
+    (api, headers) =>
+      api.GET('/api/tx/screening', {
+        params: {
+          query: { year, month },
+        },
+        headers,
+      }),
+    { token }
+  );
 
   if (response.status === 204) {
     // miesiąc zamknięty – expected outcome
@@ -45,21 +41,18 @@ export async function assignCategory(
   categoryId: number,
   token: string
 ): Promise<void> {
-  const api = await getApi();
-
-  const { error, response } = await api.POST(
-    '/api/tx/{tx_id}/category/{category_id}',
-    {
-      params: {
-        path: {
-          tx_id: txId,
-          category_id: categoryId,
+  const { error, response } = await apiRequest(
+    (api, headers) =>
+      api.POST('/api/tx/{tx_id}/category/{category_id}', {
+        params: {
+          path: {
+            tx_id: txId,
+            category_id: categoryId,
+          },
         },
-      },
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
+        headers,
+      }),
+    { token }
   );
 
   if (response.status === 204) {
@@ -82,23 +75,20 @@ export async function applyTag(
   tag: TxTag,
   token: string
 ): Promise<void> {
-  const api = await getApi();
-
-  const { error, response } = await api.POST(
-    '/api/tx/{tx_id}/tag/',
-    {
-      params: {
-        path: {
-          tx_id: txId,
+  const { error, response } = await apiRequest(
+    (api, headers) =>
+      api.POST('/api/tx/{tx_id}/tag/', {
+        params: {
+          path: {
+            tx_id: txId,
+          },
+          query: {
+            tag,
+          },
         },
-        query: {
-          tag,
-        },
-      },
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
+        headers,
+      }),
+    { token }
   );
 
   if (response.status === 204) {

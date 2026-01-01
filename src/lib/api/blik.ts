@@ -1,83 +1,81 @@
-import { createApiClient } from './client';
-
-async function getApi() {
-  return await createApiClient();
-}
+import { apiRequest } from './auth';
 
 export async function getPreview(encoded_id: string, token: string) {
-  const api = await getApi();
-  const { data, error } = await api.GET('/api/blik_files/{encoded_id}', {
-    params: { path: { encoded_id } },
-    headers: { Authorization: `Bearer ${token}` }
-  });
+  const { data, error } = await apiRequest(
+    (api, headers) =>
+      api.GET('/api/blik_files/{encoded_id}', {
+        params: { path: { encoded_id } },
+        headers
+      }),
+    { token }
+  );
 
   if (error) throw normalizeApiError(error);
   return data;
 }
 
 export async function getMatches(encoded_id: string, token: string) {
-  const api = await getApi();
-  const { data, error } = await api.GET('/api/blik_files/{encoded_id}/matches', {
-    params: { path: { encoded_id } },
-    headers: { Authorization: `Bearer ${token}` }
-  });
+  const { data, error } = await apiRequest(
+    (api, headers) =>
+      api.GET('/api/blik_files/{encoded_id}/matches', {
+        params: { path: { encoded_id } },
+        headers
+      }),
+    { token }
+  );
 
   if (error) throw normalizeApiError(error);
   return data;
 }
 
 export async function applyMatches(encoded_id: string, tx_indexes: number[], token: string) {
-  const api = await getApi();
-  const { data, error } = await api.POST('/api/blik_files/{encoded_id}/matches', {
-    params: { path: { encoded_id } },
-    headers: { Authorization: `Bearer ${token}` },
-    body: { tx_indexes }
-  });
+  const { data, error } = await apiRequest(
+    (api, headers) =>
+      api.POST('/api/blik_files/{encoded_id}/matches', {
+        params: { path: { encoded_id } },
+        headers,
+        body: { tx_indexes }
+      }),
+    { token }
+  );
 
   if (error) throw normalizeApiError(error);
   return data;
 }
 
 export async function uploadCsv(formData: FormData, token: string) {
-  const api = await getApi();
-  const { data, error } = await api.POST('/api/blik_files', {
-    body: formData as unknown as never,
-    headers: {
-      Authorization: `Bearer ${token}`
-    }
-  });
+  const { data, error } = await apiRequest(
+    (api, headers) =>
+      api.POST('/api/blik_files', {
+        body: formData as unknown as never,
+        headers
+      }),
+    { token }
+  );
 
   if (error) throw normalizeApiError(error);
   return data;
 }
 
 export async function getStats(token: string) {
-  const api = await getApi();
-  const { data, error } = await api.GET('/api/blik_files/statistics', {
-    headers: {
-      Authorization: `Bearer ${token}`
-    }
-  });
+  const { data, error } = await apiRequest(
+    (api, headers) => api.GET('/api/blik_files/statistics', { headers }),
+    { token }
+  );
 
   if (error) throw normalizeApiError(error);
   return data;
 }
 
-  export async function refreshStats(token: string) {
-    const res = await fetch('/api/blik_files/statistics/refresh', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    });
+export async function refreshStats(token: string) {
+  const { data, error } = await apiRequest(
+    (api, headers) => api.POST('/api/blik_files/statistics/refresh', { headers }),
+    { token }
+  );
 
-    if (!res.ok) {
-      const msg = (await res.text().catch(() => '')) || 'Failed to refresh statistics';
-      throw new Error(msg);
-    }
-
-    return res;
-  }
+  if (error) throw normalizeApiError(error);
+  return data;
+}
 
 function normalizeApiError(error: any): Error {
   if (Array.isArray(error?.detail)) {
