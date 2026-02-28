@@ -1191,6 +1191,8 @@ export interface components {
              * Format: date-time
              */
             created_at: string;
+            /** Short Id */
+            readonly short_id: string;
         };
         /** ValidationError */
         ValidationError: {
