@@ -1,15 +1,27 @@
 <script lang="ts">
-  import { onMount, onDestroy } from 'svelte';
+  import { onMount } from 'svelte';
   import { browser } from '$app/environment';
+  import { page } from '$app/stores';
 
   import { Icon } from '@steeze-ui/svelte-icon';
   import * as icons from '@steeze-ui/heroicons';
 
+  import AppSidebar from '$lib/components/AppSidebar.svelte';
+  import { getMe } from '$lib/api/me';
+
+  type MeUser = Awaited<ReturnType<typeof getMe>>;
+  type Toast = { id: string; type: 'success' | 'error' | 'info' | 'warning'; msg: string };
+  type ToastEventDetail = Pick<Toast, 'type' | 'msg'>;
+
+  const DEFAULT_APP_TITLE = 'Firefly Toolkit';
+
   // prosty state dla drawer
   let drawerOpen = false;
+  let meUser: MeUser | null = null;
+  let dynamicTitle = DEFAULT_APP_TITLE;
+  let headTitle = DEFAULT_APP_TITLE;
 
   // toasty trzymamy jako prosta tablica
-  type Toast = { id: string; type: 'success' | 'error' | 'info' | 'warning'; msg: string };
   let toasts: Toast[] = [];
 
   const toastIcons = {
@@ -19,59 +31,115 @@
     warning: icons.ExclamationTriangle
   } as const;
 
-  // przepisujemy token z localStorage → cookie (only browser)
-  if (browser) {
-    const token = localStorage.getItem('access_token');
-
-    if (token && !document.cookie.includes('access_token_client=')) {
-      document.cookie = `access_token_client=${token}; Path=/;`;
-    }
+  function resolveRouteTitle(pathname: string): string {
+    if (pathname.startsWith('/tx/categorize')) return 'Transactions / Categorize';
+    if (pathname.startsWith('/tx/stats')) return 'Transactions / Stats';
+    if (pathname.startsWith('/blik/upload')) return 'BLIK Sync / File Upload';
+    if (pathname.startsWith('/blik/file')) return 'BLIK Sync / File Preview';
+    if (pathname.startsWith('/blik/stats')) return 'BLIK Sync / Stats';
+    if (pathname.startsWith('/settings/secrets')) return 'Settings / Secrets';
+    return DEFAULT_APP_TITLE;
   }
 
-  function toggle() {
-    drawerOpen = !drawerOpen;
-  }
+  $: dynamicTitle = resolveRouteTitle($page.url.pathname);
+  $: headTitle =
+    dynamicTitle === DEFAULT_APP_TITLE ? DEFAULT_APP_TITLE : `${dynamicTitle} — ${DEFAULT_APP_TITLE}`;
 
   function logout() {
+    if (!browser) return;
+
     document.cookie = 'access_token_client=; Path=/; Max-Age=0';
     localStorage.removeItem('access_token');
     // używamy location.href bo chcemy pełne przeładowanie
     window.location.href = '/login';
   }
 
-  function onToastEvent(e: Event) {
-    // safety: event może nie być CustomEvent (guard)
-    const ev = e as CustomEvent | undefined;
-    const detail = ev?.detail ?? {};
-    const { type, msg } = detail;
-    if (!type || !msg) {
-      // nieprawidłowy event — ignorujemy ale logujemy
-      console.warn('Ignored toast event (missing detail):', ev);
+  function closeDrawerOnMobile() {
+    drawerOpen = false;
+  }
+
+  function readAccessToken(): string | null {
+    if (!browser) return null;
+
+    try {
+      return localStorage.getItem('access_token');
+    } catch {
+      return null;
+    }
+  }
+
+  function hasAccessTokenCookie(): boolean {
+    if (!browser) return false;
+    return document.cookie.includes('access_token_client=');
+  }
+
+  function syncAccessTokenCookieFromLocalStorage() {
+    if (!browser || hasAccessTokenCookie()) return;
+
+    const token = readAccessToken();
+    if (!token) return;
+
+    document.cookie = `access_token_client=${token}; Path=/;`;
+  }
+
+  function isToastEventDetail(detail: unknown): detail is ToastEventDetail {
+    if (!detail || typeof detail !== 'object') return false;
+
+    const candidate = detail as Partial<ToastEventDetail>;
+    const validType =
+      candidate.type === 'success' ||
+      candidate.type === 'error' ||
+      candidate.type === 'info' ||
+      candidate.type === 'warning';
+
+    return validType && typeof candidate.msg === 'string' && candidate.msg.length > 0;
+  }
+
+  function handleToastEvent(event: Event) {
+    const detail = (event as CustomEvent<unknown>).detail;
+
+    if (!isToastEventDetail(detail)) {
+      console.warn('Ignored toast event (missing detail):', event);
       return;
     }
 
     const id = crypto?.randomUUID?.() ?? String(Date.now());
-    toasts = [...toasts, { id, type, msg }];
-
-    // debug
-    console.debug('Toast added', { id, type, msg });
+    toasts = [...toasts, { id, type: detail.type, msg: detail.msg }];
 
     setTimeout(() => {
       toasts = toasts.filter((t) => t.id !== id);
     }, 3000);
   }
 
-  // rejestracja tylko w browser (onMount też działa tylko w browser, ale double-safety)
-  onMount(() => {
-    if (typeof window === 'undefined') return;
-    window.addEventListener('toast', onToastEvent as EventListener);
-  });
+  async function loadCurrentUser() {
+    const token = readAccessToken();
+    if (!token) return;
 
-  onDestroy(() => {
-    if (typeof window === 'undefined') return;
-    window.removeEventListener('toast', onToastEvent as EventListener);
+    try {
+      meUser = await getMe(token);
+    } catch (error) {
+      console.warn('Failed to fetch current user via /api/me:', error);
+    }
+  }
+
+  onMount(() => {
+    if (!browser) return;
+
+    syncAccessTokenCookieFromLocalStorage();
+    void loadCurrentUser();
+
+    const listener = (event: Event) => handleToastEvent(event);
+    window.addEventListener('toast', listener as EventListener);
+
+    return () => {
+      window.removeEventListener('toast', listener as EventListener);
+    };
   });
 </script>
+
+<svelte:head>
+  <title>{headTitle}</title>
+</svelte:head>
 
 <div class="drawer lg:drawer-open bg-base-200 text-base-content min-h-screen">
   <input id="app-drawer" type="checkbox" class="drawer-toggle" bind:checked={drawerOpen} />
@@ -101,12 +169,12 @@
       </div>
 
       <div class="flex-1">
-        <h1 class="text-2xl font-bold">BLIK Sync</h1>
+        <h1 class="text-2xl font-bold">{dynamicTitle}</h1>
       </div>
 
       <div class="flex-none">
         <div class="dropdown dropdown-end">
-          <button tabindex="0" class="btn btn-ghost btn-circle avatar">
+          <button tabindex="0" class="btn btn-ghost btn-circle avatar" title={meUser ? `Signed in as ${meUser.username}` : undefined}>
             <div class="w-10 rounded-full">
               <img
                 src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp"
@@ -115,9 +183,9 @@
             </div>
           </button>
           <ul class="menu menu-sm dropdown-content bg-base-100 rounded-box mt-3 w-52 p-2 shadow">
-            <li><a href="/login">Profil</a></li>
-            <li><a href="/login">Ustawienia</a></li>
-            <li><button on:click={logout}>Wyloguj</button></li>
+            <li><a href="/login"><Icon src={icons.User} class="h-5 w-5" /> Profile</a></li>
+            <li><a href="/settings/secrets"><Icon src={icons.Key} class="h-5 w-5" /> Secrets</a></li>
+            <li><button on:click={logout}><Icon src={icons.Power} class="h-5 w-5" />Log out</button></li>
           </ul>
         </div>
       </div>
@@ -129,91 +197,7 @@
     </main>
   </div>
 
-  <!-- SIDEBAR -->
-  <div class="drawer-side z-30">
-    <label for="app-drawer" class="drawer-overlay !z-0"></label>
-
-    <ul class="menu bg-base-100 text-base-content min-h-full w-80 p-4">
-      <li class="mb-2 text-xl font-semibold">
-        <button
-          class="btn btn-ghost btn-circle absolute top-2 right-2 lg:hidden"
-          on:click={() => (drawerOpen = false)}
-        >
-          ✕
-        </button>
-        <a href="/"
-          ><img class="mask mask-squircle w-10" src="/logo_b.png" alt="Firefly Toolkit" />Firefly
-          Toolkit</a
-        >
-      </li>
-
-      <li>
-        <details open>
-          <summary class="flex cursor-pointer items-center gap-2">
-            <Icon src={icons.ShoppingBag} class="h-5 w-5" />
-            Transactions
-          </summary>
-
-          <ul>
-            <li>
-              <a href="/tx/categorize">
-                <Icon src={icons.DocumentMagnifyingGlass} class="h-5 w-5" />
-                Categorize
-              </a>
-            </li>
-            <li>
-              <a href="/blik/stats">
-                <Icon src={icons.ChartBar} class="h-5 w-5" />
-                Stats
-              </a>
-            </li>
-          </ul>
-        </details>
-      </li>
-
-      <li>
-        <details open>
-          <summary class="flex cursor-pointer items-center gap-2">
-            <!-- icon -->
-            <Icon src={icons.DocumentCurrencyEuro} class="h-5 w-5" />
-            BLIK Sync
-          </summary>
-
-          <ul>
-            <li>
-              <a href="/blik/upload">
-                <!-- icon -->
-                <Icon src={icons.InboxArrowDown} class="h-5 w-5" />
-                File Upload
-              </a>
-            </li>
-
-            <li>
-              <a href="/blik/file">
-                <!-- icon -->
-                <Icon src={icons.DocumentCurrencyEuro} class="h-5 w-5" />
-                File Preview
-              </a>
-            </li>
-            <li>
-              <a href="/blik/file">
-                <!-- icon -->
-                <Icon src={icons.Bolt} class="h-5 w-5" />
-                Match & Update
-              </a>
-            </li>
-            <li>
-              <a href="/blik/stats">
-                <!-- icon -->
-                <Icon src={icons.ChartPie} class="h-5 w-5" />
-                Stats
-              </a>
-            </li>
-          </ul>
-        </details>
-      </li>
-    </ul>
-  </div>
+  <AppSidebar onCloseMobile={closeDrawerOnMobile} />
 </div>
 
 <!-- TOASTS -->

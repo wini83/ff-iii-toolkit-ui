@@ -3,66 +3,33 @@
   import * as icons from '@steeze-ui/heroicons';
   import { onMount, onDestroy, tick } from 'svelte';
   import { goto } from '$app/navigation';
-  import {
-    Chart,
-    BarController,
-    BarElement,
-    LineController,
-    LineElement,
-    PointElement,
-    CategoryScale,
-    LinearScale,
-    Tooltip,
-    Legend,
-    Filler
-  } from 'chart.js';
+  import { Chart, BarController, BarElement, CategoryScale, LinearScale, Tooltip, Legend } from 'chart.js';
 
-  import { blik } from '$lib/api/blik';
+  import { getMetricsStatus, refreshMetricsStatus } from '$lib/api/tx';
   import type { components } from '$lib/api/schema';
 
-  Chart.register(
-    BarController,
-    BarElement,
-    LineController,
-    LineElement,
-    PointElement,
-    CategoryScale,
-    LinearScale,
-    Tooltip,
-    Legend,
-    Filler
-  );
+  Chart.register(BarController, BarElement, CategoryScale, LinearScale, Tooltip, Legend);
 
-  type BlikMetricsStatusResponse = components['schemas']['BlikMetricsStatusResponse'];
-  type BlikMetricsResultResponse = components['schemas']['BlikMetricsResultResponse'];
+  type TxMetricsStatusResponse = components['schemas']['TxMetricsStatusResponse'];
+  type TxMetricsResultResponse = components['schemas']['TxMetricsResultResponse'];
   type JobStatus = components['schemas']['JobStatus'];
 
   const POLL_INTERVAL_MS = 2_000;
   const MAX_POLL_ATTEMPTS = 60;
 
-  let statusData: BlikMetricsStatusResponse | null = null;
-  let data: BlikMetricsResultResponse | null = null;
+  let statusData: TxMetricsStatusResponse | null = null;
+  let data: TxMetricsResultResponse | null = null;
   let loading = true;
   let refreshLoading = false;
   let networkError: string | null = null;
 
-  let processedRatio = 0;
-
-  let notProcessed = {
+  let categorizableByMonth = {
     labels: [] as string[],
     values: [] as number[]
   };
 
-  let incomplete = {
-    labels: [] as string[],
-    values: [] as number[]
-  };
-
-  let notProcessedCanvas: HTMLCanvasElement | null = null;
-  let incompleteCanvas: HTMLCanvasElement | null = null;
-
-  let notProcessedChart: Chart | null = null;
-  let incompleteChart: Chart | null = null;
+  let categorizableCanvas: HTMLCanvasElement | null = null;
+  let categorizableChart: Chart | null = null;
 
   function toChartData(obj: Record<string, number>) {
     return {
@@ -91,19 +58,8 @@
     return status === 'done';
   }
 
-  function hasNoData(status: BlikMetricsStatusResponse | null) {
+  function hasNoData(status: TxMetricsStatusResponse | null) {
     return isDone(status?.status) && status?.result === null;
-  }
-
-  function hasTotalTransactions(result: BlikMetricsResultResponse): result is BlikMetricsResultResponse & { total_transactions: number } {
-    return (
-      'total_transactions' in result &&
-      typeof (result as BlikMetricsResultResponse & { total_transactions?: unknown }).total_transactions === 'number'
-    );
-  }
-
-  function getTotalTransactions(result: BlikMetricsResultResponse) {
-    return hasTotalTransactions(result) ? result.total_transactions : result.single_part_transactions;
   }
 
   function formatTimestamp(timestamp: string | undefined) {
@@ -184,56 +140,34 @@
     emitToast('error', 'Not yet implemented');
   }
 
-  async function pollUntilDone(token: string, initialStatus: BlikMetricsStatusResponse) {
+  async function pollUntilDone(token: string, initialStatus: TxMetricsStatusResponse) {
     let current = initialStatus;
 
     for (let attempt = 0; attempt < MAX_POLL_ATTEMPTS && isRunning(current.status); attempt += 1) {
       await wait(POLL_INTERVAL_MS);
-      current = await blik.getMetricsStatus(token);
+      current = await getMetricsStatus(token);
       statusData = current;
     }
 
     return current;
   }
 
-  async function syncCharts(result: BlikMetricsResultResponse | null) {
-    notProcessedChart?.destroy();
-    incompleteChart?.destroy();
+  async function syncCharts(result: TxMetricsResultResponse | null) {
+    categorizableChart?.destroy();
 
     if (!result) return;
 
     await tick();
 
-    if (notProcessedCanvas && notProcessed.labels.length) {
-      notProcessedChart = new Chart(notProcessedCanvas, {
+    if (categorizableCanvas && categorizableByMonth.labels.length) {
+      categorizableChart = new Chart(categorizableCanvas, {
         type: 'bar',
         data: {
-          labels: notProcessed.labels,
+          labels: categorizableByMonth.labels,
           datasets: [
             {
-              label: 'Not processed',
-              data: notProcessed.values,
-              backgroundColor: '#f87171'
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { legend: { display: false } }
-        }
-      });
-    }
-
-    if (incompleteCanvas && incomplete.labels.length) {
-      incompleteChart = new Chart(incompleteCanvas, {
-        type: 'bar',
-        data: {
-          labels: incomplete.labels,
-          datasets: [
-            {
-              label: 'Incomplete',
-              data: incomplete.values,
+              label: 'Categorizable',
+              data: categorizableByMonth.values,
               backgroundColor: '#3b82f6'
             }
           ]
@@ -247,24 +181,16 @@
     }
   }
 
-  function updateUiFromStatus(status: BlikMetricsStatusResponse | null) {
+  function updateUiFromStatus(status: TxMetricsStatusResponse | null) {
     const result = isDone(status?.status) ? status?.result ?? null : null;
     data = result;
 
     if (!result) {
-      processedRatio = 0;
-      notProcessed = { labels: [], values: [] };
-      incomplete = { labels: [], values: [] };
+      categorizableByMonth = { labels: [], values: [] };
       return;
     }
 
-    const totalTransactions = getTotalTransactions(result);
-    processedRatio = totalTransactions
-      ? Math.round((result.single_part_transactions / totalTransactions) * 100)
-      : 0;
-
-    notProcessed = toChartData(result.not_processed_by_month);
-    incomplete = toChartData(result.inclomplete_procesed_by_month);
+    categorizableByMonth = toChartData(result.categorizable_by_month);
   }
 
   onMount(() => {
@@ -272,8 +198,7 @@
   });
 
   onDestroy(() => {
-    notProcessedChart?.destroy();
-    incompleteChart?.destroy();
+    categorizableChart?.destroy();
   });
 
   async function loadStats(force = false) {
@@ -292,7 +217,7 @@
     }
 
     try {
-      let nextStatus = force ? await blik.refreshMetricsStatus(token) : await blik.getMetricsStatus(token);
+      let nextStatus = force ? await refreshMetricsStatus(token) : await getMetricsStatus(token);
       statusData = nextStatus;
 
       if (isRunning(nextStatus.status)) {
@@ -332,7 +257,7 @@
 </script>
 
 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-  <div class=""></div>
+  <div></div>
   <div class="text-right space-y-2">
     <div class="badge badge-sm">
       generated at: {formatTimestamp(data?.time_stamp)} in {formatFetchSeconds(data?.fetch_seconds)}
@@ -385,7 +310,6 @@
   </div>
 {:else if data}
   {@const d = data}
-  {@const totalTransactions = getTotalTransactions(d)}
 
   <div class="mt-2 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
     <div class="stats bg-base-100 rounded-box shadow">
@@ -393,9 +317,8 @@
         <div class="stat-figure text-primary">
           <Icon src={icons.CircleStack} class="inline-block h-8 w-8 stroke-current" />
         </div>
-        <div class="stat-title text-primary">Total transactions</div>
-        <div class="stat-value text-primary">{totalTransactions}</div>
-        <div class="stat-desc">Single-part: {d.single_part_transactions}</div>
+        <div class="stat-title text-primary">Single-part transactions</div>
+        <div class="stat-value text-primary">{d.single_part_transactions}</div>
       </div>
     </div>
 
@@ -414,9 +337,8 @@
         <div class="stat-figure text-warning">
           <Icon src={icons.CircleStack} class="inline-block h-8 w-8 stroke-current" />
         </div>
-        <div class="stat-title text-warning">Not processed (TAG)</div>
-        <div class="stat-value text-warning">{d.not_processed_transactions}</div>
-        <div class="stat-desc text-warning">by description: {d.filtered_by_description_exact}</div>
+        <div class="stat-title text-warning">Action req</div>
+        <div class="stat-value text-warning">{d.action_req}</div>
       </div>
     </div>
 
@@ -425,9 +347,9 @@
         <div class="stat-figure">
           <Icon src={icons.CircleStack} class="inline-block h-8 w-8 stroke-current" />
         </div>
-        <div class="stat-title">Incomplete processed</div>
-        <div class="stat-value">{d.filtered_by_description_partial}</div>
-        <div class="stat-desc">Processed ratio: {processedRatio}%</div>
+        <div class="stat-title">Categorizable</div>
+        <div class="stat-value">{d.categorizable}</div>
+        <div class="stat-desc">BLIK not OK: {d.blik_not_ok} | Allegro not OK: {d.allegro_not_ok}</div>
       </div>
     </div>
   </div>
@@ -435,7 +357,7 @@
 
 {#if !networkError && !isFailed(statusData?.status) && !hasNoData(statusData)}
   <div class="card bg-base-100 mt-6 w-full p-6 shadow-xl">
-    <div class="text-xl font-semibold">Not processed by month</div>
+    <div class="text-xl font-semibold">Categorizable by month</div>
 
     <div class="divider mt-2 mb-2"></div>
 
@@ -448,26 +370,7 @@
         class:opacity-0={loading || isBusy(statusData?.status)}
         class:opacity-100={!loading && !isBusy(statusData?.status)}
         class="transition-opacity duration-300"
-        bind:this={notProcessedCanvas}
-      ></canvas>
-    </div>
-  </div>
-
-  <div class="card bg-base-100 mt-2 w-full p-6 shadow-xl">
-    <h2 class="text-xl font-semibold">Incomplete processed by month</h2>
-
-    <div class="divider mt-2 mb-2"></div>
-
-    <div class="relative h-64">
-      {#if loading || isBusy(statusData?.status)}
-        <div class="skeleton absolute inset-0 z-10"></div>
-      {/if}
-
-      <canvas
-        class:opacity-0={loading || isBusy(statusData?.status)}
-        class:opacity-100={!loading && !isBusy(statusData?.status)}
-        class="transition-opacity duration-300"
-        bind:this={incompleteCanvas}
+        bind:this={categorizableCanvas}
       ></canvas>
     </div>
   </div>

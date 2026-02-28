@@ -52,6 +52,10 @@
   // traktujemy ID jako string, dajemy fallback dla undefined
   let fileId: string = '';
 
+  function toIdString(id: string | number): string {
+    return String(id);
+  }
+
   // poprawna subskrypcja store 'page' z fallbackiem
   const unsubscribe = page.subscribe((p) => {
     fileId = (p.params?.id as string) ?? '';
@@ -86,6 +90,10 @@
     try {
       const data = await blik.getMatches(fileId, token);
 
+      if (!data) {
+        throw new Error('Nie udało się pobrać danych matchowania');
+      }
+
       matchData = {
         file_id: data.file_id,
         decoded_name: data.decoded_name,
@@ -94,7 +102,13 @@
         transactions_not_matched: data.transactions_not_matched,
         transactions_with_one_match: data.transactions_with_one_match,
         transactions_with_many_matches: data.transactions_with_many_matches,
-        content: data.content
+        content: data.content.map((row) => ({
+          ...row,
+          tx: {
+            ...row.tx,
+            id: toIdString(row.tx.id)
+          }
+        }))
       };
     } catch (e: any) {
       console.error(e);
@@ -139,11 +153,13 @@
         if (row) row._matched = true;
       }
 
-      // wymuś re-render
-      matchData = {
-        ...matchData!,
-        content: content.map((r) => ({ ...r }))
-      };
+      if (matchData) {
+        // wymuś re-render
+        matchData = {
+          ...matchData,
+          content: content.map((r) => ({ ...r }))
+        };
+      }
 
       selected = new Set();
 

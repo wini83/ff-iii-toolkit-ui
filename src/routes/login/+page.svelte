@@ -1,6 +1,5 @@
 <script lang="ts">
   import { browser } from '$app/environment';
-  export let data;
   export let form;
  
   let username = '';

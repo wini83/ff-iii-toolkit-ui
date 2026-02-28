@@ -38,6 +38,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Me */
+        get: operations["get_me_api_me_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/blik_files/statistics": {
         parameters: {
             query?: never;
@@ -45,8 +62,11 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get Stats */
-        get: operations["get_stats_api_blik_files_statistics_get"];
+        /**
+         * Get Statistics
+         * @deprecated
+         */
+        get: operations["get_statistics_api_blik_files_statistics_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -64,8 +84,45 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Refresh Stats */
-        post: operations["refresh_stats_api_blik_files_statistics_refresh_post"];
+        /**
+         * Refresh Statistics
+         * @deprecated
+         */
+        post: operations["refresh_statistics_api_blik_files_statistics_refresh_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/blik_files/statistics_v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Statistics Current */
+        get: operations["get_statistics_current_api_blik_files_statistics_v2_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/blik_files/statistics_v2/refresh": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Refresh Statistics Current */
+        post: operations["refresh_statistics_current_api_blik_files_statistics_v2_refresh_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -81,17 +138,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /**
-         * Upload Csv
-         * @description Upload a CSV file and parse its contents. The file is stored temporarily for further processing.
-         *      Returns an UploadResponse containing the number of records parsed and a unique file ID.
-         *
-         *     Args:
-         *         file (UploadFile): The CSV file to be uploaded.
-         *
-         *     Returns:
-         *         UploadResponse: Response containing message, count of records, and encoded file ID.
-         */
+        /** Upload Csv */
         post: operations["upload_csv_api_blik_files_post"];
         delete?: never;
         options?: never;
@@ -106,17 +153,8 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /**
-         * Get Tempfile
-         * @description Retrieve and preview the contents of an uploaded CSV file by its encoded ID.
-         *
-         *     Args:
-         *         encoded_id (str): The base64url encoded ID of the uploaded file.
-         *
-         *     Returns:
-         *         FilePreviewResponse: Response containing file details and parsed content.
-         */
-        get: operations["get_tempfile_api_blik_files__encoded_id__get"];
+        /** Preview Csv */
+        get: operations["preview_csv_api_blik_files__encoded_id__get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -132,64 +170,11 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /**
-         * Do Match
-         * @description Process the uploaded CSV file to find matching transactions in Firefly III.
-         *
-         *     Args:
-         *         encoded_id (str): The base64url encoded ID of the uploaded file.
-         *
-         *     Returns:
-         *     FileMatchResponse: Response containing match results and statistics.
-         */
-        get: operations["do_match_api_blik_files__encoded_id__matches_get"];
+        /** Preview Matches */
+        get: operations["preview_matches_api_blik_files__encoded_id__matches_get"];
         put?: never;
-        /**
-         * Apply Matches
-         * @description Apply selected matches to the transactions in Firefly III.
-         *
-         *     Args:
-         *         encoded_id (str): The base64url encoded ID of the uploaded file.
-         *         payload (ApplyPayload): Payload containing the list of CSV indexes to apply.
-         *
-         *     Returns:
-         *         FileApplyResponse: Response containing the number of updated transactions and any errors.
-         */
+        /** Apply Matches */
         post: operations["apply_matches_api_blik_files__encoded_id__matches_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/system/health": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Health Check */
-        get: operations["health_check_api_system_health_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/system/version": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Version Check */
-        get: operations["version_check_api_system_version_get"];
-        put?: never;
-        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -247,14 +232,600 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/tx/statistics": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Tx Stats */
+        get: operations["get_tx_stats_api_tx_statistics_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/tx/statistics/refresh": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Refresh Tx Stats */
+        post: operations["refresh_tx_stats_api_tx_statistics_refresh_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/allegro/secrets": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Secrets */
+        get: operations["list_secrets_api_allegro_secrets_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/allegro/{secret_id}/payments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Fetch For Id */
+        get: operations["fetch_for_id_api_allegro__secret_id__payments_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/allegro/{secret_id}/matches": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Preview Matches */
+        get: operations["preview_matches_api_allegro__secret_id__matches_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/allegro/{secret_id}/apply": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Apply Matches */
+        post: operations["apply_matches_api_allegro__secret_id__apply_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/allegro/{secret_id}/apply/auto": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Auto Apply Single Matches
+         * @description Automatically apply matches that have exactly one candidate match.
+         *     Requires that /{secret_id}/matches was called before (preview snapshot exists).
+         */
+        post: operations["auto_apply_single_matches_api_allegro__secret_id__apply_auto_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/allegro/apply-jobs/{job_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Apply Job */
+        get: operations["get_apply_job_api_allegro_apply_jobs__job_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/allegro/statistics": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Statistics Current */
+        get: operations["get_statistics_current_api_allegro_statistics_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/allegro/statistics/refresh": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Refresh Statistics Current */
+        post: operations["refresh_statistics_current_api_allegro_statistics_refresh_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/users": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Users */
+        get: operations["list_users_api_users_get"];
+        put?: never;
+        /** Create User */
+        post: operations["create_user_api_users_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/users/{user_id}/disable": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Disable User */
+        post: operations["disable_user_api_users__user_id__disable_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/users/{user_id}/enable": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Enable User */
+        post: operations["enable_user_api_users__user_id__enable_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/users/{user_id}/promote": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Promote User */
+        post: operations["promote_user_api_users__user_id__promote_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/users/{user_id}/demote": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Demote User */
+        post: operations["demote_user_api_users__user_id__demote_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/users/{user_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete User */
+        delete: operations["delete_user_api_users__user_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/users/audit-log": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Audit Log */
+        get: operations["list_audit_log_api_users_audit_log_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/user-secrets": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Secrets */
+        get: operations["list_secrets_api_user_secrets_get"];
+        put?: never;
+        /** Create Secret */
+        post: operations["create_secret_api_user_secrets_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/user-secrets/{secret_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete Secret */
+        delete: operations["delete_secret_api_user_secrets__secret_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/system/health": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Health Check */
+        get: operations["health_check_api_system_health_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/system/version": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Version Check */
+        get: operations["version_check_api_system_version_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/system/bootstrap/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Bootstrap Status */
+        get: operations["bootstrap_status_api_system_bootstrap_status_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/system/bootstrap": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Bootstrap System */
+        post: operations["bootstrap_system_api_system_bootstrap_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
-        /** ApplyPayload */
-        ApplyPayload: {
-            /** Tx Indexes */
-            tx_indexes: number[];
+        /** AllegroMatchResponse */
+        AllegroMatchResponse: {
+            /** Login */
+            login: string;
+            /** Payments Fetched */
+            payments_fetched: number;
+            /** Transactions Found */
+            transactions_found: number;
+            /** Transactions Not Matched */
+            transactions_not_matched: number;
+            /** Transactions With One Match */
+            transactions_with_one_match: number;
+            /** Transactions With Many Matches */
+            transactions_with_many_matches: number;
+            /** Fetch Seconds */
+            fetch_seconds: number;
+            /** Content */
+            content: components["schemas"]["api__models__allegro__MatchResult"][];
+        };
+        /** AllegroMetricsResultResponse */
+        AllegroMetricsResultResponse: {
+            /** Total Transactions */
+            total_transactions: number;
+            /** Allegro Transactions */
+            allegro_transactions: number;
+            /** Not Processed  Allegro Transactions */
+            not_processed__allegro_transactions: number;
+            /** Not Processed By Month */
+            not_processed_by_month: {
+                [key: string]: number;
+            };
+            /**
+             * Time Stamp
+             * Format: date-time
+             */
+            time_stamp: string;
+            /** Fetch Seconds */
+            fetch_seconds: number;
+        };
+        /** AllegroMetricsStatusResponse */
+        AllegroMetricsStatusResponse: {
+            status: components["schemas"]["JobStatus"];
+            /** Progress */
+            progress: string | null;
+            result: components["schemas"]["AllegroMetricsResultResponse"] | null;
+            /** Error */
+            error: string | null;
+        };
+        /** AllegroPayment */
+        AllegroPayment: {
+            /** Amount */
+            amount: number;
+            /**
+             * Date
+             * Format: date
+             */
+            date: string;
+            /** Details */
+            details: string[];
+            /** Is Balanced */
+            is_balanced: boolean;
+            /** Allegro Login */
+            allegro_login: string;
+            /** External Id */
+            external_id: string;
+            /** External Short Id */
+            external_short_id: string;
+        };
+        /** ApplyDecision */
+        ApplyDecision: {
+            /** Payment Id */
+            payment_id: string;
+            /** Transaction Id */
+            transaction_id: number;
+            /**
+             * Strategy
+             * @default auto
+             * @enum {string}
+             */
+            strategy: "auto" | "manual" | "force";
+        };
+        /** ApplyJobResponse */
+        ApplyJobResponse: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Secret Id
+             * Format: uuid
+             */
+            secret_id: string;
+            status: components["schemas"]["JobStatus"];
+            /** Total */
+            total: number;
+            /** Applied */
+            applied: number;
+            /** Failed */
+            failed: number;
+            /**
+             * Started At
+             * Format: date-time
+             */
+            started_at: string;
+            /** Finished At */
+            finished_at: string | null;
+            /** Results */
+            results: components["schemas"]["ApplyOutcomeResponse"][];
+        };
+        /** ApplyOutcomeResponse */
+        ApplyOutcomeResponse: {
+            /** Transaction Id */
+            transaction_id: number;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "success" | "failed";
+            /** Reason */
+            reason?: string | null;
+        };
+        /** AuditLogItem */
+        AuditLogItem: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Actor Id
+             * Format: uuid
+             */
+            actor_id: string;
+            /** Action */
+            action: string;
+            /** Target Id */
+            target_id: string | null;
+            /** Meta */
+            meta: {
+                [key: string]: unknown;
+            } | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+        };
+        /** AuditLogResponse */
+        AuditLogResponse: {
+            /** Items */
+            items: components["schemas"]["AuditLogItem"][];
+            /** Limit */
+            limit: number;
+            /** Offset */
+            offset: number;
+        };
+        /** BlikMetricsResultResponse */
+        BlikMetricsResultResponse: {
+            /** Single Part Transactions */
+            single_part_transactions: number;
+            /** Uncategorized Transactions */
+            uncategorized_transactions: number;
+            /** Filtered By Description Exact */
+            filtered_by_description_exact: number;
+            /** Filtered By Description Partial */
+            filtered_by_description_partial: number;
+            /** Not Processed Transactions */
+            not_processed_transactions: number;
+            /** Not Processed By Month */
+            not_processed_by_month: {
+                [key: string]: number;
+            };
+            /** Inclomplete Procesed By Month */
+            inclomplete_procesed_by_month: {
+                [key: string]: number;
+            };
+            /**
+             * Time Stamp
+             * Format: date-time
+             */
+            time_stamp: string;
+            /** Fetch Seconds */
+            fetch_seconds: number;
+        };
+        /** BlikMetricsStatusResponse */
+        BlikMetricsStatusResponse: {
+            status: components["schemas"]["JobStatus"];
+            /** Progress */
+            progress: string | null;
+            result: components["schemas"]["BlikMetricsResultResponse"] | null;
+            /** Error */
+            error: string | null;
         };
         /** Body_login_for_access_token_api_auth_token_post */
         Body_login_for_access_token_api_auth_token_post: {
@@ -288,6 +859,24 @@ export interface components {
              */
             file: string;
         };
+        /** BootstrapPayload */
+        BootstrapPayload: {
+            /** Username */
+            username: string;
+            /** Password */
+            password: string;
+        };
+        /** BootstrapResponse */
+        BootstrapResponse: {
+            /** Bootstrapped */
+            bootstrapped: boolean;
+        };
+        /** CreateSecretPayload */
+        CreateSecretPayload: {
+            type: components["schemas"]["SecretType"];
+            /** Secret */
+            secret: string;
+        };
         /** FileApplyResponse */
         FileApplyResponse: {
             /** File Id */
@@ -314,7 +903,7 @@ export interface components {
             /** Transactions With Many Matches */
             transactions_with_many_matches: number;
             /** Content */
-            content: components["schemas"]["MatchResult"][];
+            content: components["schemas"]["api__models__blik_files__MatchResult"][];
         };
         /** FilePreviewResponse */
         FilePreviewResponse: {
@@ -336,26 +925,44 @@ export interface components {
         HealthResponse: {
             /**
              * Status
-             * @default ok
+             * @enum {string}
              */
-            status: string;
-            /** Database */
-            database?: string | null;
+            status: "ok" | "degraded" | "error";
+            /**
+             * Database
+             * @enum {string}
+             */
+            database: "ok" | "error";
             /** External Services */
             external_services?: {
                 [key: string]: string;
             } | null;
+            /** Bootstrapped */
+            bootstrapped: boolean;
             /**
              * Timestamp
              * Format: date-time
              */
             timestamp?: string;
         };
-        /** MatchResult */
-        MatchResult: {
-            tx: components["schemas"]["SimplifiedTx"];
-            /** Matches */
-            matches: components["schemas"]["SimplifiedRecord"][];
+        /**
+         * JobStatus
+         * @enum {string}
+         */
+        JobStatus: "pending" | "running" | "done" | "failed";
+        /** MeResponse */
+        MeResponse: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Username */
+            username: string;
+            /** Is Active */
+            is_active: boolean;
+            /** Is Superuser */
+            is_superuser: boolean;
         };
         /** ScreeningMonthResponse */
         ScreeningMonthResponse: {
@@ -370,10 +977,18 @@ export interface components {
             /** Categories */
             categories: components["schemas"]["SimplifiedCategory"][];
         };
-        /** SimplifiedCategory */
+        /**
+         * SecretType
+         * @enum {string}
+         */
+        SecretType: "allegro" | "amazon" | "session" | "api_token";
+        /**
+         * SimplifiedCategory
+         * @description Simplified representation of a Firefly III Category.
+         */
         SimplifiedCategory: {
             /** Id */
-            id: string;
+            id: number;
             /** Name */
             name: string;
         };
@@ -418,7 +1033,10 @@ export interface components {
              */
             recipient_account: string;
         };
-        /** SimplifiedTx */
+        /**
+         * SimplifiedTx
+         * @description Simplified representation of a Firefly III transaction.
+         */
         SimplifiedTx: {
             /**
              * Date
@@ -428,7 +1046,7 @@ export interface components {
             /** Amount */
             amount: number;
             /** Id */
-            id: string;
+            id: number;
             /** Description */
             description: string;
             /** Tags */
@@ -436,7 +1054,20 @@ export interface components {
             /** Notes */
             notes: string;
             /** Category */
-            category: string;
+            category: string | null;
+            /** Currency Code */
+            currency_code: string;
+            /** Currency Symbol */
+            currency_symbol: string;
+            /**
+             * Type
+             * @enum {string}
+             */
+            type: "withdrawal" | "deposit" | "transfer";
+            /** Fx Amount */
+            fx_amount?: number | null;
+            /** Fx Currency */
+            fx_currency?: string | null;
         };
         /** StatisticsResponse */
         StatisticsResponse: {
@@ -468,6 +1099,41 @@ export interface components {
             /** Token Type */
             token_type: string;
         };
+        /** TxMetricsResultResponse */
+        TxMetricsResultResponse: {
+            /** Single Part Transactions */
+            single_part_transactions: number;
+            /** Uncategorized Transactions */
+            uncategorized_transactions: number;
+            /** Blik Not Ok */
+            blik_not_ok: number;
+            /** Action Req */
+            action_req: number;
+            /** Allegro Not Ok */
+            allegro_not_ok: number;
+            /** Categorizable */
+            categorizable: number;
+            /** Categorizable By Month */
+            categorizable_by_month: {
+                [key: string]: number;
+            };
+            /**
+             * Time Stamp
+             * Format: date-time
+             */
+            time_stamp: string;
+            /** Fetch Seconds */
+            fetch_seconds: number;
+        };
+        /** TxMetricsStatusResponse */
+        TxMetricsStatusResponse: {
+            status: components["schemas"]["JobStatus"];
+            /** Progress */
+            progress: string | null;
+            result: components["schemas"]["TxMetricsResultResponse"] | null;
+            /** Error */
+            error: string | null;
+        };
         /**
          * TxTag
          * @enum {string}
@@ -481,6 +1147,52 @@ export interface components {
             count: number;
             /** Id */
             id: string;
+        };
+        /** UserCreateRequest */
+        UserCreateRequest: {
+            /** Username */
+            username: string;
+            /** Password */
+            password: string;
+            /**
+             * Is Superuser
+             * @default false
+             */
+            is_superuser: boolean;
+        };
+        /** UserResponse */
+        UserResponse: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Username */
+            username: string;
+            /** Is Superuser */
+            is_superuser: boolean;
+            /** Is Active */
+            is_active: boolean;
+        };
+        /** UserSecretResponse */
+        UserSecretResponse: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            type: components["schemas"]["SecretType"];
+            /** Usage Count */
+            usage_count: number;
+            /** Last Used At */
+            last_used_at: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Short Id */
+            readonly short_id: string;
         };
         /** ValidationError */
         ValidationError: {
@@ -500,6 +1212,28 @@ export interface components {
              * Format: date-time
              */
             timestamp?: string;
+        };
+        /** ApplyPayload */
+        api__models__allegro__ApplyPayload: {
+            /** Decisions */
+            decisions: components["schemas"]["ApplyDecision"][];
+        };
+        /** MatchResult */
+        api__models__allegro__MatchResult: {
+            tx: components["schemas"]["SimplifiedTx"];
+            /** Matches */
+            matches: components["schemas"]["AllegroPayment"][];
+        };
+        /** ApplyPayload */
+        api__models__blik_files__ApplyPayload: {
+            /** Tx Indexes */
+            tx_indexes: number[];
+        };
+        /** MatchResult */
+        api__models__blik_files__MatchResult: {
+            tx: components["schemas"]["SimplifiedTx"];
+            /** Matches */
+            matches: components["schemas"]["SimplifiedRecord"][];
         };
     };
     responses: never;
@@ -563,7 +1297,27 @@ export interface operations {
             };
         };
     };
-    get_stats_api_blik_files_statistics_get: {
+    get_me_api_me_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MeResponse"];
+                };
+            };
+        };
+    };
+    get_statistics_api_blik_files_statistics_get: {
         parameters: {
             query?: never;
             header?: never;
@@ -583,7 +1337,7 @@ export interface operations {
             };
         };
     };
-    refresh_stats_api_blik_files_statistics_refresh_post: {
+    refresh_statistics_api_blik_files_statistics_refresh_post: {
         parameters: {
             query?: never;
             header?: never;
@@ -599,6 +1353,46 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["StatisticsResponse"];
+                };
+            };
+        };
+    };
+    get_statistics_current_api_blik_files_statistics_v2_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BlikMetricsStatusResponse"];
+                };
+            };
+        };
+    };
+    refresh_statistics_current_api_blik_files_statistics_v2_refresh_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BlikMetricsStatusResponse"];
                 };
             };
         };
@@ -636,7 +1430,7 @@ export interface operations {
             };
         };
     };
-    get_tempfile_api_blik_files__encoded_id__get: {
+    preview_csv_api_blik_files__encoded_id__get: {
         parameters: {
             query?: never;
             header?: never;
@@ -667,7 +1461,7 @@ export interface operations {
             };
         };
     };
-    do_match_api_blik_files__encoded_id__matches_get: {
+    preview_matches_api_blik_files__encoded_id__matches_get: {
         parameters: {
             query?: never;
             header?: never;
@@ -709,7 +1503,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["ApplyPayload"];
+                "application/json": components["schemas"]["api__models__blik_files__ApplyPayload"];
             };
         };
         responses: {
@@ -729,46 +1523,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    health_check_api_system_health_get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HealthResponse"];
-                };
-            };
-        };
-    };
-    version_check_api_system_version_get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["VersionResponse"];
                 };
             };
         };
@@ -875,6 +1629,678 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_tx_stats_api_tx_statistics_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TxMetricsStatusResponse"];
+                };
+            };
+        };
+    };
+    refresh_tx_stats_api_tx_statistics_refresh_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TxMetricsStatusResponse"];
+                };
+            };
+        };
+    };
+    list_secrets_api_allegro_secrets_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserSecretResponse"][];
+                };
+            };
+        };
+    };
+    fetch_for_id_api_allegro__secret_id__payments_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                secret_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AllegroPayment"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    preview_matches_api_allegro__secret_id__matches_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                secret_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AllegroMatchResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    apply_matches_api_allegro__secret_id__apply_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                secret_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["api__models__allegro__ApplyPayload"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApplyJobResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    auto_apply_single_matches_api_allegro__secret_id__apply_auto_post: {
+        parameters: {
+            query?: {
+                limit?: number | null;
+            };
+            header?: never;
+            path: {
+                secret_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApplyJobResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_apply_job_api_allegro_apply_jobs__job_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                job_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApplyJobResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_statistics_current_api_allegro_statistics_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AllegroMetricsStatusResponse"];
+                };
+            };
+        };
+    };
+    refresh_statistics_current_api_allegro_statistics_refresh_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AllegroMetricsStatusResponse"];
+                };
+            };
+        };
+    };
+    list_users_api_users_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserResponse"][];
+                };
+            };
+        };
+    };
+    create_user_api_users_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UserCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    disable_user_api_users__user_id__disable_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                user_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    enable_user_api_users__user_id__enable_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                user_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    promote_user_api_users__user_id__promote_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                user_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    demote_user_api_users__user_id__demote_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                user_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_user_api_users__user_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                user_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_audit_log_api_users_audit_log_get: {
+        parameters: {
+            query?: {
+                actor_id?: string | null;
+                target_id?: string | null;
+                action?: string | null;
+                created_from?: string | null;
+                created_to?: string | null;
+                meta_contains?: string | null;
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuditLogResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_secrets_api_user_secrets_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserSecretResponse"][];
+                };
+            };
+        };
+    };
+    create_secret_api_user_secrets_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateSecretPayload"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserSecretResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_secret_api_user_secrets__secret_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                secret_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    health_check_api_system_health_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HealthResponse"];
+                };
+            };
+        };
+    };
+    version_check_api_system_version_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VersionResponse"];
+                };
+            };
+        };
+    };
+    bootstrap_status_api_system_bootstrap_status_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BootstrapResponse"];
+                };
+            };
+        };
+    };
+    bootstrap_system_api_system_bootstrap_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BootstrapPayload"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
             };
             /** @description Validation Error */
             422: {
