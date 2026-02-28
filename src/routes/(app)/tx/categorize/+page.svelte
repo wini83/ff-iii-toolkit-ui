@@ -47,6 +47,21 @@
     return String(id);
   }
 
+  function formatMoney(amount: number, currencyCode: string | null | undefined, currencySymbol: string | null | undefined) {
+    const safeCode = currencyCode && currencyCode.trim() ? currencyCode.trim() : 'PLN';
+    const safeSymbol = currencySymbol && currencySymbol.trim() ? currencySymbol.trim() : safeCode;
+    return `${amount} ${safeSymbol} (${safeCode})`;
+  }
+
+  function splitNotesLines(notes: string | null | undefined) {
+    if (!notes || !notes.trim()) return [];
+    return notes
+      .replaceAll('\\n', '\n')
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter((line) => line.length > 0);
+  }
+
   function ensureCategoryState(txId: string | number) {
     const normalizedId = toIdString(txId);
 
@@ -266,8 +281,23 @@
     <div>
       <div class="font-semibold">#{currentTx.id} – {currentTx.description}</div>
       <div class="text-sm opacity-70">
-        {currentTx.date} · {currentTx.amount} PLN
+        {currentTx.date} · {formatMoney(currentTx.amount, currentTx.currency_code, currentTx.currency_symbol)}
       </div>
+      {#if currentTx.fx_amount !== null && currentTx.fx_amount !== undefined}
+        <div class="text-sm opacity-70">
+          FX: {formatMoney(currentTx.fx_amount, currentTx.fx_currency, currentTx.fx_currency)}
+        </div>
+      {/if}
+      {#if splitNotesLines(currentTx.notes).length > 0}
+        <div class="mt-1 text-sm opacity-80">
+          <div class="font-medium">Notes:</div>
+          <div class="mt-1 space-y-0.5">
+            {#each splitNotesLines(currentTx.notes) as noteLine}
+              <div>{noteLine}</div>
+            {/each}
+          </div>
+        </div>
+      {/if}
 
       {#if currentTx.tags?.length}
         <div class="mt-2 flex gap-2">
