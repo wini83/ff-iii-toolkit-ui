@@ -162,7 +162,7 @@
               </a>
             </li>
             <li>
-              <a href="/blik/stats">
+              <a href="/tx/stats">
                 <Icon src={icons.ChartBar} class="h-5 w-5" />
                 Stats
               </a>

@@ -3,6 +3,7 @@ import { normalizeApiError } from '$lib/api/errors';
 import type { operations, components } from '$lib/api/schema';
 
 type TxTag = components['schemas']['TxTag'];
+type TxMetricsStatusResponse = components['schemas']['TxMetricsStatusResponse'];
 
 type ScreeningMonthResponse =
   operations['get_screening_month_api_tx_screening_get']['responses'][200]['content']['application/json'];
@@ -100,4 +101,36 @@ export async function applyTag(
   }
 
   throw new Error('Unexpected response from applyTag');
+}
+
+export async function getMetricsStatus(token: string): Promise<TxMetricsStatusResponse> {
+  const { data, error, response } = await apiRequest(
+    (api, headers) => api.GET('/api/tx/statistics', { headers }),
+    { token }
+  );
+
+  if (!response.ok || error || !data) {
+    if (error) {
+      throw normalizeApiError(error);
+    }
+    throw new Error(`Failed to load tx statistics (${response.status})`);
+  }
+
+  return data;
+}
+
+export async function refreshMetricsStatus(token: string): Promise<TxMetricsStatusResponse> {
+  const { data, error, response } = await apiRequest(
+    (api, headers) => api.POST('/api/tx/statistics/refresh', { headers }),
+    { token }
+  );
+
+  if (!response.ok || error || !data) {
+    if (error) {
+      throw normalizeApiError(error);
+    }
+    throw new Error(`Failed to refresh tx statistics (${response.status})`);
+  }
+
+  return data;
 }
