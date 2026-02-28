@@ -98,6 +98,12 @@
 
         <ul>
           <li>
+            <a href="/allegro/accounts">
+              <Icon src={icons.Key} class="h-5 w-5" />
+              Accounts
+            </a>
+          </li>
+          <li>
             <a href="/allegro/stats">
               <Icon src={icons.ChartBar} class="h-5 w-5" />
               Stats
