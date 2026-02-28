@@ -43,11 +43,17 @@
 
   /* ---------------- Helpers ---------------- */
 
-  function ensureCategoryState(txId: string) {
-    if (selectedCategories[txId] === undefined) {
+  function toIdString(id: string | number): string {
+    return String(id);
+  }
+
+  function ensureCategoryState(txId: string | number) {
+    const normalizedId = toIdString(txId);
+
+    if (selectedCategories[normalizedId] === undefined) {
       selectedCategories = {
         ...selectedCategories,
-        [txId]: ''
+        [normalizedId]: ''
       };
     }
   }
@@ -90,7 +96,8 @@
   async function applyCurrent() {
     if (!currentTx || !data) return;
 
-    const rawValue = selectedCategories[currentTx.id];
+    const currentTxId = toIdString(currentTx.id);
+    const rawValue = selectedCategories[currentTxId];
     const categoryId = Number(rawValue);
     if (!categoryId) return;
 
@@ -103,7 +110,7 @@
       data.transactions = data.transactions.filter((t) => t.id !== currentTx.id);
       data.remaining -= 1;
 
-      delete selectedCategories[currentTx.id];
+      delete selectedCategories[currentTxId];
 
       if (cursor >= data.transactions.length) {
         cursor = Math.max(0, data.transactions.length - 1);

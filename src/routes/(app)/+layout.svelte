@@ -115,9 +115,9 @@
             </div>
           </button>
           <ul class="menu menu-sm dropdown-content bg-base-100 rounded-box mt-3 w-52 p-2 shadow">
-            <li><a href="/login">Profil</a></li>
-            <li><a href="/login">Ustawienia</a></li>
-            <li><button on:click={logout}>Wyloguj</button></li>
+            <li><a href="/login"><Icon src={icons.User} class="h-5 w-5" /> Profile</a></li>
+            <li><a href="/settings/secrets"><Icon src={icons.Key} class="h-5 w-5" /> Secrets</a></li>
+            <li><button on:click={logout}><Icon src={icons.Power} class="h-5 w-5" />Log out</button></li>
           </ul>
         </div>
       </div>
