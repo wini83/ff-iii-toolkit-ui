@@ -44,3 +44,29 @@ npx openapi-typescript http://localhost:8000/openapi.json \
   -o src/lib/api/schema.ts
 
 ```
+
+## Releases (Commitizen + changelog)
+
+Tworzenie commita konwencjonalnego (Commitizen):
+
+```sh
+npm run commit
+```
+
+Pierwszy release beta dla `0.3.4` (ustawia `0.3.4-beta.0`, generuje `CHANGELOG.md`, commit i tag):
+
+```sh
+npm run release:beta:first
+```
+
+Kolejny release beta (np. `0.3.4-beta.1`, `0.3.4-beta.2`):
+
+```sh
+npm run release:beta
+```
+
+Normalny release (bez prerelease):
+
+```sh
+npm run release
+```
