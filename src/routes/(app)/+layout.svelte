@@ -34,6 +34,10 @@
   function resolveRouteTitle(pathname: string): string {
     if (pathname.startsWith('/tx/categorize')) return 'Transactions / Categorize';
     if (pathname.startsWith('/tx/stats')) return 'Transactions / Stats';
+    if (pathname.startsWith('/allegro/accounts')) return 'Allegro / Accounts';
+    if (pathname.startsWith('/allegro/') && pathname.endsWith('/matches')) return 'Allegro / Matches';
+    if (pathname.startsWith('/allegro/') && pathname.endsWith('/payments')) return 'Allegro / Payments';
+    if (pathname.startsWith('/allegro/stats')) return 'Allegro / Stats';
     if (pathname.startsWith('/blik/upload')) return 'BLIK Sync / File Upload';
     if (pathname.startsWith('/blik/file')) return 'BLIK Sync / File Preview';
     if (pathname.startsWith('/blik/stats')) return 'BLIK Sync / Stats';

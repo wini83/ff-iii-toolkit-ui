@@ -88,5 +88,29 @@
         </ul>
       </details>
     </li>
+
+    <li>
+      <details open>
+        <summary class="flex cursor-pointer items-center gap-2">
+          <Icon src={icons.BuildingStorefront} class="h-5 w-5" />
+          Allegro
+        </summary>
+
+        <ul>
+          <li>
+            <a href="/allegro/accounts">
+              <Icon src={icons.Key} class="h-5 w-5" />
+              Accounts
+            </a>
+          </li>
+          <li>
+            <a href="/allegro/stats">
+              <Icon src={icons.ChartBar} class="h-5 w-5" />
+              Stats
+            </a>
+          </li>
+        </ul>
+      </details>
+    </li>
   </ul>
 </div>
