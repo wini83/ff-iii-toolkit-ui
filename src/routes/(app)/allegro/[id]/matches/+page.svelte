@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
+  import { onDestroy, onMount } from 'svelte';
   import { goto } from '$app/navigation';
   import { page } from '$app/stores';
   import { Icon } from '@steeze-ui/svelte-icon';
@@ -24,6 +24,7 @@
   let rows: AllegroMatchResult[] = [];
   let selectedCandidates: Set<string> = new Set();
   let appliedCandidates: Set<string> = new Set();
+  let applyPollingCanceled = false;
 
   $: secretId = $page.params.id;
   $: login = matchResponse?.login ?? null;
@@ -165,44 +166,30 @@
     return marked;
   }
 
-  function resultKey(result: ApplyJobResponse['results'][number]) {
-    return `${result.transaction_id}::${result.status}::${result.reason ?? ''}`;
-  }
-
-  function processJobUpdates(
-    job: ApplyJobResponse | null,
-    selectedByTx: Map<number, string[]>,
-    seenResults: Set<string>
+  function processJobUpdatesSlice(
+    resultsSlice: ApplyJobResponse['results'],
+    selectedByTx: Map<number, string[]>
   ) {
-    if (!job) return { newSuccess: 0, newFailed: 0 };
-
     let newSuccess = 0;
     let newFailed = 0;
     const newSuccessTxIds = new Set<number>();
 
-    for (const result of job.results) {
-      const key = resultKey(result);
-      if (seenResults.has(key)) continue;
-      seenResults.add(key);
-
+    for (const result of resultsSlice) {
       if (result.status === 'success') {
         newSuccess += 1;
         newSuccessTxIds.add(result.transaction_id);
-        emitToast('success', `Applied transaction #${result.transaction_id}.`);
       } else {
         newFailed += 1;
-        emitToast(
-          'error',
-          result.reason
-            ? `Failed transaction #${result.transaction_id}: ${result.reason}`
-            : `Failed transaction #${result.transaction_id}.`
-        );
       }
     }
 
     if (newSuccessTxIds.size > 0) {
       markAppliedForTxIds(newSuccessTxIds, selectedByTx);
     }
+
+    // Polling returns cumulative results; emit only per-slice summaries to avoid toast storms.
+    if (newSuccess > 0) emitToast('success', `Applied: ${newSuccess}.`);
+    if (newFailed > 0) emitToast('error', `Failed: ${newFailed}.`);
 
     return { newSuccess, newFailed };
   }
@@ -212,16 +199,27 @@
     token: string,
     initialStatus: JobStatus,
     selectedByTx: Map<number, string[]>,
-    seenResults: Set<string>
+    processedRef: { value: number }
   ) {
     let status = initialStatus;
     let job: ApplyJobResponse | null = null;
 
-    for (let attempt = 0; attempt < MAX_POLL_ATTEMPTS && isBusy(status); attempt += 1) {
+    for (
+      let attempt = 0;
+      attempt < MAX_POLL_ATTEMPTS && isBusy(status) && !applyPollingCanceled;
+      attempt += 1
+    ) {
       await wait(POLL_INTERVAL_MS);
+      if (applyPollingCanceled) break;
       job = await allegro.getApplyJob(jobId, token);
       if (!job) break;
-      processJobUpdates(job, selectedByTx, seenResults);
+      const total = job.results?.length ?? 0;
+      if (total > processedRef.value) {
+        // Process only fresh results since previous poll.
+        const slice = job.results.slice(processedRef.value);
+        processedRef.value = total;
+        processJobUpdatesSlice(slice, selectedByTx);
+      }
       status = job.status;
     }
 
@@ -229,6 +227,8 @@
   }
 
   async function applySelected() {
+    if (applying) return;
+
     const token = localStorage.getItem('access_token');
     const routeSecretId = getNonEmptyString(secretId);
 
@@ -248,14 +248,21 @@
       return;
     }
     const selectedByTx = mapSelectedByTx();
-    const seenResults = new Set<string>();
+    let processed = 0;
+    applyPollingCanceled = false;
 
     applying = true;
     try {
       const startJob = await allegro.applyMatches(routeSecretId, decisions, token);
       if (!startJob) throw new Error('Apply job was not created.');
 
-      processJobUpdates(startJob, selectedByTx, seenResults);
+      const initialTotal = startJob.results?.length ?? 0;
+      if (initialTotal > processed) {
+        // First delta comes from applyMatches response.
+        const initialSlice = startJob.results.slice(processed);
+        processed = initialTotal;
+        processJobUpdatesSlice(initialSlice, selectedByTx);
+      }
 
       let finalJob = startJob;
       if (isBusy(startJob.status)) {
@@ -264,7 +271,7 @@
           token,
           startJob.status,
           selectedByTx,
-          seenResults
+          { value: processed }
         );
         if (polled) finalJob = polled;
       }
@@ -273,7 +280,6 @@
         throw new Error('Apply job failed.');
       }
 
-      processJobUpdates(finalJob, selectedByTx, seenResults);
       const marked = appliedCandidates.size;
       selectedCandidates = new Set();
 
@@ -331,6 +337,10 @@
 
   onMount(() => {
     void loadMatches();
+  });
+
+  onDestroy(() => {
+    applyPollingCanceled = true;
   });
 </script>
 
