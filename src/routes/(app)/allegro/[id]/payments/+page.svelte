@@ -9,13 +9,18 @@
   import type { components } from '$lib/api/schema';
 
   type AllegroPayment = components['schemas']['AllegroPayment'];
+  const PAGE_SIZE_OPTIONS = [10, 20, 50, 100] as const;
 
   let loading = true;
   let networkError: string | null = null;
   let payments: AllegroPayment[] = [];
+  let pageSize = 20;
+  let offset = 0;
 
   $: secretId = $page.params.id;
   $: accountLogin = payments.length > 0 ? payments[0]?.allegro_login ?? null : null;
+  $: currentPage = Math.floor(offset / pageSize) + 1;
+  $: hasNextPage = payments.length === pageSize;
 
   function getNonEmptyString(value: unknown): string | null {
     if (typeof value !== 'string') return null;
@@ -109,7 +114,7 @@
     networkError = null;
 
     try {
-      payments = await allegro.fetchPayments(routeSecretId, token);
+      payments = await allegro.fetchPayments(routeSecretId, token, pageSize, offset);
     } catch (error: unknown) {
       networkError = extractErrorMessage(error, 'Failed to load Allegro payments');
       emitToast('error', networkError);
@@ -122,6 +127,28 @@
   onMount(() => {
     void loadPayments();
   });
+
+  function goToPreviousPage() {
+    if (loading || offset === 0) return;
+    offset = Math.max(0, offset - pageSize);
+    void loadPayments();
+  }
+
+  function goToNextPage() {
+    if (loading || !hasNextPage) return;
+    offset += pageSize;
+    void loadPayments();
+  }
+
+  function onPageSizeChange(event: Event) {
+    const target = event.currentTarget;
+    if (!(target instanceof HTMLSelectElement)) return;
+    const value = Number.parseInt(target.value, 10);
+    if (!Number.isFinite(value) || value <= 0 || value === pageSize) return;
+    pageSize = value;
+    offset = 0;
+    void loadPayments();
+  }
 </script>
 
 <div class="card bg-base-100 shadow-xl">
@@ -145,6 +172,28 @@
       </div>
     </div>
     <div class="divider mt-0 mb-2"></div>
+    <div class="mb-2 flex flex-wrap items-center justify-between gap-2">
+      <div class="flex items-center gap-2">
+        <span class="text-sm">Rows per page</span>
+        <select class="select select-bordered select-sm" value={pageSize} on:change={onPageSizeChange}>
+          {#each PAGE_SIZE_OPTIONS as option}
+            <option value={option}>{option}</option>
+          {/each}
+        </select>
+      </div>
+      <div class="flex items-center gap-2">
+        <button class="btn btn-outline btn-sm" on:click={goToPreviousPage} disabled={loading || offset === 0}>
+          Prev
+        </button>
+        <span class="text-sm">Page {currentPage}</span>
+        <button class="btn btn-outline btn-sm" on:click={goToNextPage} disabled={loading || !hasNextPage}>
+          Next
+        </button>
+      </div>
+    </div>
+    <p class="text-base-content/70 text-xs">
+      Showing {payments.length === 0 ? 0 : offset + 1} - {offset + payments.length}
+    </p>
 
     {#if networkError}
       <p class="text-error text-sm">{networkError}</p>

@@ -355,6 +355,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/allegro/{secret_id}/cache": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Clear Cache For Secret */
+        delete: operations["clear_cache_for_secret_api_allegro__secret_id__cache_delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/allegro/apply-jobs/{job_id}": {
         parameters: {
             query?: never;
@@ -1703,7 +1720,10 @@ export interface operations {
     };
     fetch_for_id_api_allegro__secret_id__payments_get: {
         parameters: {
-            query?: never;
+            query?: {
+                limit?: number;
+                offset?: number;
+            };
             header?: never;
             path: {
                 secret_id: string;
@@ -1734,7 +1754,10 @@ export interface operations {
     };
     preview_matches_api_allegro__secret_id__matches_get: {
         parameters: {
-            query?: never;
+            query?: {
+                limit?: number;
+                offset?: number;
+            };
             header?: never;
             path: {
                 secret_id: string;
@@ -1818,6 +1841,40 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApplyJobResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    clear_cache_for_secret_api_allegro__secret_id__cache_delete: {
+        parameters: {
+            query?: {
+                limit?: number | null;
+                offset?: number | null;
+            };
+            header?: never;
+            path: {
+                secret_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
                 };
             };
             /** @description Validation Error */

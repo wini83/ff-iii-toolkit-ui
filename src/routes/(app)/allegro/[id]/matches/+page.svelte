@@ -13,6 +13,7 @@
   type ApplyDecision = components['schemas']['ApplyDecision'];
   type ApplyJobResponse = components['schemas']['ApplyJobResponse'];
   type JobStatus = components['schemas']['JobStatus'];
+  const PAGE_SIZE_OPTIONS = [10, 20, 50, 100] as const;
 
   const POLL_INTERVAL_MS = 2_000;
   const MAX_POLL_ATTEMPTS = 60;
@@ -25,9 +26,12 @@
   let selectedCandidates: Set<string> = new Set();
   let appliedCandidates: Set<string> = new Set();
   let applyPollingCanceled = false;
+  let pageSize = 20;
+  let offset = 0;
 
   $: secretId = $page.params.id;
   $: login = matchResponse?.login ?? null;
+  $: currentPage = Math.floor(offset / pageSize) + 1;
 
   function getNonEmptyString(value: unknown): string | null {
     if (typeof value !== 'string') return null;
@@ -322,17 +326,41 @@
     networkError = null;
 
     try {
-      const result = await allegro.getMatches(routeSecretId, token);
+      const result = await allegro.getMatches(routeSecretId, token, pageSize, offset);
       matchResponse = result;
       rows = result?.content ?? [];
+      selectedCandidates = new Set();
     } catch (error: unknown) {
       networkError = extractErrorMessage(error, 'Failed to load Allegro matches');
       emitToast('error', networkError);
       matchResponse = null;
       rows = [];
+      selectedCandidates = new Set();
     } finally {
       loading = false;
     }
+  }
+
+  function goToPreviousPage() {
+    if (loading || offset === 0) return;
+    offset = Math.max(0, offset - pageSize);
+    void loadMatches();
+  }
+
+  function goToNextPage() {
+    if (loading) return;
+    offset += pageSize;
+    void loadMatches();
+  }
+
+  function onPageSizeChange(event: Event) {
+    const target = event.currentTarget;
+    if (!(target instanceof HTMLSelectElement)) return;
+    const value = Number.parseInt(target.value, 10);
+    if (!Number.isFinite(value) || value <= 0 || value === pageSize) return;
+    pageSize = value;
+    offset = 0;
+    void loadMatches();
   }
 
   onMount(() => {
@@ -373,6 +401,28 @@
       </div>
     </div>
     <div class="divider mt-0 mb-2"></div>
+    <div class="mb-2 flex flex-wrap items-center justify-between gap-2">
+      <div class="flex items-center gap-2">
+        <span class="text-sm">Rows per page</span>
+        <select class="select select-bordered select-sm" value={pageSize} on:change={onPageSizeChange}>
+          {#each PAGE_SIZE_OPTIONS as option}
+            <option value={option}>{option}</option>
+          {/each}
+        </select>
+      </div>
+      <div class="flex items-center gap-2">
+        <button class="btn btn-outline btn-sm" on:click={goToPreviousPage} disabled={loading || offset === 0}>
+          Prev
+        </button>
+        <span class="text-sm">Page {currentPage}</span>
+        <button class="btn btn-outline btn-sm" on:click={goToNextPage} disabled={loading}>
+          Next
+        </button>
+      </div>
+    </div>
+    <p class="text-base-content/70 text-xs">
+      Showing {rows.length === 0 ? 0 : offset + 1} - {offset + rows.length}
+    </p>
 
     {#if networkError}
       <p class="text-error text-sm">{networkError}</p>

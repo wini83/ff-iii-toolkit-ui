@@ -18,11 +18,20 @@ export async function listSecrets(token: string): Promise<UserSecret[]> {
   return data ?? [];
 }
 
-export async function fetchPayments(secret_id: string, token: string): Promise<AllegroPayment[]> {
+export async function fetchPayments(
+  secret_id: string,
+  token: string,
+  limit?: number,
+  offset?: number
+): Promise<AllegroPayment[]> {
+  const query: { limit?: number; offset?: number } = {};
+  if (limit !== undefined) query.limit = limit;
+  if (offset !== undefined) query.offset = offset;
+
   const { data, error } = await apiRequest(
     (api, headers) =>
       api.GET('/api/allegro/{secret_id}/payments', {
-        params: { path: { secret_id } },
+        params: { path: { secret_id }, query },
         headers
       }),
     { token }
@@ -32,11 +41,20 @@ export async function fetchPayments(secret_id: string, token: string): Promise<A
   return data ?? [];
 }
 
-export async function getMatches(secret_id: string, token: string): Promise<AllegroMatchResponse | null> {
+export async function getMatches(
+  secret_id: string,
+  token: string,
+  limit?: number,
+  offset?: number
+): Promise<AllegroMatchResponse | null> {
+  const query: { limit?: number; offset?: number } = {};
+  if (limit !== undefined) query.limit = limit;
+  if (offset !== undefined) query.offset = offset;
+
   const { data, error } = await apiRequest(
     (api, headers) =>
       api.GET('/api/allegro/{secret_id}/matches', {
-        params: { path: { secret_id } },
+        params: { path: { secret_id }, query },
         headers
       }),
     { token }
