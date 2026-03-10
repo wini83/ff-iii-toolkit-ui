@@ -136,12 +136,12 @@
     );
   }
 
-  async function pollUntilDone(token: string, initialStatus: AllegroMetricsStatusResponse) {
+  async function pollUntilDone(initialStatus: AllegroMetricsStatusResponse) {
     let current = initialStatus;
 
     for (let attempt = 0; attempt < MAX_POLL_ATTEMPTS && isRunning(current.status); attempt += 1) {
       await wait(POLL_INTERVAL_MS);
-      current = await allegro.getMetricsStatus(token);
+      current = await allegro.getMetricsStatus();
       statusData = current;
     }
 
@@ -198,12 +198,6 @@
   });
 
   async function loadStats(force = false) {
-    const token = localStorage.getItem('access_token');
-    if (!token) {
-      goto('/login');
-      return;
-    }
-
     loading = true;
     networkError = null;
 
@@ -213,11 +207,11 @@
     }
 
     try {
-      let nextStatus = force ? await allegro.refreshMetricsStatus(token) : await allegro.getMetricsStatus(token);
+      let nextStatus = force ? await allegro.refreshMetricsStatus() : await allegro.getMetricsStatus();
       statusData = nextStatus;
 
       if (isRunning(nextStatus.status)) {
-        nextStatus = await pollUntilDone(token, nextStatus);
+        nextStatus = await pollUntilDone(nextStatus);
         statusData = nextStatus;
       }
 

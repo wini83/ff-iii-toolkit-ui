@@ -96,7 +96,6 @@
   }
 
   async function loadPayments() {
-    const token = localStorage.getItem('access_token');
     const routeSecretId = getNonEmptyString(secretId);
 
     if (!routeSecretId) {
@@ -105,16 +104,11 @@
       return;
     }
 
-    if (!token) {
-      goto('/login');
-      return;
-    }
-
     loading = true;
     networkError = null;
 
     try {
-      payments = await allegro.fetchPayments(routeSecretId, token, pageSize, offset);
+      payments = await allegro.fetchPayments(routeSecretId, undefined, pageSize, offset);
     } catch (error: unknown) {
       networkError = extractErrorMessage(error, 'Failed to load Allegro payments');
       emitToast('error', networkError);

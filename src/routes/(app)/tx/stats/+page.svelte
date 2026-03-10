@@ -140,12 +140,12 @@
     emitToast('error', 'Not yet implemented');
   }
 
-  async function pollUntilDone(token: string, initialStatus: TxMetricsStatusResponse) {
+  async function pollUntilDone(initialStatus: TxMetricsStatusResponse) {
     let current = initialStatus;
 
     for (let attempt = 0; attempt < MAX_POLL_ATTEMPTS && isRunning(current.status); attempt += 1) {
       await wait(POLL_INTERVAL_MS);
-      current = await getMetricsStatus(token);
+      current = await getMetricsStatus();
       statusData = current;
     }
 
@@ -202,12 +202,6 @@
   });
 
   async function loadStats(force = false) {
-    const token = localStorage.getItem('access_token');
-    if (!token) {
-      goto('/login');
-      return;
-    }
-
     loading = true;
     networkError = null;
 
@@ -217,11 +211,11 @@
     }
 
     try {
-      let nextStatus = force ? await refreshMetricsStatus(token) : await getMetricsStatus(token);
+      let nextStatus = force ? await refreshMetricsStatus() : await getMetricsStatus();
       statusData = nextStatus;
 
       if (isRunning(nextStatus.status)) {
-        nextStatus = await pollUntilDone(token, nextStatus);
+        nextStatus = await pollUntilDone(nextStatus);
         statusData = nextStatus;
       }
 

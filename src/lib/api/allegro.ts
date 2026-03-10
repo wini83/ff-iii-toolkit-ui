@@ -8,7 +8,7 @@ type AllegroApplyPayload = components['schemas']['api__models__allegro__ApplyPay
 type ApplyJobResponse = components['schemas']['ApplyJobResponse'];
 type AllegroMetricsStatusResponse = components['schemas']['AllegroMetricsStatusResponse'];
 
-export async function listSecrets(token: string): Promise<UserSecret[]> {
+export async function listSecrets(token?: string | null): Promise<UserSecret[]> {
   const { data, error } = await apiRequest(
     (api, headers) => api.GET('/api/allegro/secrets', { headers }),
     { token }
@@ -20,7 +20,7 @@ export async function listSecrets(token: string): Promise<UserSecret[]> {
 
 export async function fetchPayments(
   secret_id: string,
-  token: string,
+  token?: string | null,
   limit?: number,
   offset?: number
 ): Promise<AllegroPayment[]> {
@@ -43,7 +43,7 @@ export async function fetchPayments(
 
 export async function getMatches(
   secret_id: string,
-  token: string,
+  token?: string | null,
   limit?: number,
   offset?: number
 ): Promise<AllegroMatchResponse | null> {
@@ -67,7 +67,7 @@ export async function getMatches(
 export async function applyMatches(
   secret_id: string,
   decisions: AllegroApplyPayload['decisions'],
-  token: string
+  token?: string | null
 ): Promise<ApplyJobResponse | null> {
   const { data, error } = await apiRequest(
     (api, headers) =>
@@ -85,7 +85,7 @@ export async function applyMatches(
 
 export async function autoApplyMatches(
   secret_id: string,
-  token: string,
+  token?: string | null,
   limit?: number
 ): Promise<ApplyJobResponse | null> {
   const { data, error } = await apiRequest(
@@ -104,7 +104,7 @@ export async function autoApplyMatches(
   return data ?? null;
 }
 
-export async function getApplyJob(job_id: string, token: string): Promise<ApplyJobResponse | null> {
+export async function getApplyJob(job_id: string, token?: string | null): Promise<ApplyJobResponse | null> {
   const { data, error } = await apiRequest(
     (api, headers) =>
       api.GET('/api/allegro/apply-jobs/{job_id}', {
@@ -118,7 +118,7 @@ export async function getApplyJob(job_id: string, token: string): Promise<ApplyJ
   return data ?? null;
 }
 
-export async function getMetricsStatus(token: string): Promise<AllegroMetricsStatusResponse> {
+export async function getMetricsStatus(token?: string | null): Promise<AllegroMetricsStatusResponse> {
   const { data, error, response } = await apiRequest(
     (api, headers) => api.GET('/api/allegro/statistics', { headers }),
     { token }
@@ -131,7 +131,7 @@ export async function getMetricsStatus(token: string): Promise<AllegroMetricsSta
   return data;
 }
 
-export async function refreshMetricsStatus(token: string): Promise<AllegroMetricsStatusResponse> {
+export async function refreshMetricsStatus(token?: string | null): Promise<AllegroMetricsStatusResponse> {
   const { data, error, response } = await apiRequest(
     (api, headers) => api.POST('/api/allegro/statistics/refresh', { headers }),
     { token }

@@ -87,11 +87,8 @@
     loading = true;
     error = null;
 
-    const token = localStorage.getItem('access_token');
-    if (!token) return goto('/login');
-
     try {
-      data = await getScreeningMonth(year, month, token);
+      data = await getScreeningMonth(year, month);
 
       if (data && data.transactions.length > 0) {
         initialCount = data.transactions.length;
@@ -116,11 +113,8 @@
     const categoryId = Number(rawValue);
     if (!categoryId) return;
 
-    const token = localStorage.getItem('access_token');
-    if (!token) return goto('/login');
-
     try {
-      await assignCategory(Number(currentTx.id), categoryId, token);
+      await assignCategory(Number(currentTx.id), categoryId);
 
       data.transactions = data.transactions.filter((t) => t.id !== currentTx.id);
       data.remaining -= 1;
@@ -154,11 +148,8 @@
   async function tagCurrentTx(tag: TxTag) {
     if (!currentTx || !data) return;
 
-    const token = localStorage.getItem('access_token');
-    if (!token) return goto('/login');
-
     try {
-      await applyTag(Number(currentTx.id), tag, token);
+      await applyTag(Number(currentTx.id), tag);
 
       if (TERMINAL_TAGS.has(tag)) {
         data.transactions = data.transactions.filter((t) => t.id !== currentTx.id);

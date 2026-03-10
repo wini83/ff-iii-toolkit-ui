@@ -6,18 +6,19 @@ type ApiCall<T> = (client: ApiClient, authHeaders: HeadersInit) => Promise<ApiRe
 
 const SESSION_EXPIRED_MSG = 'Sesja wygasła, zaloguj się ponownie';
 
+let currentAccessToken: string | null = null;
 let refreshPromise: Promise<string | null> | null = null;
 let sessionExpired = false;
 let toastEmitted = false;
 
 function getStoredToken(): string | null {
-  if (typeof window === 'undefined') return null;
-  return localStorage.getItem('access_token');
+  return currentAccessToken;
 }
 
 function storeToken(token: string) {
-  if (typeof window === 'undefined') return;
-  localStorage.setItem('access_token', token);
+  currentAccessToken = token;
+  sessionExpired = false;
+  toastEmitted = false;
 }
 
 function emitSessionExpiredToast() {
@@ -31,6 +32,7 @@ function emitSessionExpiredToast() {
 }
 
 function markSessionExpired() {
+  currentAccessToken = null;
   sessionExpired = true;
   emitSessionExpiredToast();
 }

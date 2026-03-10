@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { browser } from '$app/environment';
+  import { goto } from '$app/navigation';
   import { page } from '$app/stores';
 
   import { Icon } from '@steeze-ui/svelte-icon';
@@ -49,41 +49,17 @@
   $: headTitle =
     dynamicTitle === DEFAULT_APP_TITLE ? DEFAULT_APP_TITLE : `${dynamicTitle} — ${DEFAULT_APP_TITLE}`;
 
-  function logout() {
-    if (!browser) return;
-
-    document.cookie = 'access_token_client=; Path=/; Max-Age=0';
-    localStorage.removeItem('access_token');
-    // używamy location.href bo chcemy pełne przeładowanie
-    window.location.href = '/login';
+  async function logout() {
+    try {
+      await fetch('/logout', { method: 'POST' });
+    } finally {
+      meUser = null;
+      await goto('/login', { invalidateAll: true });
+    }
   }
 
   function closeDrawerOnMobile() {
     drawerOpen = false;
-  }
-
-  function readAccessToken(): string | null {
-    if (!browser) return null;
-
-    try {
-      return localStorage.getItem('access_token');
-    } catch {
-      return null;
-    }
-  }
-
-  function hasAccessTokenCookie(): boolean {
-    if (!browser) return false;
-    return document.cookie.includes('access_token_client=');
-  }
-
-  function syncAccessTokenCookieFromLocalStorage() {
-    if (!browser || hasAccessTokenCookie()) return;
-
-    const token = readAccessToken();
-    if (!token) return;
-
-    document.cookie = `access_token_client=${token}; Path=/;`;
   }
 
   function isToastEventDetail(detail: unknown): detail is ToastEventDetail {
@@ -116,20 +92,14 @@
   }
 
   async function loadCurrentUser() {
-    const token = readAccessToken();
-    if (!token) return;
-
     try {
-      meUser = await getMe(token);
+      meUser = await getMe();
     } catch (error) {
       console.warn('Failed to fetch current user via /api/me:', error);
     }
   }
 
   onMount(() => {
-    if (!browser) return;
-
-    syncAccessTokenCookieFromLocalStorage();
     void loadCurrentUser();
 
     const listener = (event: Event) => handleToastEvent(event);

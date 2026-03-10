@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { browser } from '$app/environment';
   export let form;
  
   let username = '';
@@ -8,12 +7,6 @@
 
   $: if (form?.error) {
     error = form.error;
-  }
-
-  $: if (browser && form?.success && form.token) {
-    localStorage.setItem('access_token', form.token);
-    document.cookie = `access_token_client=${form.token}; Path=/;`;
-    window.location.href = '/';
   }
 </script>
 

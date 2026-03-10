@@ -82,17 +82,11 @@
   }
 
   async function loadSecrets() {
-    const token = localStorage.getItem('access_token');
-    if (!token) {
-      goto('/login');
-      return;
-    }
-
     loading = true;
     networkError = null;
 
     try {
-      const result = await allegro.listSecrets(token);
+      const result = await allegro.listSecrets();
       secrets = result.filter((secret) => secret.type === 'allegro');
     } catch (error: unknown) {
       networkError = extractErrorMessage(error, 'Failed to load Allegro secrets');

@@ -44,15 +44,6 @@
     return fallback;
   }
 
-  function getTokenOrRedirect(): string | null {
-    const token = localStorage.getItem('access_token');
-    if (!token) {
-      goto('/login');
-      return null;
-    }
-    return token;
-  }
-
   function formatSecretType(type: SecretType): string {
     return type.replaceAll('_', ' ').replace(/\b\w/g, (char) => char.toUpperCase());
   }
@@ -112,14 +103,8 @@
     loading = true;
     error = null;
 
-    const token = getTokenOrRedirect();
-    if (!token) {
-      loading = false;
-      return;
-    }
-
     try {
-      const list = await userSecrets.listUserSecrets(token);
+      const list = await userSecrets.listUserSecrets();
       secrets = list;
     } catch (err: unknown) {
       error = getErrorMessage(err, 'Failed to load user secrets');
@@ -136,9 +121,6 @@
       return;
     }
 
-    const token = getTokenOrRedirect();
-    if (!token) return;
-
     submitting = true;
 
     try {
@@ -147,7 +129,7 @@
         secret: formSecret
       };
 
-      const saved: CreateSecretResponse = await userSecrets.createUserSecret(payload, token);
+      const saved: CreateSecretResponse = await userSecrets.createUserSecret(payload);
       emitToast('success', `Secret created: ${formatSecretType(saved.type)}`);
       closeFormModal();
       await loadSecrets();
@@ -163,13 +145,10 @@
   async function deleteSecret() {
     if (!pendingDelete) return;
 
-    const token = getTokenOrRedirect();
-    if (!token) return;
-
     deleting = true;
 
     try {
-      await userSecrets.deleteUserSecret(pendingDelete.id, token);
+      await userSecrets.deleteUserSecret(pendingDelete.id);
       emitToast('success', `Secret deleted: ${formatSecretType(pendingDelete.type)}`);
       closeDeleteModal();
       await loadSecrets();

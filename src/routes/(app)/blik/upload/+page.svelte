@@ -1,7 +1,9 @@
 <script lang="ts">
+  import { goto } from '$app/navigation';
   import { Icon } from '@steeze-ui/svelte-icon';
   import * as icons from '@steeze-ui/heroicons';
   import Steps from '$lib/components/Steps.svelte';
+  import { blik } from '$lib/api/blik';
 
   let file: File | null = null;
   let fileName = '';
@@ -14,42 +16,19 @@
 
     if (!file) return;
 
-    const token = localStorage.getItem('access_token');
-    if (!token) {
-      error = 'Brak autoryzacji — zaloguj się ponownie.';
-      return;
-    }
-
     const formData = new FormData();
     formData.append('file', file);
 
     loading = true;
 
     try {
-      const res = await fetch('/api/blik_files', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`
-        },
-        body: formData
-      });
-
-      if (!res.ok) {
-        const text = await res.text();
-        throw new Error(text || `Upload failed (${res.status})`);
-      }
-
-      const data = await res.json();
+      const data = await blik.uploadCsv(formData);
 
       if (!data?.id) {
         throw new Error('Nieprawidłowa odpowiedź backendu');
       }
 
-      // opcjonalnie — zapamiętanie ostatniego pliku
-      localStorage.setItem('lastFileId', data.id);
-
-      // redirect do preview
-      window.location.href = `/blik/file/${data.id}`;
+      await goto(`/blik/file/${data.id}`);
     } catch (e: any) {
       console.error('UPLOAD ERROR', e);
       error = e.message ?? 'Błąd podczas uploadu';

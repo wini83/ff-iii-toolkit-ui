@@ -214,7 +214,6 @@
 
   async function pollApplyJob(
     jobId: string,
-    token: string,
     initialStatus: JobStatus,
     selectedByTx: Map<number, string[]>,
     processedRef: { value: number }
@@ -229,7 +228,7 @@
     ) {
       await wait(POLL_INTERVAL_MS);
       if (applyPollingCanceled) break;
-      job = await allegro.getApplyJob(jobId, token);
+      job = await allegro.getApplyJob(jobId);
       if (!job) break;
       const total = job.results?.length ?? 0;
       if (total > processedRef.value) {
@@ -247,13 +246,7 @@
   async function applySelected() {
     if (applying) return;
 
-    const token = localStorage.getItem('access_token');
     const routeSecretId = getNonEmptyString(secretId);
-
-    if (!token) {
-      goto('/login');
-      return;
-    }
 
     if (!routeSecretId) {
       emitToast('error', 'Missing secret id in route.');
@@ -271,7 +264,7 @@
 
     applying = true;
     try {
-      const startJob = await allegro.applyMatches(routeSecretId, decisions, token);
+      const startJob = await allegro.applyMatches(routeSecretId, decisions);
       if (!startJob) throw new Error('Apply job was not created.');
 
       const initialTotal = startJob.results?.length ?? 0;
@@ -286,7 +279,6 @@
       if (isBusy(startJob.status)) {
         const polled = await pollApplyJob(
           startJob.id,
-          token,
           startJob.status,
           selectedByTx,
           { value: processed }
@@ -322,7 +314,6 @@
   }
 
   async function loadMatches() {
-    const token = localStorage.getItem('access_token');
     const routeSecretId = getNonEmptyString(secretId);
 
     if (!routeSecretId) {
@@ -331,16 +322,11 @@
       return;
     }
 
-    if (!token) {
-      goto('/login');
-      return;
-    }
-
     loading = true;
     networkError = null;
 
     try {
-      const result = await allegro.getMatches(routeSecretId, token, pageSize, offset);
+      const result = await allegro.getMatches(routeSecretId, undefined, pageSize, offset);
       matchResponse = result;
       rows = result?.content ?? [];
       selectedCandidates = new Set();

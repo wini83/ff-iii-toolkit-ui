@@ -11,7 +11,7 @@ type ScreeningMonthResponse =
 export async function getScreeningMonth(
   year: number,
   month: number,
-  token: string
+  token?: string | null
 ): Promise<ScreeningMonthResponse | null> {
   const { data, error, response } = await apiRequest(
     (api, headers) =>
@@ -40,7 +40,7 @@ export async function getScreeningMonth(
 export async function assignCategory(
   txId: number,
   categoryId: number,
-  token: string
+  token?: string | null
 ): Promise<void> {
   const { error, response } = await apiRequest(
     (api, headers) =>
@@ -74,7 +74,7 @@ export async function assignCategory(
 export async function applyTag(
   txId: number,
   tag: TxTag,
-  token: string
+  token?: string | null
 ): Promise<void> {
   const { error, response } = await apiRequest(
     (api, headers) =>
@@ -103,7 +103,7 @@ export async function applyTag(
   throw new Error('Unexpected response from applyTag');
 }
 
-export async function getMetricsStatus(token: string): Promise<TxMetricsStatusResponse> {
+export async function getMetricsStatus(token?: string | null): Promise<TxMetricsStatusResponse> {
   const { data, error, response } = await apiRequest(
     (api, headers) => api.GET('/api/tx/statistics', { headers }),
     { token }
@@ -119,7 +119,7 @@ export async function getMetricsStatus(token: string): Promise<TxMetricsStatusRe
   return data;
 }
 
-export async function refreshMetricsStatus(token: string): Promise<TxMetricsStatusResponse> {
+export async function refreshMetricsStatus(token?: string | null): Promise<TxMetricsStatusResponse> {
   const { data, error, response } = await apiRequest(
     (api, headers) => api.POST('/api/tx/statistics/refresh', { headers }),
     { token }

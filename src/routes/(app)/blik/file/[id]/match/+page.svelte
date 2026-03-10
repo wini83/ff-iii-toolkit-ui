@@ -84,11 +84,8 @@
     loading = true;
     error = '';
 
-    const token = localStorage.getItem('access_token');
-    if (!token) return goto('/login');
-
     try {
-      const data = await blik.getMatches(fileId, token);
+      const data = await blik.getMatches(fileId);
 
       if (!data) {
         throw new Error('Nie udało się pobrać danych matchowania');
@@ -130,9 +127,6 @@
   }
 
   async function applyMatches() {
-    const token = localStorage.getItem('access_token');
-    if (!token) return goto('/login');
-
     const ids = Array.from(selected).map(Number);
 
     if (!ids.length) {
@@ -145,7 +139,7 @@
     }
 
     try {
-      await blik.applyMatches(fileId, ids, token);
+      await blik.applyMatches(fileId, ids);
 
       // Oznaczamy lokalnie
       for (const id of ids) {

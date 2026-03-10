@@ -1,14 +1,8 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
-  import { onMount } from 'svelte';
   import Steps from '$lib/components/Steps.svelte';
 
   let fileId = '';
-
-  onMount(() => {
-    const id = localStorage.getItem('lastFileId');
-    if (id) fileId = id; // auto-fill jeśli istnieje
-  });
 
   function goToFile() {
     const trimmed = fileId.trim();

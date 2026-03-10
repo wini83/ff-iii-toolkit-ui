@@ -4,7 +4,7 @@ import type { components } from '$lib/api/schema';
 type UserSecret = components['schemas']['UserSecretResponse'];
 type CreateUserSecretRequest = components['schemas']['CreateSecretPayload'];
 
-export async function listUserSecrets(token: string): Promise<UserSecret[]> {
+export async function listUserSecrets(token?: string | null): Promise<UserSecret[]> {
   const { data, error, response } = await apiRequest(
     (api, headers) => api.GET('/api/user-secrets', { headers }),
     { token }
@@ -19,7 +19,7 @@ export async function listUserSecrets(token: string): Promise<UserSecret[]> {
 
 export async function createUserSecret(
   payload: CreateUserSecretRequest,
-  token: string
+  token?: string | null
 ): Promise<UserSecret> {
   const { data, error, response } = await apiRequest(
     (api, headers) =>
@@ -37,7 +37,7 @@ export async function createUserSecret(
   return data;
 }
 
-export async function deleteUserSecret(secretId: string, token: string): Promise<void> {
+export async function deleteUserSecret(secretId: string, token?: string | null): Promise<void> {
   const { error, response } = await apiRequest(
     (api, headers) =>
       api.DELETE('/api/user-secrets/{secret_id}', {

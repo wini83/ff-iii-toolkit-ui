@@ -184,12 +184,12 @@
     emitToast('error', 'Not yet implemented');
   }
 
-  async function pollUntilDone(token: string, initialStatus: BlikMetricsStatusResponse) {
+  async function pollUntilDone(initialStatus: BlikMetricsStatusResponse) {
     let current = initialStatus;
 
     for (let attempt = 0; attempt < MAX_POLL_ATTEMPTS && isRunning(current.status); attempt += 1) {
       await wait(POLL_INTERVAL_MS);
-      current = await blik.getMetricsStatus(token);
+      current = await blik.getMetricsStatus();
       statusData = current;
     }
 
@@ -277,12 +277,6 @@
   });
 
   async function loadStats(force = false) {
-    const token = localStorage.getItem('access_token');
-    if (!token) {
-      goto('/login');
-      return;
-    }
-
     loading = true;
     networkError = null;
 
@@ -292,11 +286,11 @@
     }
 
     try {
-      let nextStatus = force ? await blik.refreshMetricsStatus(token) : await blik.getMetricsStatus(token);
+      let nextStatus = force ? await blik.refreshMetricsStatus() : await blik.getMetricsStatus();
       statusData = nextStatus;
 
       if (isRunning(nextStatus.status)) {
-        nextStatus = await pollUntilDone(token, nextStatus);
+        nextStatus = await pollUntilDone(nextStatus);
         statusData = nextStatus;
       }
 

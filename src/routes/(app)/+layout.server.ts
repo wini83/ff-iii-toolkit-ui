@@ -1,6 +1,11 @@
 import { redirect, type RequestEvent } from '@sveltejs/kit';
 import type { LayoutServerLoad } from './$types';
 import { decodeJwt } from '$lib/jwt';
+import {
+  clearAuthCookies,
+  propagateBackendAuthCookies,
+  setAccessTokenCookie
+} from '$lib/server/auth-cookies';
 
 type RefreshResponse = {
   access_token?: string;
@@ -38,16 +43,10 @@ async function refreshAccessToken(
   const token = data?.access_token;
   if (!token) return undefined;
 
-  cookies.set('access_token_client', token, {
-    path: '/',
-    sameSite: 'lax'
-  });
+  setAccessTokenCookie(cookies, token);
+  propagateBackendAuthCookies(res.headers, cookies);
 
   return token;
-}
-
-function clearAccessCookie(cookies: RequestEvent['cookies']) {
-  cookies.delete('access_token_client', { path: '/' });
 }
 
 export const load: LayoutServerLoad = async ({ cookies, request, fetch }) => {
@@ -55,14 +54,14 @@ export const load: LayoutServerLoad = async ({ cookies, request, fetch }) => {
     return {};
   }
 
-  let token = cookies.get('access_token_client');
+  let token = cookies.get('access_token');
 
   if (!token || !isTokenValid(token)) {
     token = await refreshAccessToken(fetch, cookies, request);
   }
 
   if (!token || !isTokenValid(token)) {
-    clearAccessCookie(cookies);
+    clearAuthCookies(cookies);
     throw redirect(302, '/login');
   }
 

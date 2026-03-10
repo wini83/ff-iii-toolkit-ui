@@ -29,18 +29,8 @@
     loading = true;
     error = '';
 
-    const token = localStorage.getItem('access_token');
-    if (!token) {
-      goto('/login');
-      return;
-    }
-
     try {
-      const res = await fetch(`/api/blik_files/${file_id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
+      const res = await fetch(`/api/blik_files/${file_id}`);
 
       if (!res.ok) {
         const text = await res.text();

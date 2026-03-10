@@ -3,7 +3,7 @@ import type { components } from '$lib/api/schema';
 
 type BlikMetricsStatusResponse = components['schemas']['BlikMetricsStatusResponse'];
 
-export async function getPreview(encoded_id: string, token: string) {
+export async function getPreview(encoded_id: string, token?: string | null) {
   const { data, error } = await apiRequest(
     (api, headers) =>
       api.GET('/api/blik_files/{encoded_id}', {
@@ -17,7 +17,7 @@ export async function getPreview(encoded_id: string, token: string) {
   return data;
 }
 
-export async function getMatches(encoded_id: string, token: string) {
+export async function getMatches(encoded_id: string, token?: string | null) {
   const { data, error } = await apiRequest(
     (api, headers) =>
       api.GET('/api/blik_files/{encoded_id}/matches', {
@@ -31,7 +31,7 @@ export async function getMatches(encoded_id: string, token: string) {
   return data;
 }
 
-export async function applyMatches(encoded_id: string, tx_indexes: number[], token: string) {
+export async function applyMatches(encoded_id: string, tx_indexes: number[], token?: string | null) {
   const { data, error } = await apiRequest(
     (api, headers) =>
       api.POST('/api/blik_files/{encoded_id}/matches', {
@@ -46,7 +46,7 @@ export async function applyMatches(encoded_id: string, tx_indexes: number[], tok
   return data;
 }
 
-export async function uploadCsv(formData: FormData, token: string) {
+export async function uploadCsv(formData: FormData, token?: string | null) {
   const { data, error } = await apiRequest(
     (api, headers) =>
       api.POST('/api/blik_files', {
@@ -60,7 +60,7 @@ export async function uploadCsv(formData: FormData, token: string) {
   return data;
 }
 
-export async function getStats(token: string) {
+export async function getStats(token?: string | null) {
   const { data, error } = await apiRequest(
     (api, headers) => api.GET('/api/blik_files/statistics', { headers }),
     { token }
@@ -70,7 +70,7 @@ export async function getStats(token: string) {
   return data;
 }
 
-export async function refreshStats(token: string) {
+export async function refreshStats(token?: string | null) {
   const { data, error } = await apiRequest(
     (api, headers) => api.POST('/api/blik_files/statistics/refresh', { headers }),
     { token }
@@ -80,7 +80,7 @@ export async function refreshStats(token: string) {
   return data;
 }
 
-export async function getMetricsStatus(token: string): Promise<BlikMetricsStatusResponse> {
+export async function getMetricsStatus(token?: string | null): Promise<BlikMetricsStatusResponse> {
   const { data, error, response } = await apiRequest(
     (api, headers) => api.GET('/api/blik_files/statistics_v2', { headers }),
     { token }
@@ -93,7 +93,7 @@ export async function getMetricsStatus(token: string): Promise<BlikMetricsStatus
   return data;
 }
 
-export async function refreshMetricsStatus(token: string): Promise<BlikMetricsStatusResponse> {
+export async function refreshMetricsStatus(token?: string | null): Promise<BlikMetricsStatusResponse> {
   const { data, error, response } = await apiRequest(
     (api, headers) => api.POST('/api/blik_files/statistics_v2/refresh', { headers }),
     { token }
