@@ -668,6 +668,8 @@ export interface components {
             fetch_seconds: number;
             /** Content */
             content: components["schemas"]["api__models__allegro__MatchResult"][];
+            /** Unmatched Payments */
+            unmatched_payments: components["schemas"]["AllegroPayment"][];
         };
         /** AllegroMetricsResultResponse */
         AllegroMetricsResultResponse: {
@@ -967,6 +969,11 @@ export interface components {
          * @enum {string}
          */
         JobStatus: "pending" | "running" | "done" | "failed";
+        /**
+         * MatchProcessingStatus
+         * @enum {string}
+         */
+        MatchProcessingStatus: "new" | "already_processed";
         /** MeResponse */
         MeResponse: {
             /**
@@ -1240,6 +1247,7 @@ export interface components {
             tx: components["schemas"]["SimplifiedTx"];
             /** Matches */
             matches: components["schemas"]["AllegroPayment"][];
+            status: components["schemas"]["MatchProcessingStatus"];
         };
         /** ApplyPayload */
         api__models__blik_files__ApplyPayload: {

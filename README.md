@@ -40,7 +40,7 @@ You can preview the production build with `npm run preview`.
 ### dev
 
 ```sh
-npx openapi-typescript http://localhost:8000/openapi.json \
+npx openapi-typescript http://localhost:8000/api/openapi.json \
   -o src/lib/api/schema.ts
 
 ```

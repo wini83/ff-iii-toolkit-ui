@@ -28,6 +28,7 @@
   let applyPollingCanceled = false;
   let pageSize = 20;
   let offset = 0;
+  let isStatsModalOpen = false;
 
   $: secretId = $page.params.id;
   $: login = matchResponse?.login ?? null;
@@ -113,6 +114,14 @@
     return `${txId}::${paymentExternalId}`;
   }
 
+  function isRowProcessed(row: AllegroMatchResult) {
+    return row.status === 'already_processed';
+  }
+
+  function canSelectCandidate(row: AllegroMatchResult, paymentExternalId: string) {
+    return !isRowProcessed(row) && !appliedCandidates.has(candidateKey(row.tx.id, paymentExternalId));
+  }
+
   function toggleCandidate(txId: number, paymentExternalId: string) {
     const key = candidateKey(txId, paymentExternalId);
     if (appliedCandidates.has(key)) return;
@@ -167,6 +176,11 @@
     }
 
     appliedCandidates = new Set(appliedCandidates);
+    if (successTxIds.size > 0) {
+      rows = rows.map((row) =>
+        successTxIds.has(row.tx.id) ? { ...row, status: 'already_processed' } : row
+      );
+    }
     return marked;
   }
 
@@ -382,6 +396,10 @@
         </p>
       </div>
       <div class="flex flex-wrap items-center gap-2">
+        <button class="btn btn-outline btn-sm" on:click={() => (isStatsModalOpen = true)}>
+          <Icon src={icons.ChartBar} class="h-4 w-4" />
+          Stats
+        </button>
         <button
           class="btn btn-primary btn-sm"
           on:click={applySelected}
@@ -401,29 +419,19 @@
       </div>
     </div>
     <div class="divider mt-0 mb-2"></div>
-    <div class="mb-2 flex flex-wrap items-center justify-between gap-2">
-      <div class="flex items-center gap-2">
-        <span class="text-sm">Rows per page</span>
-        <select class="select select-bordered select-sm" value={pageSize} on:change={onPageSizeChange}>
-          {#each PAGE_SIZE_OPTIONS as option}
-            <option value={option}>{option}</option>
-          {/each}
-        </select>
-      </div>
-      <div class="flex items-center gap-2">
-        <button class="btn btn-outline btn-sm" on:click={goToPreviousPage} disabled={loading || offset === 0}>
+    <div class="mb-2 flex items-center justify-end">
+      <div class="join">
+        <button class="btn btn-outline btn-xs join-item" on:click={goToPreviousPage} disabled={loading || offset === 0}>
           Prev
         </button>
-        <span class="text-sm">Page {currentPage}</span>
-        <button class="btn btn-outline btn-sm" on:click={goToNextPage} disabled={loading}>
+        <button class="btn btn-ghost btn-xs join-item pointer-events-none">
+          Page {currentPage}
+        </button>
+        <button class="btn btn-outline btn-xs join-item" on:click={goToNextPage} disabled={loading}>
           Next
         </button>
       </div>
     </div>
-    <p class="text-base-content/70 text-xs">
-      Showing {rows.length === 0 ? 0 : offset + 1} - {offset + rows.length}
-    </p>
-
     {#if networkError}
       <p class="text-error text-sm">{networkError}</p>
     {/if}
@@ -441,33 +449,6 @@
         <span>No matches data available.</span>
       </div>
     {:else}
-      <div class="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
-        <div class="stats bg-base-200 rounded-box">
-          <div class="stat py-2">
-            <div class="stat-title text-xs">Payments fetched</div>
-            <div class="stat-value text-primary text-2xl">{matchResponse.payments_fetched}</div>
-          </div>
-        </div>
-        <div class="stats bg-base-200 rounded-box">
-          <div class="stat py-2">
-            <div class="stat-title text-xs">Transactions found</div>
-            <div class="stat-value text-2xl">{matchResponse.transactions_found}</div>
-          </div>
-        </div>
-        <div class="stats bg-base-200 rounded-box">
-          <div class="stat py-2">
-            <div class="stat-title text-xs">One match</div>
-            <div class="stat-value text-success text-2xl">{matchResponse.transactions_with_one_match}</div>
-          </div>
-        </div>
-        <div class="stats bg-base-200 rounded-box">
-          <div class="stat py-2">
-            <div class="stat-title text-xs">Many matches</div>
-            <div class="stat-value text-warning text-2xl">{matchResponse.transactions_with_many_matches}</div>
-          </div>
-        </div>
-      </div>
-
       {#if rows.length === 0}
         <div class="alert mt-3">
           <Icon src={icons.InformationCircle} class="h-5 w-5" />
@@ -479,18 +460,26 @@
             <thead>
               <tr>
                 <th>Transaction</th>
+                <th>Status</th>
                 <th>Candidates</th>
               </tr>
             </thead>
             <tbody>
               {#each rows as row}
                 <tr>
-                  <td class="min-w-80 align-top">
+                  <td class="align-top">
                     <div class="space-y-1">
                       <div class="font-medium">{row.tx.description}</div>
                       <div class="text-base-content/70 text-xs">
                         #{row.tx.id} | {formatDate(row.tx.date)} | {formatMoney(row.tx.amount, row.tx.currency_symbol)}
                       </div>
+                    </div>
+                  </td>
+                  <td class="align-top">
+                    <div class="flex flex-wrap gap-2">
+                      <span class={`badge badge-sm ${isRowProcessed(row) ? 'badge-neutral' : 'badge-info'}`}>
+                        {isRowProcessed(row) ? 'processed' : 'new'}
+                      </span>
                     </div>
                   </td>
                   <td class="align-top">
@@ -501,7 +490,7 @@
                         {#each row.matches as candidate}
                           {@const key = candidateKey(row.tx.id, candidate.external_id)}
                           <div
-                            class={`rounded-box p-2 text-sm ${appliedCandidates.has(key) ? 'bg-success/15 ring-success ring-1' : 'bg-base-200'}`}
+                            class={`rounded-box p-2 text-sm ${appliedCandidates.has(key) ? 'bg-success/15 ring-success ring-1' : 'bg-base-100'}`}
                           >
                             <div class="flex flex-wrap items-center justify-between gap-2">
                               <label class="flex cursor-pointer items-center gap-2">
@@ -509,14 +498,11 @@
                                   type="checkbox"
                                   class="checkbox checkbox-primary checkbox-sm"
                                   checked={selectedCandidates.has(key)}
-                                  disabled={appliedCandidates.has(key)}
+                                  disabled={!canSelectCandidate(row, candidate.external_id)}
                                   on:change={() => toggleCandidate(row.tx.id, candidate.external_id)}
                                 />
                                 <span class="text-xs font-medium">Select</span>
                               </label>
-                              {#if appliedCandidates.has(key)}
-                                <span class="badge badge-success badge-xs">applied</span>
-                              {/if}
                             </div>
                             <div class="mt-1 flex flex-wrap items-center gap-2">
                               <span class="font-medium">{formatDate(candidate.date)}</span>
@@ -549,5 +535,154 @@
         </div>
       {/if}
     {/if}
+
+    <div class="border-base-200 mt-4 flex flex-wrap items-end justify-between gap-3 border-t pt-4">
+      <div class="text-base-content/70 text-xs">
+        Showing {rows.length === 0 ? 0 : offset + 1} - {offset + rows.length}
+      </div>
+      <div class="flex flex-wrap items-end gap-3">
+        <label class="flex items-center gap-2">
+          <span class="text-base-content/70 text-[11px] font-medium uppercase tracking-wide">Rows</span>
+          <select class="select select-bordered select-xs w-16" value={pageSize} on:change={onPageSizeChange}>
+            {#each PAGE_SIZE_OPTIONS as option}
+              <option value={option}>{option}</option>
+            {/each}
+          </select>
+        </label>
+        <div class="join">
+          <button class="btn btn-outline btn-xs join-item" on:click={goToPreviousPage} disabled={loading || offset === 0}>
+            Prev
+          </button>
+          <button class="btn btn-ghost btn-xs join-item pointer-events-none">
+            Page {currentPage}
+          </button>
+          <button class="btn btn-outline btn-xs join-item" on:click={goToNextPage} disabled={loading}>
+            Next
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
+
+{#if matchResponse}
+  <dialog class:modal-open={isStatsModalOpen} class="modal">
+    <div class="modal-box max-w-4xl">
+      <div class="mb-4 flex items-start justify-between gap-3">
+        <div>
+          <h3 class="text-lg font-semibold">Matching stats</h3>
+          <p class="text-base-content/70 text-sm">
+            Summary for selected Allegro secret{login ? ` (${login})` : ''}.
+          </p>
+        </div>
+        <button class="btn btn-ghost btn-circle btn-sm" on:click={() => (isStatsModalOpen = false)} aria-label="Close stats modal">
+          <Icon src={icons.XMark} class="h-5 w-5" />
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
+        <div class="stats bg-base-200 rounded-box">
+          <div class="stat py-2">
+            <div class="stat-title text-xs">Payments fetched</div>
+            <div class="stat-value text-primary text-2xl">{matchResponse.payments_fetched}</div>
+          </div>
+        </div>
+        <div class="stats bg-base-200 rounded-box">
+          <div class="stat py-2">
+            <div class="stat-title text-xs">Transactions found</div>
+            <div class="stat-value text-2xl">{matchResponse.transactions_found}</div>
+          </div>
+        </div>
+        <div class="stats bg-base-200 rounded-box">
+          <div class="stat py-2">
+            <div class="stat-title text-xs">One match</div>
+            <div class="stat-value text-success text-2xl">{matchResponse.transactions_with_one_match}</div>
+          </div>
+        </div>
+        <div class="stats bg-base-200 rounded-box">
+          <div class="stat py-2">
+            <div class="stat-title text-xs">Many matches</div>
+            <div class="stat-value text-warning text-2xl">{matchResponse.transactions_with_many_matches}</div>
+          </div>
+        </div>
+        <div class="stats bg-base-200 rounded-box">
+          <div class="stat py-2">
+            <div class="stat-title text-xs">Unmatched payments</div>
+            <div class="stat-value text-secondary text-2xl">{matchResponse.unmatched_payments.length}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-action">
+        <button class="btn btn-sm" on:click={() => (isStatsModalOpen = false)}>Close</button>
+      </div>
+    </div>
+    <form method="dialog" class="modal-backdrop">
+      <button on:click={() => (isStatsModalOpen = false)}>close</button>
+    </form>
+  </dialog>
+
+  <div class="card bg-base-100 mt-6 shadow-xl">
+    <div class="card-body">
+      <div class="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h4 class="card-title text-base">Unmatched payments</h4>
+          <p class="text-base-content/70 text-sm">
+            Payments fetched from Allegro that do not have any transaction candidate.
+          </p>
+        </div>
+        <span class="badge badge-outline badge-sm">{matchResponse.unmatched_payments.length}</span>
+      </div>
+
+      {#if matchResponse.unmatched_payments.length === 0}
+        <div class="alert mt-2">
+          <Icon src={icons.InformationCircle} class="h-5 w-5" />
+          <span>No unmatched payments.</span>
+        </div>
+      {:else}
+        <div class="overflow-x-auto">
+          <table class="table table-sm">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Amount</th>
+                <th>Status</th>
+                <th>Payment ID</th>
+                <th>Details</th>
+              </tr>
+            </thead>
+            <tbody>
+              {#each matchResponse.unmatched_payments as payment}
+                <tr>
+                  <td>{formatDate(payment.date)}</td>
+                  <td>{formatMoney(payment.amount)}</td>
+                  <td>
+                    <span class={`badge badge-xs ${payment.is_balanced ? 'badge-success' : 'badge-warning'}`}>
+                      {payment.is_balanced ? 'balanced' : 'unbalanced'}
+                    </span>
+                  </td>
+                  <td>
+                    <div class="tooltip" data-tip={payment.external_id}>
+                      <span class="font-mono text-xs">{payment.external_short_id}</span>
+                    </div>
+                  </td>
+                  <td class="min-w-80">
+                    {#if payment.details.length}
+                      <div class="space-y-1">
+                        {#each payment.details as detail}
+                          <div class="text-base-content/80 text-xs leading-tight">{detail}</div>
+                        {/each}
+                      </div>
+                    {:else}
+                      <span class="text-base-content/60 text-xs">No details</span>
+                    {/if}
+                  </td>
+                </tr>
+              {/each}
+            </tbody>
+          </table>
+        </div>
+      {/if}
+    </div>
+  </div>
+{/if}
