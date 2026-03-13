@@ -1,4 +1,7 @@
 <script lang="ts">
+  import { Icon } from '@steeze-ui/svelte-icon';
+  import * as icons from '@steeze-ui/heroicons';
+
   export let form;
 
   let username = '';
@@ -10,91 +13,125 @@
   }
 </script>
 
-<div class="bg-base-200 flex min-h-screen items-center">
-  <div class="card mx-auto w-full max-w-5xl shadow-xl">
-    <div class="bg-base-100 grid grid-cols-1 rounded-xl md:grid-cols-2">
-      <!-- LEFT SIDE -->
-      <div class="">
-        <div class="hero bg-base-200 min-h-full rounded-l-xl">
-          <div class="hero-content py-12">
-            <div class="max-w-md text-center">
-              <h1 class="text-3xl font-bold">Firefly III Toolkit</h1>
+<svelte:head>
+  <title>Login — Firefly Toolkit</title>
+</svelte:head>
 
-              <div class="mt-12">
-                <img
-                  src="/android-chrome-192x192.png"
-                  alt="Alior2Firefly"
-                  class="inline-block w-48"
-                />
-              </div>
+<div
+  class="from-base-200 via-base-200 to-primary/10 flex min-h-screen items-center justify-center bg-gradient-to-br px-4 py-10"
+>
+  <div
+    class="bg-base-100 grid w-full max-w-6xl overflow-hidden rounded-[2rem] shadow-2xl lg:grid-cols-[1.05fr_0.95fr]"
+  >
+    <section
+      class="from-primary/95 to-secondary/85 text-primary-content relative hidden overflow-hidden bg-gradient-to-br p-10 lg:flex lg:flex-col lg:justify-between"
+    >
+      <div class="absolute inset-0 opacity-20">
+        <div class="absolute top-0 left-0 h-60 w-60 rounded-full bg-white/30 blur-3xl"></div>
+        <div class="absolute right-0 bottom-0 h-72 w-72 rounded-full bg-black/20 blur-3xl"></div>
+      </div>
 
-              <h1 class="mt-8 text-2xl font-bold">Features:</h1>
+      <div class="relative z-10">
+        <div
+          class="inline-flex items-center gap-3 rounded-full bg-white/10 px-4 py-2 text-sm backdrop-blur"
+        >
+          <Icon src={icons.ShieldCheck} class="h-5 w-5" />
+          Secure access
+        </div>
 
-              <p class="mt-4 py-2">
-                ✓ <span class="font-semibold">Alior / BLIK </span> File import & Sync
-              </p>
-              <p class="mb-4 py-2">
-                ✓ <span class="font-semibold">Citi Handlowy</span> Integration
-                <span class="badge badge-soft badge-primary">TBD</span>
-              </p>
-              <p class="mb-4 py-2">
-                ✓ Transaction <span class="font-semibold">Categorization</span>
-                <span class="badge badge-soft badge-primary">TBD</span>
-              </p>
+        <div class="mt-8 flex items-center gap-5">
+          <img src="/logo_b.png" alt="Firefly Toolkit" class="h-36 w-36 object-contain" />
+          <h1 class="text-4xl leading-tight font-semibold">Firefly Toolkit</h1>
+        </div>
+
+        <p class="text-primary-content/80 mt-4 max-w-md text-sm/6">
+          Firefly Toolkit brings together banking imports, sync flows and onboarding utilities in
+          one place.
+        </p>
+      </div>
+
+      <div class="relative z-10 grid gap-4">
+        <div class="rounded-3xl bg-white/10 p-5 backdrop-blur">
+          <div class="text-primary-content/70 text-xs tracking-[0.2em] uppercase">
+            Included today
+          </div>
+          <div class="mt-3 space-y-3 text-sm">
+            <div class="flex items-center gap-3">
+              <Icon src={icons.ArrowUpTray} class="h-5 w-5" />
+              Alior BLIK import workflow
+            </div>
+            <div class="flex items-center gap-3">
+              <Icon src={icons.Sparkles} class="h-5 w-5" />
+              Transaction categorization tools
+            </div>
+            <div class="flex items-center gap-3">
+              <Icon src={icons.BuildingStorefront} class="h-5 w-5" />
+              Allegro enrichment workflow
             </div>
           </div>
         </div>
       </div>
+    </section>
 
-      <!-- RIGHT SIDE -->
-      <div class="px-10 py-24">
-        <h2 class="mb-2 text-center text-2xl font-semibold">Login</h2>
+    <section class="px-6 py-8 sm:px-10 sm:py-12">
+      <div class="mx-auto max-w-md">
+        <div class="mb-8">
+          <div class="bg-primary/12 text-primary inline-flex rounded-2xl p-3">
+            <Icon src={icons.LockClosed} class="h-6 w-6" />
+          </div>
+          <h2 class="mt-4 text-3xl font-semibold tracking-tight">Login</h2>
+          <p class="text-base-content/70 mt-2 text-sm">
+            Use your application credentials to access the toolkit dashboard.
+          </p>
+        </div>
 
-        <form method="POST">
-          <div class="form-control mt-4 w-full">
-            <label class="label" for="loginUser">
-              <span class="label-text">Login</span>
-            </label>
+        <form method="POST" class="space-y-5">
+          <label class="form-control">
+            <div class="label">
+              <span class="label-text font-medium">Login</span>
+            </div>
             <input
               id="loginUser"
               name="username"
               bind:value={username}
-              placeholder="User"
+              placeholder="Your username"
               class="input input-bordered w-full"
+              autocomplete="username"
             />
-          </div>
+          </label>
 
-          <div class="form-control mt-4 w-full">
-            <label class="label" for="loginPass">
-              <span class="label-text">Password</span>
-            </label>
+          <label class="form-control">
+            <div class="label">
+              <span class="label-text font-medium">Password</span>
+            </div>
             <input
               type="password"
               id="loginPass"
               name="password"
               bind:value={password}
               class="input input-bordered w-full"
+              placeholder="Your password"
+              autocomplete="current-password"
             />
-          </div>
+          </label>
 
-          <div class="text-primary mt-2 text-right">
-            <a href="/login" class="hover:text-primary text-sm hover:underline">
-              Forgot Password?
-            </a>
+          <div class="bg-base-200/60 rounded-2xl px-4 py-3 text-sm">
+            Access is provided through administrator-created accounts.
           </div>
 
           {#if error}
-            <p class="text-error mt-6 text-center">{error}</p>
+            <div class="alert alert-error">
+              <Icon src={icons.ExclamationTriangle} class="h-5 w-5" />
+              <span>{error}</span>
+            </div>
           {/if}
 
-          <button type="submit" class="btn btn-primary mt-6 w-full"> Login </button>
-
-          <div class="mt-4 text-center">
-            Don't have an account yet?
-            <a href="/login" class="text-primary hover:underline"> Register </a>
-          </div>
+          <button type="submit" class="btn btn-primary w-full">
+            <Icon src={icons.ArrowRightEndOnRectangle} class="h-5 w-5" />
+            Sign in
+          </button>
         </form>
       </div>
-    </div>
+    </section>
   </div>
 </div>
