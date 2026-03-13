@@ -1,4 +1,6 @@
 import { createApiClient } from './client';
+import { normalizeApiError } from '$lib/api/errors';
+import type { components } from '$lib/api/schema';
 
 type ApiClient = Awaited<ReturnType<typeof createApiClient>>;
 type ApiResponse<T> = { data?: T; error?: unknown; response: Response };
@@ -76,7 +78,7 @@ export async function apiRequest<T>(
 
   const client = await createApiClient();
   const useAuth = options?.auth !== false;
-  const token = useAuth ? (options?.token ?? getStoredToken()) : null;
+  const token = useAuth ? options?.token ?? getStoredToken() : null;
 
   let result = await call(client, buildAuthHeaders(token));
   if (!useAuth || result.response.status !== 401) {
@@ -96,4 +98,23 @@ export async function apiRequest<T>(
   }
 
   return result;
+}
+
+type SetPasswordPayload = components['schemas']['SetPasswordRequest'];
+
+export async function setPassword(payload: SetPasswordPayload): Promise<void> {
+  const { error, response } = await apiRequest(
+    (api, headers) =>
+      api.POST('/api/auth/set-password', {
+        body: payload,
+        headers
+      }),
+    { auth: false }
+  );
+
+  if (response.status === 204) {
+    return;
+  }
+
+  throw normalizeApiError(error, 'Failed to set password', response.status);
 }

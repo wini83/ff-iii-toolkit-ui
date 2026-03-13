@@ -42,16 +42,16 @@ export const actions: Actions = {
       return fail(401, { error: 'Nieprawidłowy login lub hasło' });
     }
 
-      const data = await res.json();
-      const accessToken = data?.access_token;
+    const data = await res.json();
+    const accessToken = data?.access_token;
 
     if (!accessToken) {
       return fail(500, { error: 'Brak tokenu w odpowiedzi backendu' });
     }
 
-      setAccessTokenCookie(cookies, accessToken);
-      propagateBackendAuthCookies(res.headers, cookies);
+    setAccessTokenCookie(cookies, accessToken);
+    propagateBackendAuthCookies(res.headers, cookies);
 
-      throw redirect(303, '/');
+    throw redirect(303, '/');
   }
 };

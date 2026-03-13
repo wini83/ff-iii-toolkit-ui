@@ -31,7 +31,11 @@ export async function getMatches(encoded_id: string, token?: string | null) {
   return data;
 }
 
-export async function applyMatches(encoded_id: string, tx_indexes: number[], token?: string | null) {
+export async function applyMatches(
+  encoded_id: string,
+  tx_indexes: number[],
+  token?: string | null
+) {
   const { data, error } = await apiRequest(
     (api, headers) =>
       api.POST('/api/blik_files/{encoded_id}/matches', {
@@ -93,7 +97,9 @@ export async function getMetricsStatus(token?: string | null): Promise<BlikMetri
   return data;
 }
 
-export async function refreshMetricsStatus(token?: string | null): Promise<BlikMetricsStatusResponse> {
+export async function refreshMetricsStatus(
+  token?: string | null
+): Promise<BlikMetricsStatusResponse> {
   const { data, error, response } = await apiRequest(
     (api, headers) => api.POST('/api/blik_files/statistics_v2/refresh', { headers }),
     { token }

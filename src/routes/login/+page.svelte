@@ -1,6 +1,6 @@
 <script lang="ts">
   export let form;
- 
+
   let username = '';
   let password = '';
   let error: string = form?.error ?? '';

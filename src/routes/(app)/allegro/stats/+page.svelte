@@ -3,7 +3,15 @@
   import * as icons from '@steeze-ui/heroicons';
   import { onMount, onDestroy, tick } from 'svelte';
   import { goto } from '$app/navigation';
-  import { Chart, BarController, BarElement, CategoryScale, LinearScale, Tooltip, Legend } from 'chart.js';
+  import {
+    Chart,
+    BarController,
+    BarElement,
+    CategoryScale,
+    LinearScale,
+    Tooltip,
+    Legend
+  } from 'chart.js';
 
   import { allegro } from '$lib/api/allegro';
   import type { components } from '$lib/api/schema';
@@ -207,7 +215,9 @@
     }
 
     try {
-      let nextStatus = force ? await allegro.refreshMetricsStatus() : await allegro.getMetricsStatus();
+      let nextStatus = force
+        ? await allegro.refreshMetricsStatus()
+        : await allegro.getMetricsStatus();
       statusData = nextStatus;
 
       if (isRunning(nextStatus.status)) {
@@ -318,9 +328,11 @@
         </div>
         <div class="stat-title text-warning">Not processed Allegro</div>
         <div class="stat-value text-warning">{d.not_processed__allegro_transactions}</div>
-        <div class="stat-desc">Coverage: {d.allegro_transactions > 0
+        <div class="stat-desc">
+          Coverage: {d.allegro_transactions > 0
             ? `${Math.round(((d.allegro_transactions - d.not_processed__allegro_transactions) / d.allegro_transactions) * 100)}%`
-            : 'n/a'}</div>
+            : 'n/a'}
+        </div>
       </div>
     </div>
   </div>

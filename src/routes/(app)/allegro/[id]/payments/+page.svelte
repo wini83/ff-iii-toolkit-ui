@@ -66,7 +66,11 @@
   function emitToast(type: 'info' | 'success' | 'error', msg: string) {
     const safeMsg =
       getNonEmptyString(msg) ??
-      (type === 'error' ? 'Failed to load Allegro payments' : type === 'success' ? 'Success' : 'Info');
+      (type === 'error'
+        ? 'Failed to load Allegro payments'
+        : type === 'success'
+          ? 'Success'
+          : 'Info');
 
     window.dispatchEvent(
       new CustomEvent('toast', {
@@ -169,18 +173,30 @@
     <div class="mb-2 flex flex-wrap items-center justify-between gap-2">
       <div class="flex items-center gap-2">
         <span class="text-sm">Rows per page</span>
-        <select class="select select-bordered select-sm" value={pageSize} on:change={onPageSizeChange}>
+        <select
+          class="select select-bordered select-sm"
+          value={pageSize}
+          on:change={onPageSizeChange}
+        >
           {#each PAGE_SIZE_OPTIONS as option}
             <option value={option}>{option}</option>
           {/each}
         </select>
       </div>
       <div class="flex items-center gap-2">
-        <button class="btn btn-outline btn-sm" on:click={goToPreviousPage} disabled={loading || offset === 0}>
+        <button
+          class="btn btn-outline btn-sm"
+          on:click={goToPreviousPage}
+          disabled={loading || offset === 0}
+        >
           Prev
         </button>
         <span class="text-sm">Page {currentPage}</span>
-        <button class="btn btn-outline btn-sm" on:click={goToNextPage} disabled={loading || !hasNextPage}>
+        <button
+          class="btn btn-outline btn-sm"
+          on:click={goToNextPage}
+          disabled={loading || !hasNextPage}
+        >
           Next
         </button>
       </div>

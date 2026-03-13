@@ -104,7 +104,10 @@ export async function autoApplyMatches(
   return data ?? null;
 }
 
-export async function getApplyJob(job_id: string, token?: string | null): Promise<ApplyJobResponse | null> {
+export async function getApplyJob(
+  job_id: string,
+  token?: string | null
+): Promise<ApplyJobResponse | null> {
   const { data, error } = await apiRequest(
     (api, headers) =>
       api.GET('/api/allegro/apply-jobs/{job_id}', {
@@ -118,7 +121,9 @@ export async function getApplyJob(job_id: string, token?: string | null): Promis
   return data ?? null;
 }
 
-export async function getMetricsStatus(token?: string | null): Promise<AllegroMetricsStatusResponse> {
+export async function getMetricsStatus(
+  token?: string | null
+): Promise<AllegroMetricsStatusResponse> {
   const { data, error, response } = await apiRequest(
     (api, headers) => api.GET('/api/allegro/statistics', { headers }),
     { token }
@@ -131,7 +136,9 @@ export async function getMetricsStatus(token?: string | null): Promise<AllegroMe
   return data;
 }
 
-export async function refreshMetricsStatus(token?: string | null): Promise<AllegroMetricsStatusResponse> {
+export async function refreshMetricsStatus(
+  token?: string | null
+): Promise<AllegroMetricsStatusResponse> {
   const { data, error, response } = await apiRequest(
     (api, headers) => api.POST('/api/allegro/statistics/refresh', { headers }),
     { token }

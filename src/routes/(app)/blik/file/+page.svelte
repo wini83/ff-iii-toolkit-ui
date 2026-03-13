@@ -26,13 +26,13 @@
   <div class="divider mt-2"></div>
 
   <fieldset class="fieldset border-base-300 rounded-box w-xs border p-4">
-  <legend class="fieldset-legend">Open file</legend>
-  <div class="join">
-    <label class="input">
-      <span class="label">ID:</span>
-      <input type="text" bind:value={fileId} placeholder="Enter ID" />
-    </label>
-    <button class="btn join-item" on:click={goToFile} disabled={!fileId.trim()}>Go</button>
-  </div>
-</fieldset>
+    <legend class="fieldset-legend">Open file</legend>
+    <div class="join">
+      <label class="input">
+        <span class="label">ID:</span>
+        <input type="text" bind:value={fileId} placeholder="Enter ID" />
+      </label>
+      <button class="btn join-item" on:click={goToFile} disabled={!fileId.trim()}>Go</button>
+    </div>
+  </fieldset>
 </div>

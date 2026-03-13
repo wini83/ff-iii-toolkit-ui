@@ -5,8 +5,7 @@
   // opcjonalnie: kontrola szerokości kolumn (UX++ dla tabel finansowych)
   export let colWidths: string[] | null = null;
 
-  const getWidth = (i: number) =>
-    colWidths?.[i] ?? ['w-16', 'w-32', 'w-24', 'w-20'][i % 4];
+  const getWidth = (i: number) => colWidths?.[i] ?? ['w-16', 'w-32', 'w-24', 'w-20'][i % 4];
 </script>
 
 <div class="w-full overflow-x-auto">

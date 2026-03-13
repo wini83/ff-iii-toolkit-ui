@@ -3,6 +3,7 @@
   import * as icons from '@steeze-ui/heroicons';
 
   export let onCloseMobile: () => void = () => {};
+  export let isSuperuser = false;
 </script>
 
 <!-- SIDEBAR -->
@@ -112,5 +113,25 @@
         </ul>
       </details>
     </li>
+
+    {#if isSuperuser}
+      <li>
+        <details open>
+          <summary class="flex cursor-pointer items-center gap-2">
+            <Icon src={icons.ShieldCheck} class="h-5 w-5" />
+            Administration
+          </summary>
+
+          <ul>
+            <li>
+              <a href="/users">
+                <Icon src={icons.Users} class="h-5 w-5" />
+                Users
+              </a>
+            </li>
+          </ul>
+        </details>
+      </li>
+    {/if}
   </ul>
 </div>

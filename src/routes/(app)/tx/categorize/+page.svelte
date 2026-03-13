@@ -47,7 +47,11 @@
     return String(id);
   }
 
-  function formatMoney(amount: number, currencyCode: string | null | undefined, currencySymbol: string | null | undefined) {
+  function formatMoney(
+    amount: number,
+    currencyCode: string | null | undefined,
+    currencySymbol: string | null | undefined
+  ) {
     const safeCode = currencyCode && currencyCode.trim() ? currencyCode.trim() : 'PLN';
     const safeSymbol = currencySymbol && currencySymbol.trim() ? currencySymbol.trim() : safeCode;
     return `${amount} ${safeSymbol} (${safeCode})`;
@@ -272,7 +276,11 @@
     <div>
       <div class="font-semibold">#{currentTx.id} – {currentTx.description}</div>
       <div class="text-sm opacity-70">
-        {currentTx.date} · {formatMoney(currentTx.amount, currentTx.currency_code, currentTx.currency_symbol)}
+        {currentTx.date} · {formatMoney(
+          currentTx.amount,
+          currentTx.currency_code,
+          currentTx.currency_symbol
+        )}
       </div>
       {#if currentTx.fx_amount !== null && currentTx.fx_amount !== undefined}
         <div class="text-sm opacity-70">

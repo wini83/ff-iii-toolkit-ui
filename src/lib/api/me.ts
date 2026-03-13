@@ -2,8 +2,7 @@ import { apiRequest } from './auth';
 import { normalizeApiError } from '$lib/api/errors';
 import type { operations } from '$lib/api/schema';
 
-type MeResponse =
-  operations['get_me_api_me_get']['responses'][200]['content']['application/json'];
+type MeResponse = operations['get_me_api_me_get']['responses'][200]['content']['application/json'];
 
 export async function getMe(token?: string | null): Promise<MeResponse> {
   const { data, error, response } = await apiRequest(

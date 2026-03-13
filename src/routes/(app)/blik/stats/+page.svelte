@@ -95,15 +95,20 @@
     return isDone(status?.status) && status?.result === null;
   }
 
-  function hasTotalTransactions(result: BlikMetricsResultResponse): result is BlikMetricsResultResponse & { total_transactions: number } {
+  function hasTotalTransactions(
+    result: BlikMetricsResultResponse
+  ): result is BlikMetricsResultResponse & { total_transactions: number } {
     return (
       'total_transactions' in result &&
-      typeof (result as BlikMetricsResultResponse & { total_transactions?: unknown }).total_transactions === 'number'
+      typeof (result as BlikMetricsResultResponse & { total_transactions?: unknown })
+        .total_transactions === 'number'
     );
   }
 
   function getTotalTransactions(result: BlikMetricsResultResponse) {
-    return hasTotalTransactions(result) ? result.total_transactions : result.single_part_transactions;
+    return hasTotalTransactions(result)
+      ? result.total_transactions
+      : result.single_part_transactions;
   }
 
   function formatTimestamp(timestamp: string | undefined) {
@@ -327,7 +332,7 @@
 
 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
   <div class=""></div>
-  <div class="text-right space-y-2">
+  <div class="space-y-2 text-right">
     <div class="badge badge-sm">
       generated at: {formatTimestamp(data?.time_stamp)} in {formatFetchSeconds(data?.fetch_seconds)}
     </div>

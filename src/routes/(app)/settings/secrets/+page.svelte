@@ -172,7 +172,11 @@
         <p class="text-base-content/70 text-sm">Manage integration credentials for your account.</p>
       </div>
 
-      <button class="btn btn-primary" disabled={loading || submitting || deleting} on:click={openCreateModal}>
+      <button
+        class="btn btn-primary"
+        disabled={loading || submitting || deleting}
+        on:click={openCreateModal}
+      >
         <Icon src={icons.Plus} class="h-5 w-5" />
         Add secret
       </button>
@@ -198,7 +202,7 @@
       </div>
     {:else}
       <div class="hidden overflow-x-auto lg:block">
-        <table class="table table-zebra">
+        <table class="table-zebra table">
           <thead>
             <tr>
               <th>Type</th>
@@ -219,7 +223,9 @@
                   </div>
                 </td>
                 <td>
-                  <span class="badge badge-outline badge-sm font-mono">{formatShortId(secret.short_id)}</span>
+                  <span class="badge badge-outline badge-sm font-mono"
+                    >{formatShortId(secret.short_id)}</span
+                  >
                 </td>
                 <td>{secret.usage_count}</td>
                 <td>{formatDate(secret.last_used_at)}</td>
@@ -251,13 +257,18 @@
                   <Icon src={icons.Key} class="h-5 w-5" />
                   {formatSecretType(secret.type)}
                 </div>
-                <span class="badge badge-outline badge-sm font-mono">{formatShortId(secret.short_id)}</span>
+                <span class="badge badge-outline badge-sm font-mono"
+                  >{formatShortId(secret.short_id)}</span
+                >
               </div>
 
-              <div class="text-sm space-y-1">
+              <div class="space-y-1 text-sm">
                 <p><span class="font-medium">Usage:</span> {secret.usage_count}</p>
                 <p><span class="font-medium">Last used:</span> {formatDate(secret.last_used_at)}</p>
-                <p><span class="font-medium">Last updated:</span> {formatDate(secret.created_at)}</p>
+                <p>
+                  <span class="font-medium">Last updated:</span>
+                  {formatDate(secret.created_at)}
+                </p>
               </div>
 
               <div class="card-actions justify-end">
@@ -288,7 +299,12 @@
     <div class="mt-4 space-y-3">
       <fieldset class="fieldset">
         <legend class="fieldset-legend">Secret Type</legend>
-        <select class="select select-bordered w-full" bind:value={formType} disabled={submitting} required>
+        <select
+          class="select select-bordered w-full"
+          bind:value={formType}
+          disabled={submitting}
+          required
+        >
           {#each SECRET_TYPES as option}
             <option value={option}>{formatSecretType(option)}</option>
           {/each}
@@ -340,7 +356,9 @@
     <h3 class="text-lg font-semibold">Delete secret</h3>
     <p class="text-base-content/70 mt-2 text-sm">
       Are you sure you want to delete
-      <span class="font-semibold">{pendingDelete ? formatSecretType(pendingDelete.type) : 'this secret'}</span>?
+      <span class="font-semibold"
+        >{pendingDelete ? formatSecretType(pendingDelete.type) : 'this secret'}</span
+      >?
     </p>
 
     <div class="modal-action">

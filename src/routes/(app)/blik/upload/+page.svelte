@@ -38,7 +38,6 @@
   }
 </script>
 
-
 <Steps
   activeIndex={0}
   steps={[

@@ -23,7 +23,10 @@ function isSameSite(value: string): value is SameSite {
 }
 
 function parseSetCookieHeader(value: string): ParsedCookie | null {
-  const parts = value.split(';').map((part) => part.trim()).filter(Boolean);
+  const parts = value
+    .split(';')
+    .map((part) => part.trim())
+    .filter(Boolean);
   const [nameValue, ...attributes] = parts;
   if (!nameValue) return null;
 
@@ -102,7 +105,11 @@ export function setAccessTokenCookie(cookies: Cookies, token: string) {
 
 export function propagateBackendAuthCookies(headers: Headers, cookies: Cookies) {
   const setCookieHeaders =
-    typeof headers.getSetCookie === 'function' ? headers.getSetCookie() : headers.get('set-cookie') ? [headers.get('set-cookie') as string] : [];
+    typeof headers.getSetCookie === 'function'
+      ? headers.getSetCookie()
+      : headers.get('set-cookie')
+        ? [headers.get('set-cookie') as string]
+        : [];
 
   for (const headerValue of setCookieHeaders) {
     const parsed = parseSetCookieHeader(headerValue);
@@ -136,7 +143,11 @@ export function clearAuthCookies(cookies: Cookies) {
   const refreshCookieMeta = cookies.get(REFRESH_COOKIE_META);
   if (refreshCookieMeta) {
     try {
-      const parsed = JSON.parse(refreshCookieMeta) as { name?: string; path?: string; domain?: string };
+      const parsed = JSON.parse(refreshCookieMeta) as {
+        name?: string;
+        path?: string;
+        domain?: string;
+      };
       if (parsed.name) {
         cookies.delete(parsed.name, {
           path: parsed.path ?? '/',

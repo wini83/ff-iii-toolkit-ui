@@ -35,19 +35,24 @@
     if (pathname.startsWith('/tx/categorize')) return 'Transactions / Categorize';
     if (pathname.startsWith('/tx/stats')) return 'Transactions / Stats';
     if (pathname.startsWith('/allegro/accounts')) return 'Allegro / Accounts';
-    if (pathname.startsWith('/allegro/') && pathname.endsWith('/matches')) return 'Allegro / Matches';
-    if (pathname.startsWith('/allegro/') && pathname.endsWith('/payments')) return 'Allegro / Payments';
+    if (pathname.startsWith('/allegro/') && pathname.endsWith('/matches'))
+      return 'Allegro / Matches';
+    if (pathname.startsWith('/allegro/') && pathname.endsWith('/payments'))
+      return 'Allegro / Payments';
     if (pathname.startsWith('/allegro/stats')) return 'Allegro / Stats';
     if (pathname.startsWith('/blik/upload')) return 'BLIK Sync / File Upload';
     if (pathname.startsWith('/blik/file')) return 'BLIK Sync / File Preview';
     if (pathname.startsWith('/blik/stats')) return 'BLIK Sync / Stats';
     if (pathname.startsWith('/settings/secrets')) return 'Settings / Secrets';
+    if (pathname.startsWith('/users')) return 'Administration / Users';
     return DEFAULT_APP_TITLE;
   }
 
   $: dynamicTitle = resolveRouteTitle($page.url.pathname);
   $: headTitle =
-    dynamicTitle === DEFAULT_APP_TITLE ? DEFAULT_APP_TITLE : `${dynamicTitle} — ${DEFAULT_APP_TITLE}`;
+    dynamicTitle === DEFAULT_APP_TITLE
+      ? DEFAULT_APP_TITLE
+      : `${dynamicTitle} — ${DEFAULT_APP_TITLE}`;
 
   async function logout() {
     try {
@@ -148,18 +153,26 @@
 
       <div class="flex-none">
         <div class="dropdown dropdown-end">
-          <button tabindex="0" class="btn btn-ghost btn-circle avatar" title={meUser ? `Signed in as ${meUser.username}` : undefined}>
+          <button
+            tabindex="0"
+            class="btn btn-ghost btn-circle avatar"
+            title={meUser ? `Signed in as ${meUser.username}` : undefined}
+          >
             <div class="w-10 rounded-full">
               <img
-                src="{`https://api.dicebear.com/9.x/initials/svg?seed=${meUser?.username}`}"
+                src={`https://api.dicebear.com/9.x/initials/svg?seed=${meUser?.username}`}
                 alt="avatar"
               />
             </div>
           </button>
           <ul class="menu menu-sm dropdown-content bg-base-100 rounded-box mt-3 w-52 p-2 shadow">
             <li><a href="/login"><Icon src={icons.User} class="h-5 w-5" /> Profile</a></li>
-            <li><a href="/settings/secrets"><Icon src={icons.Key} class="h-5 w-5" /> Secrets</a></li>
-            <li><button on:click={logout}><Icon src={icons.Power} class="h-5 w-5" />Log out</button></li>
+            <li>
+              <a href="/settings/secrets"><Icon src={icons.Key} class="h-5 w-5" /> Secrets</a>
+            </li>
+            <li>
+              <button on:click={logout}><Icon src={icons.Power} class="h-5 w-5" />Log out</button>
+            </li>
           </ul>
         </div>
       </div>
@@ -171,7 +184,7 @@
     </main>
   </div>
 
-  <AppSidebar onCloseMobile={closeDrawerOnMobile} />
+  <AppSidebar onCloseMobile={closeDrawerOnMobile} isSuperuser={meUser?.is_superuser ?? false} />
 </div>
 
 <!-- TOASTS -->

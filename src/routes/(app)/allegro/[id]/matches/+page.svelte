@@ -78,7 +78,11 @@
   function emitToast(type: 'info' | 'success' | 'error', msg: string) {
     const safeMsg =
       getNonEmptyString(msg) ??
-      (type === 'error' ? 'Failed to load Allegro matches' : type === 'success' ? 'Success' : 'Info');
+      (type === 'error'
+        ? 'Failed to load Allegro matches'
+        : type === 'success'
+          ? 'Success'
+          : 'Info');
 
     window.dispatchEvent(
       new CustomEvent('toast', {
@@ -119,7 +123,9 @@
   }
 
   function canSelectCandidate(row: AllegroMatchResult, paymentExternalId: string) {
-    return !isRowProcessed(row) && !appliedCandidates.has(candidateKey(row.tx.id, paymentExternalId));
+    return (
+      !isRowProcessed(row) && !appliedCandidates.has(candidateKey(row.tx.id, paymentExternalId))
+    );
   }
 
   function toggleCandidate(txId: number, paymentExternalId: string) {
@@ -277,12 +283,9 @@
 
       let finalJob = startJob;
       if (isBusy(startJob.status)) {
-        const polled = await pollApplyJob(
-          startJob.id,
-          startJob.status,
-          selectedByTx,
-          { value: processed }
-        );
+        const polled = await pollApplyJob(startJob.id, startJob.status, selectedByTx, {
+          value: processed
+        });
         if (polled) finalJob = polled;
       }
 
@@ -297,10 +300,15 @@
         const firstReason = finalJob.results.find((r) => r.status === 'failed')?.reason ?? null;
         emitToast(
           'error',
-          firstReason ? `Apply failed: ${firstReason}` : `Apply failed for ${finalJob.failed} item(s).`
+          firstReason
+            ? `Apply failed: ${firstReason}`
+            : `Apply failed for ${finalJob.failed} item(s).`
         );
       } else if (finalJob.failed > 0) {
-        emitToast('info', `Partially applied. Applied: ${finalJob.applied}, failed: ${finalJob.failed}.`);
+        emitToast(
+          'info',
+          `Partially applied. Applied: ${finalJob.applied}, failed: ${finalJob.failed}.`
+        );
       } else if (marked > 0 || finalJob.applied > 0) {
         emitToast('success', `Apply finished. Applied: ${finalJob.applied}.`);
       } else {
@@ -407,7 +415,11 @@
     <div class="divider mt-0 mb-2"></div>
     <div class="mb-2 flex items-center justify-end">
       <div class="join">
-        <button class="btn btn-outline btn-xs join-item" on:click={goToPreviousPage} disabled={loading || offset === 0}>
+        <button
+          class="btn btn-outline btn-xs join-item"
+          on:click={goToPreviousPage}
+          disabled={loading || offset === 0}
+        >
           Prev
         </button>
         <button class="btn btn-ghost btn-xs join-item pointer-events-none">
@@ -434,92 +446,99 @@
         <Icon src={icons.InformationCircle} class="h-5 w-5" />
         <span>No matches data available.</span>
       </div>
+    {:else if rows.length === 0}
+      <div class="alert mt-3">
+        <Icon src={icons.InformationCircle} class="h-5 w-5" />
+        <span>No match candidates to display.</span>
+      </div>
     {:else}
-      {#if rows.length === 0}
-        <div class="alert mt-3">
-          <Icon src={icons.InformationCircle} class="h-5 w-5" />
-          <span>No match candidates to display.</span>
-        </div>
-      {:else}
-        <div class="overflow-x-auto pt-3">
-          <table class="table">
-            <thead>
+      <div class="overflow-x-auto pt-3">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Transaction</th>
+              <th>Status</th>
+              <th>Candidates</th>
+            </tr>
+          </thead>
+          <tbody>
+            {#each rows as row}
               <tr>
-                <th>Transaction</th>
-                <th>Status</th>
-                <th>Candidates</th>
-              </tr>
-            </thead>
-            <tbody>
-              {#each rows as row}
-                <tr>
-                  <td class="align-top">
-                    <div class="space-y-1">
-                      <div class="font-medium">{row.tx.description}</div>
-                      <div class="text-base-content/70 text-xs">
-                        #{row.tx.id} | {formatDate(row.tx.date)} | {formatMoney(row.tx.amount, row.tx.currency_symbol)}
-                      </div>
+                <td class="align-top">
+                  <div class="space-y-1">
+                    <div class="font-medium">{row.tx.description}</div>
+                    <div class="text-base-content/70 text-xs">
+                      #{row.tx.id} | {formatDate(row.tx.date)} | {formatMoney(
+                        row.tx.amount,
+                        row.tx.currency_symbol
+                      )}
                     </div>
-                  </td>
-                  <td class="align-top">
-                    <div class="flex flex-wrap gap-2">
-                      <span class={`badge badge-sm ${isRowProcessed(row) ? 'badge-neutral' : 'badge-info'}`}>
-                        {isRowProcessed(row) ? 'processed' : 'new'}
-                      </span>
-                    </div>
-                  </td>
-                  <td class="align-top">
-                    {#if row.matches.length === 0}
-                      <span class="text-base-content/60 text-sm">No candidates</span>
-                    {:else}
-                      <div class="space-y-2">
-                        {#each row.matches as candidate}
-                          {@const key = candidateKey(row.tx.id, candidate.external_id)}
-                          <div
-                            class={`rounded-box p-2 text-sm ${appliedCandidates.has(key) ? 'bg-success/15 ring-success ring-1' : 'bg-base-100'}`}
-                          >
-                            <div class="flex flex-wrap items-center justify-between gap-2">
-                              <label class="flex cursor-pointer items-center gap-2">
-                                <input
-                                  type="checkbox"
-                                  class="checkbox checkbox-primary checkbox-sm"
-                                  checked={selectedCandidates.has(key)}
-                                  disabled={!canSelectCandidate(row, candidate.external_id)}
-                                  on:change={() => toggleCandidate(row.tx.id, candidate.external_id)}
-                                />
-                                <span class="text-xs font-medium">Select</span>
-                              </label>
-                            </div>
-                            <div class="mt-1 flex flex-wrap items-center gap-2">
-                              <span class="font-medium">{formatDate(candidate.date)}</span>
-                              <span>{formatMoney(candidate.amount)}</span>
-                              <span class={`badge badge-xs ${candidate.is_balanced ? 'badge-success' : 'badge-warning'}`}>
-                                {candidate.is_balanced ? 'balanced' : 'unbalanced'}
-                              </span>
-                              <div class="tooltip" data-tip={candidate.external_id}>
-                                <span class="font-mono text-xs">{candidate.external_short_id}</span>
-                              </div>
-                            </div>
-                            <div class="mt-2 space-y-1">
-                              {#if candidate.details.length}
-                                {#each candidate.details as detail}
-                                  <div class="text-base-content/80 text-xs leading-tight">{detail}</div>
-                                {/each}
-                              {:else}
-                                <div class="text-base-content/60 text-xs">No details</div>
-                              {/if}
+                  </div>
+                </td>
+                <td class="align-top">
+                  <div class="flex flex-wrap gap-2">
+                    <span
+                      class={`badge badge-sm ${isRowProcessed(row) ? 'badge-neutral' : 'badge-info'}`}
+                    >
+                      {isRowProcessed(row) ? 'processed' : 'new'}
+                    </span>
+                  </div>
+                </td>
+                <td class="align-top">
+                  {#if row.matches.length === 0}
+                    <span class="text-base-content/60 text-sm">No candidates</span>
+                  {:else}
+                    <div class="space-y-2">
+                      {#each row.matches as candidate}
+                        {@const key = candidateKey(row.tx.id, candidate.external_id)}
+                        <div
+                          class={`rounded-box p-2 text-sm ${appliedCandidates.has(key) ? 'bg-success/15 ring-success ring-1' : 'bg-base-100'}`}
+                        >
+                          <div class="flex flex-wrap items-center justify-between gap-2">
+                            <label class="flex cursor-pointer items-center gap-2">
+                              <input
+                                type="checkbox"
+                                class="checkbox checkbox-primary checkbox-sm"
+                                checked={selectedCandidates.has(key)}
+                                disabled={!canSelectCandidate(row, candidate.external_id)}
+                                on:change={() => toggleCandidate(row.tx.id, candidate.external_id)}
+                              />
+                              <span class="text-xs font-medium">Select</span>
+                            </label>
+                          </div>
+                          <div class="mt-1 flex flex-wrap items-center gap-2">
+                            <span class="font-medium">{formatDate(candidate.date)}</span>
+                            <span>{formatMoney(candidate.amount)}</span>
+                            <span
+                              class={`badge badge-xs ${candidate.is_balanced ? 'badge-success' : 'badge-warning'}`}
+                            >
+                              {candidate.is_balanced ? 'balanced' : 'unbalanced'}
+                            </span>
+                            <div class="tooltip" data-tip={candidate.external_id}>
+                              <span class="font-mono text-xs">{candidate.external_short_id}</span>
                             </div>
                           </div>
-                        {/each}
-                      </div>
-                    {/if}
-                  </td>
-                </tr>
-              {/each}
-            </tbody>
-          </table>
-        </div>
-      {/if}
+                          <div class="mt-2 space-y-1">
+                            {#if candidate.details.length}
+                              {#each candidate.details as detail}
+                                <div class="text-base-content/80 text-xs leading-tight">
+                                  {detail}
+                                </div>
+                              {/each}
+                            {:else}
+                              <div class="text-base-content/60 text-xs">No details</div>
+                            {/if}
+                          </div>
+                        </div>
+                      {/each}
+                    </div>
+                  {/if}
+                </td>
+              </tr>
+            {/each}
+          </tbody>
+        </table>
+      </div>
     {/if}
 
     <div class="border-base-200 mt-4 flex flex-wrap items-end justify-between gap-3 border-t pt-4">
@@ -528,21 +547,35 @@
       </div>
       <div class="flex flex-wrap items-end gap-3">
         <label class="flex items-center gap-2">
-          <span class="text-base-content/70 text-[11px] font-medium uppercase tracking-wide">Rows</span>
-          <select class="select select-bordered select-xs w-16" value={pageSize} on:change={onPageSizeChange}>
+          <span class="text-base-content/70 text-[11px] font-medium tracking-wide uppercase"
+            >Rows</span
+          >
+          <select
+            class="select select-bordered select-xs w-16"
+            value={pageSize}
+            on:change={onPageSizeChange}
+          >
             {#each PAGE_SIZE_OPTIONS as option}
               <option value={option}>{option}</option>
             {/each}
           </select>
         </label>
         <div class="join">
-          <button class="btn btn-outline btn-xs join-item" on:click={goToPreviousPage} disabled={loading || offset === 0}>
+          <button
+            class="btn btn-outline btn-xs join-item"
+            on:click={goToPreviousPage}
+            disabled={loading || offset === 0}
+          >
             Prev
           </button>
           <button class="btn btn-ghost btn-xs join-item pointer-events-none">
             Page {currentPage}
           </button>
-          <button class="btn btn-outline btn-xs join-item" on:click={goToNextPage} disabled={loading}>
+          <button
+            class="btn btn-outline btn-xs join-item"
+            on:click={goToNextPage}
+            disabled={loading}
+          >
             Next
           </button>
         </div>
@@ -561,7 +594,11 @@
             Summary for selected Allegro secret{login ? ` (${login})` : ''}.
           </p>
         </div>
-        <button class="btn btn-ghost btn-circle btn-sm" on:click={() => (isStatsModalOpen = false)} aria-label="Close stats modal">
+        <button
+          class="btn btn-ghost btn-circle btn-sm"
+          on:click={() => (isStatsModalOpen = false)}
+          aria-label="Close stats modal"
+        >
           <Icon src={icons.XMark} class="h-5 w-5" />
         </button>
       </div>
@@ -582,19 +619,25 @@
         <div class="stats bg-base-200 rounded-box">
           <div class="stat py-2">
             <div class="stat-title text-xs">One match</div>
-            <div class="stat-value text-success text-2xl">{matchResponse.transactions_with_one_match}</div>
+            <div class="stat-value text-success text-2xl">
+              {matchResponse.transactions_with_one_match}
+            </div>
           </div>
         </div>
         <div class="stats bg-base-200 rounded-box">
           <div class="stat py-2">
             <div class="stat-title text-xs">Many matches</div>
-            <div class="stat-value text-warning text-2xl">{matchResponse.transactions_with_many_matches}</div>
+            <div class="stat-value text-warning text-2xl">
+              {matchResponse.transactions_with_many_matches}
+            </div>
           </div>
         </div>
         <div class="stats bg-base-200 rounded-box">
           <div class="stat py-2">
             <div class="stat-title text-xs">Unmatched payments</div>
-            <div class="stat-value text-secondary text-2xl">{matchResponse.unmatched_payments.length}</div>
+            <div class="stat-value text-secondary text-2xl">
+              {matchResponse.unmatched_payments.length}
+            </div>
           </div>
         </div>
       </div>
@@ -627,7 +670,7 @@
         </div>
       {:else}
         <div class="overflow-x-auto">
-          <table class="table table-sm">
+          <table class="table-sm table">
             <thead>
               <tr>
                 <th>Date</th>
@@ -643,7 +686,9 @@
                   <td>{formatDate(payment.date)}</td>
                   <td>{formatMoney(payment.amount)}</td>
                   <td>
-                    <span class={`badge badge-xs ${payment.is_balanced ? 'badge-success' : 'badge-warning'}`}>
+                    <span
+                      class={`badge badge-xs ${payment.is_balanced ? 'badge-success' : 'badge-warning'}`}
+                    >
                       {payment.is_balanced ? 'balanced' : 'unbalanced'}
                     </span>
                   </td>

@@ -57,7 +57,11 @@
   function emitToast(type: 'info' | 'success' | 'error', msg: string) {
     const safeMsg =
       getNonEmptyString(msg) ??
-      (type === 'error' ? 'Failed to load Allegro secrets' : type === 'success' ? 'Success' : 'Info');
+      (type === 'error'
+        ? 'Failed to load Allegro secrets'
+        : type === 'success'
+          ? 'Success'
+          : 'Info');
 
     window.dispatchEvent(
       new CustomEvent('toast', {

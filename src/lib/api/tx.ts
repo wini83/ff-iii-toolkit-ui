@@ -17,9 +17,9 @@ export async function getScreeningMonth(
     (api, headers) =>
       api.GET('/api/tx/screening', {
         params: {
-          query: { year, month },
+          query: { year, month }
         },
-        headers,
+        headers
       }),
     { token }
   );
@@ -36,7 +36,6 @@ export async function getScreeningMonth(
   return data ?? null;
 }
 
-
 export async function assignCategory(
   txId: number,
   categoryId: number,
@@ -48,10 +47,10 @@ export async function assignCategory(
         params: {
           path: {
             tx_id: txId,
-            category_id: categoryId,
-          },
+            category_id: categoryId
+          }
         },
-        headers,
+        headers
       }),
     { token }
   );
@@ -71,23 +70,19 @@ export async function assignCategory(
  * NEW: Apply Tag
  * ----------------------------- */
 
-export async function applyTag(
-  txId: number,
-  tag: TxTag,
-  token?: string | null
-): Promise<void> {
+export async function applyTag(txId: number, tag: TxTag, token?: string | null): Promise<void> {
   const { error, response } = await apiRequest(
     (api, headers) =>
       api.POST('/api/tx/{tx_id}/tag/', {
         params: {
           path: {
-            tx_id: txId,
+            tx_id: txId
           },
           query: {
-            tag,
-          },
+            tag
+          }
         },
-        headers,
+        headers
       }),
     { token }
   );
@@ -119,7 +114,9 @@ export async function getMetricsStatus(token?: string | null): Promise<TxMetrics
   return data;
 }
 
-export async function refreshMetricsStatus(token?: string | null): Promise<TxMetricsStatusResponse> {
+export async function refreshMetricsStatus(
+  token?: string | null
+): Promise<TxMetricsStatusResponse> {
   const { data, error, response } = await apiRequest(
     (api, headers) => api.POST('/api/tx/statistics/refresh', { headers }),
     { token }

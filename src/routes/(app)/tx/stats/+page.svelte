@@ -3,7 +3,15 @@
   import * as icons from '@steeze-ui/heroicons';
   import { onMount, onDestroy, tick } from 'svelte';
   import { goto } from '$app/navigation';
-  import { Chart, BarController, BarElement, CategoryScale, LinearScale, Tooltip, Legend } from 'chart.js';
+  import {
+    Chart,
+    BarController,
+    BarElement,
+    CategoryScale,
+    LinearScale,
+    Tooltip,
+    Legend
+  } from 'chart.js';
 
   import { getMetricsStatus, refreshMetricsStatus } from '$lib/api/tx';
   import type { components } from '$lib/api/schema';
@@ -252,7 +260,7 @@
 
 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
   <div></div>
-  <div class="text-right space-y-2">
+  <div class="space-y-2 text-right">
     <div class="badge badge-sm">
       generated at: {formatTimestamp(data?.time_stamp)} in {formatFetchSeconds(data?.fetch_seconds)}
     </div>
@@ -343,7 +351,9 @@
         </div>
         <div class="stat-title">Categorizable</div>
         <div class="stat-value">{d.categorizable}</div>
-        <div class="stat-desc">BLIK not OK: {d.blik_not_ok} | Allegro not OK: {d.allegro_not_ok}</div>
+        <div class="stat-desc">
+          BLIK not OK: {d.blik_not_ok} | Allegro not OK: {d.allegro_not_ok}
+        </div>
       </div>
     </div>
   </div>
