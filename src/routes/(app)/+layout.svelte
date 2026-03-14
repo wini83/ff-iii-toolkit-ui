@@ -14,11 +14,13 @@
   type ToastEventDetail = Pick<Toast, 'type' | 'msg'>;
 
   const DEFAULT_APP_TITLE = 'Firefly Toolkit';
+  const THEME_STORAGE_KEY = 'ff-toolkit-theme';
   // prosty state dla drawer
   let drawerOpen = false;
   let meUser: MeUser | null = null;
   let dynamicTitle = DEFAULT_APP_TITLE;
   let headTitle = DEFAULT_APP_TITLE;
+  let theme: 'light' | 'dark' = 'light';
 
   // toasty trzymamy jako prosta tablica
   let toasts: Toast[] = [];
@@ -52,6 +54,16 @@
     dynamicTitle === DEFAULT_APP_TITLE
       ? DEFAULT_APP_TITLE
       : `${dynamicTitle} — ${DEFAULT_APP_TITLE}`;
+
+  function applyTheme(nextTheme: 'light' | 'dark') {
+    theme = nextTheme;
+    document.documentElement.setAttribute('data-theme', nextTheme);
+    localStorage.setItem(THEME_STORAGE_KEY, nextTheme);
+  }
+
+  function toggleTheme() {
+    applyTheme(theme === 'light' ? 'dark' : 'light');
+  }
 
   async function logout() {
     try {
@@ -104,6 +116,15 @@
   }
 
   onMount(() => {
+    const storedTheme = localStorage.getItem(THEME_STORAGE_KEY);
+    const preferredTheme =
+      storedTheme === 'light' || storedTheme === 'dark'
+        ? storedTheme
+        : window.matchMedia('(prefers-color-scheme: dark)').matches
+          ? 'dark'
+          : 'light';
+
+    applyTheme(preferredTheme);
     void loadCurrentUser();
 
     const listener = (event: Event) => handleToastEvent(event);
@@ -120,12 +141,12 @@
 </svelte:head>
 
 <div
-  class="drawer from-base-200 via-base-200 to-primary/10 text-base-content lg:drawer-open min-h-screen bg-gradient-to-br"
+  class="drawer from-base-200 via-base-200 to-primary/10 text-base-content lg:drawer-open min-h-screen overflow-x-hidden bg-gradient-to-br"
 >
   <input id="app-drawer" type="checkbox" class="drawer-toggle" bind:checked={drawerOpen} />
 
   <!-- CONTENT -->
-  <div class="drawer-content flex flex-col">
+  <div class="drawer-content flex flex-col overflow-x-hidden">
     <!-- NAVBAR -->
     <div
       class="from-base-100/95 via-base-100/90 to-primary/8 border-base-300/70 sticky top-0 z-10 border-b bg-gradient-to-r shadow-[0_10px_30px_-20px_rgba(15,23,42,0.28)] backdrop-blur"
@@ -150,7 +171,16 @@
           </div>
         </div>
 
-        <div class="flex-none">
+        <div class="flex-none flex items-center gap-2">
+          <button
+            class="btn btn-ghost btn-sm rounded-2xl px-3"
+            on:click={toggleTheme}
+            aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} theme`}
+            title={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
+          >
+            <Icon src={theme === 'light' ? icons.Moon : icons.Sun} class="h-5 w-5" />
+          </button>
+
           <div class="dropdown dropdown-end">
             <div
               class="tooltip tooltip-bottom"
