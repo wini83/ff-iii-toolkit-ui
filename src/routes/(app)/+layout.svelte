@@ -14,7 +14,6 @@
   type ToastEventDetail = Pick<Toast, 'type' | 'msg'>;
 
   const DEFAULT_APP_TITLE = 'Firefly Toolkit';
-
   // prosty state dla drawer
   let drawerOpen = false;
   let meUser: MeUser | null = null;
@@ -120,67 +119,80 @@
   <title>{headTitle}</title>
 </svelte:head>
 
-<div class="drawer lg:drawer-open bg-base-200 text-base-content min-h-screen">
+<div
+  class="drawer from-base-200 via-base-200 to-primary/10 text-base-content min-h-screen bg-gradient-to-br lg:drawer-open"
+>
   <input id="app-drawer" type="checkbox" class="drawer-toggle" bind:checked={drawerOpen} />
 
   <!-- CONTENT -->
   <div class="drawer-content flex flex-col">
     <!-- NAVBAR -->
-    <div class="navbar bg-base-100 sticky top-0 z-10 shadow-md shadow-none lg:shadow-md">
-      <div class="flex-none lg:hidden">
-        <label for="app-drawer" class="btn btn-ghost drawer-button px-2">
-          <Icon src={icons.Bars3} class="h-6 w-6" />
-          <!-- <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-6 w-6"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M4 6h16M4 12h16M4 18h16"
-            />
-          </svg> -->
-        </label>
-      </div>
+    <div
+      class="from-base-100/95 via-base-100/90 to-primary/8 sticky top-0 z-10 border-b border-base-300/70 bg-gradient-to-r shadow-[0_10px_30px_-20px_rgba(15,23,42,0.28)] backdrop-blur"
+    >
+      <div class="navbar min-h-0 px-4 py-3 sm:px-6">
+        <div class="flex flex-1 items-center gap-3">
+          <div class="flex-none lg:hidden">
+            <label for="app-drawer" class="btn btn-ghost drawer-button btn-sm px-2">
+              <Icon src={icons.Bars3} class="h-6 w-6" />
+            </label>
+          </div>
 
-      <div class="flex-1">
-        <h1 class="text-2xl font-bold">{dynamicTitle}</h1>
-      </div>
+          <div class="bg-primary/12 text-primary hidden rounded-2xl p-2.5 sm:inline-flex">
+            <Icon src={icons.Squares2x2} class="h-5 w-5" />
+          </div>
 
-      <div class="flex-none">
-        <div class="dropdown dropdown-end">
-          <button
-            tabindex="0"
-            class="btn btn-ghost btn-circle avatar"
-            title={meUser ? `Signed in as ${meUser.username}` : undefined}
-          >
-            <div class="w-10 rounded-full">
-              <img
-                src={`https://api.dicebear.com/9.x/initials/svg?seed=${meUser?.username}`}
-                alt="avatar"
-              />
+          <div class="min-w-0">
+            <div class="text-base-content/55 text-[11px] font-medium tracking-[0.22em] uppercase">
+              Workspace
             </div>
-          </button>
-          <ul class="menu menu-sm dropdown-content bg-base-100 rounded-box mt-3 w-52 p-2 shadow">
-            <li><a href="/login"><Icon src={icons.User} class="h-5 w-5" /> Profile</a></li>
-            <li>
-              <a href="/settings/secrets"><Icon src={icons.Key} class="h-5 w-5" /> Secrets</a>
-            </li>
-            <li>
-              <button on:click={logout}><Icon src={icons.Power} class="h-5 w-5" />Log out</button>
-            </li>
-          </ul>
+            <h1 class="truncate text-lg font-semibold sm:text-2xl">{dynamicTitle}</h1>
+          </div>
+        </div>
+
+        <div class="flex-none">
+          <div class="dropdown dropdown-end">
+            <button
+              tabindex="0"
+              class="btn btn-ghost rounded-2xl px-2 sm:px-3"
+              title={meUser ? `Signed in as ${meUser.username}` : undefined}
+            >
+              <div class="avatar">
+                <div class="bg-base-200 w-9 rounded-xl">
+                  <img
+                    src={`https://api.dicebear.com/9.x/initials/svg?seed=${meUser?.username}`}
+                    alt="avatar"
+                  />
+                </div>
+              </div>
+              <!-- <span class="hidden text-sm font-medium sm:inline">
+                {meUser?.username ?? 'Account'}
+              </span> -->
+              <Icon src={icons.ChevronDown} class="h-4 w-4 opacity-60" />
+            </button>
+            <ul
+              class="menu menu-sm dropdown-content bg-base-100 rounded-box border-base-200 mt-3 w-56 border p-2 shadow-xl"
+            >
+              <li><a href="/login"><Icon src={icons.User} class="h-5 w-5" /> Profile</a></li>
+              <li>
+                <a href="/settings/secrets"><Icon src={icons.Key} class="h-5 w-5" /> Secrets</a>
+              </li>
+              <li>
+                <button on:click={logout}>
+                  <Icon src={icons.Power} class="h-5 w-5" />Log out
+                </button>
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>
 
     <!-- PAGE CONTENT -->
-    <main class="flex-1 p-6">
-      <slot />
+    <main class="flex-1 px-4 py-4 sm:px-6 sm:py-6">
+      <div class="mx-auto w-full max-w-7xl">
+        <slot />
+      </div>
     </main>
   </div>
 
