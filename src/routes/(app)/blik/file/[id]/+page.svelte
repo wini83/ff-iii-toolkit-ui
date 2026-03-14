@@ -1,60 +1,38 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
-  import { page } from '$app/stores';
   import { goto } from '$app/navigation';
   import { Icon } from '@steeze-ui/svelte-icon';
   import * as icons from '@steeze-ui/heroicons';
   import Steps from '$lib/components/Steps.svelte';
-  import TableSkeleton from '$lib/components/TableSkeleton.svelte';
+  import type { PageData } from './$types';
 
-  let file_id = '';
-  let decoded_name = '';
-  let size = 0;
-  let content: any[] = [];
+  export let data: PageData;
 
-  let loading = true;
-  let error = '';
+  type PreviewRow = {
+    date?: string;
+    amount?: number;
+    account_currency?: string;
+    operation_amount?: number;
+    operation_currency?: string;
+    sender?: string;
+    sender_account?: string;
+    recipient?: string;
+    recipient_account?: string;
+    details?: string;
+  };
 
-  // ID z URL
-  const unsubscribe = page.subscribe((p) => {
-    file_id = p.params.id ?? '';
-  });
+  let file_id = data.fileId;
 
-  onMount(() => {
-    loadPreview();
-    return () => unsubscribe();
-  });
-
-  async function loadPreview() {
-    loading = true;
-    error = '';
-
-    try {
-      const res = await fetch(`/api/blik_files/${file_id}`);
-
-      if (!res.ok) {
-        const text = await res.text();
-        throw new Error(text || `Błąd API (${res.status})`);
-      }
-
-      const data = await res.json();
-
-      decoded_name = data.decoded_name;
-      size = data.size;
-      content = data.content ?? [];
-    } catch (e: any) {
-      console.error(e);
-      error = e.message ?? 'Nie udało się pobrać podglądu pliku';
-    } finally {
-      loading = false;
-    }
-  }
+  $: preview = data.preview;
+  $: error = data.previewError;
+  $: decoded_name = preview?.decoded_name ?? '';
+  $: size = preview?.size ?? 0;
+  $: content = (preview?.content ?? []) as PreviewRow[];
 
   function goToMatch() {
     goto(`/blik/file/${file_id}/match`);
   }
 
-  function formatAmount(v: number) {
+  function formatAmount(v?: number) {
     if (v == null) return '';
     return Number(v).toLocaleString('pl-PL', {
       minimumFractionDigits: 2,
@@ -99,9 +77,7 @@
 
   <div class="divider mt-2"></div>
 
-  {#if loading}
-    <TableSkeleton rows={8} cols={5} />
-  {:else if error}
+  {#if error}
     <div role="alert" class="alert alert-error">
       <Icon src={icons.ExclamationTriangle} class="h-6 w-6" />
       <span>{error}</span>
