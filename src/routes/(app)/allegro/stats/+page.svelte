@@ -254,107 +254,233 @@
       refreshLoading = false;
     }
   }
+
+  function openAccounts() {
+    goto('/allegro/accounts');
+  }
 </script>
 
-<div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-  <div></div>
-  <div class="space-y-2 text-right">
-    <div class="badge badge-sm">
-      generated at: {formatTimestamp(data?.time_stamp)} in {formatFetchSeconds(data?.fetch_seconds)}
-    </div>
-    <div>
-      <button
-        class="btn btn-ghost btn-sm normal-case"
-        on:click={() => loadStats(true)}
-        disabled={refreshLoading}
+<svelte:head>
+  <title>Allegro Stats — Firefly Toolkit</title>
+</svelte:head>
+
+<div class="mx-auto flex w-full max-w-7xl flex-col gap-6">
+  <section class="card bg-base-100 border-base-200 overflow-hidden border shadow-xl">
+    <div
+      class="from-primary/10 via-base-100 to-base-100 grid gap-5 bg-gradient-to-br px-6 py-6 lg:grid-cols-[1.3fr_0.7fr] lg:px-8"
+    >
+      <div class="flex items-start gap-4">
+        <div class="bg-warning/15 text-warning rounded-3xl p-4">
+          <Icon src={icons.ChartBar} class="h-8 w-8" />
+        </div>
+
+        <div class="space-y-2">
+          <div
+            class="bg-base-200/80 inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium tracking-[0.24em] uppercase"
+          >
+            <span class="bg-success h-2 w-2 rounded-full"></span>
+            Metrics overview
+          </div>
+          <div>
+            <h2 class="text-3xl font-semibold tracking-tight">Allegro stats</h2>
+            <p class="text-base-content/70 mt-2 max-w-2xl text-sm sm:text-base">
+              Review current marketplace coverage, generated statistics and the remaining backlog of
+              not-processed Allegro transactions.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div
+        class="bg-base-100/80 ring-base-200 flex flex-col justify-between gap-4 rounded-3xl p-5 shadow-sm ring-1"
       >
-        <Icon
-          src={icons.ArrowPath}
-          class={`inline-block h-5 w-5 stroke-current ${refreshLoading || isRunning(statusData?.status) ? 'animate-spin' : ''}`}
-        />
-        Refresh
-      </button>
-    </div>
-  </div>
-</div>
-
-{#if networkError}
-  <div class="alert alert-error mt-4">
-    <Icon src={icons.ExclamationTriangle} class="h-5 w-5" />
-    <span>{networkError}</span>
-  </div>
-{:else if isDone(statusData?.status) && data}
-  <div class="alert alert-success mt-4">
-    <Icon src={icons.CheckCircle} class="h-5 w-5" />
-    <span>Statistics loaded successfully.</span>
-  </div>
-{/if}
-
-{#if loading || isBusy(statusData?.status)}
-  <div class="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-    <div class="skeleton h-28"></div>
-    <div class="skeleton h-28"></div>
-    <div class="skeleton h-28"></div>
-    <div class="skeleton h-28"></div>
-  </div>
-{:else if data}
-  {@const d = data}
-
-  <div class="mt-4 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-    <div class="stats bg-base-100 rounded-box shadow">
-      <div class="stat">
-        <div class="stat-figure text-primary">
-          <Icon src={icons.CircleStack} class="inline-block h-8 w-8 stroke-current" />
+        <div>
+          <div class="text-base-content/60 text-xs tracking-[0.2em] uppercase">Quick actions</div>
+          <p class="mt-2 text-sm">
+            Trigger a fresh statistics job or return to the Allegro accounts overview.
+          </p>
         </div>
-        <div class="stat-title text-primary">Total transactions</div>
-        <div class="stat-value text-primary">{d.total_transactions}</div>
-      </div>
-    </div>
 
-    <div class="stats bg-base-100 rounded-box shadow">
-      <div class="stat">
-        <div class="stat-figure text-secondary">
-          <Icon src={icons.Banknotes} class="inline-block h-8 w-8 stroke-current" />
-        </div>
-        <div class="stat-title text-secondary">Allegro transactions</div>
-        <div class="stat-value text-secondary">{d.allegro_transactions}</div>
-      </div>
-    </div>
-
-    <div class="stats bg-base-100 rounded-box shadow md:col-span-2">
-      <div class="stat">
-        <div class="stat-figure text-warning">
-          <Icon src={icons.ExclamationTriangle} class="inline-block h-8 w-8 stroke-current" />
-        </div>
-        <div class="stat-title text-warning">Not processed Allegro</div>
-        <div class="stat-value text-warning">{d.not_processed__allegro_transactions}</div>
-        <div class="stat-desc">
-          Coverage: {d.allegro_transactions > 0
-            ? `${Math.round(((d.allegro_transactions - d.not_processed__allegro_transactions) / d.allegro_transactions) * 100)}%`
-            : 'n/a'}
+        <div class="flex flex-wrap justify-end gap-3">
+          <button
+            class="btn btn-primary"
+            on:click={() => loadStats(true)}
+            disabled={refreshLoading}
+          >
+            <Icon
+              src={icons.ArrowPath}
+              class={`h-5 w-5 ${refreshLoading || isRunning(statusData?.status) ? 'animate-spin' : ''}`}
+            />
+            Refresh stats
+          </button>
         </div>
       </div>
     </div>
-  </div>
-{/if}
+  </section>
 
-{#if !networkError && !isFailed(statusData?.status) && !hasNoData(statusData)}
-  <div class="card bg-base-100 mt-6 w-full p-6 shadow-xl">
-    <div class="text-xl font-semibold">Not processed Allegro by month</div>
+  <section class="card bg-base-100 shadow-xl">
+    <div class="card-body gap-5">
+      <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <h3 class="text-xl font-semibold">Statistics summary</h3>
+          <p class="text-base-content/70 mt-1 text-sm">
+            Latest generated metrics snapshot and processing coverage for Allegro data.
+          </p>
+        </div>
 
-    <div class="divider mt-2 mb-2"></div>
+        <div class="flex flex-col items-start gap-2 sm:items-end">
+          <div class="badge badge-sm">
+            generated at: {formatTimestamp(data?.time_stamp)} in {formatFetchSeconds(data?.fetch_seconds)}
+          </div>
+          {#if networkError}
+            <div class="badge badge-error badge-sm">Load failed</div>
+          {:else if isDone(statusData?.status) && data}
+            <div class="badge badge-success badge-sm">Statistics ready</div>
+          {:else if isBusy(statusData?.status)}
+            <div class="badge badge-warning badge-sm">Job running</div>
+          {/if}
+        </div>
+      </div>
 
-    <div class="relative h-64">
-      {#if loading || isBusy(statusData?.status)}
-        <div class="skeleton absolute inset-0 z-10"></div>
+      <div class="divider my-0"></div>
+
+      {#if networkError}
+        <div class="alert alert-error">
+          <Icon src={icons.ExclamationTriangle} class="h-5 w-5" />
+          <span>{networkError}</span>
+        </div>
       {/if}
 
-      <canvas
-        class:opacity-0={loading || isBusy(statusData?.status)}
-        class:opacity-100={!loading && !isBusy(statusData?.status)}
-        class="transition-opacity duration-300"
-        bind:this={notProcessedCanvas}
-      ></canvas>
+      {#if loading || isBusy(statusData?.status)}
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <div class="card bg-base-100 shadow-lg">
+            <div class="card-body gap-3">
+              <div class="skeleton h-4 w-24"></div>
+              <div class="skeleton h-9 w-16"></div>
+              <div class="skeleton h-4 w-36"></div>
+            </div>
+          </div>
+          <div class="card bg-base-100 shadow-lg">
+            <div class="card-body gap-3">
+              <div class="skeleton h-4 w-24"></div>
+              <div class="skeleton h-9 w-16"></div>
+              <div class="skeleton h-4 w-36"></div>
+            </div>
+          </div>
+          <div class="card bg-base-100 shadow-lg md:col-span-2">
+            <div class="card-body gap-3">
+              <div class="skeleton h-4 w-32"></div>
+              <div class="skeleton h-9 w-16"></div>
+              <div class="skeleton h-4 w-40"></div>
+            </div>
+          </div>
+        </div>
+      {:else if data}
+        {@const d = data}
+
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <div class="card bg-base-100 shadow-lg">
+            <div class="card-body">
+              <div class="text-base-content/60 text-xs tracking-[0.2em] uppercase">
+                Total transactions
+              </div>
+              <div class="mt-3 flex items-end justify-between gap-4">
+                <div class="text-4xl font-semibold">{d.total_transactions}</div>
+                <div class="bg-primary/12 text-primary rounded-2xl p-3">
+                  <Icon src={icons.CircleStack} class="h-5 w-5" />
+                </div>
+              </div>
+              <p class="text-base-content/60 mt-3 text-sm">
+                All transactions available in the current statistics snapshot.
+              </p>
+            </div>
+          </div>
+
+          <div class="card bg-base-100 shadow-lg">
+            <div class="card-body">
+              <div class="text-base-content/60 text-xs tracking-[0.2em] uppercase">
+                Allegro transactions
+              </div>
+              <div class="mt-3 flex items-end justify-between gap-4">
+                <div class="text-4xl font-semibold">{d.allegro_transactions}</div>
+                <div class="bg-secondary/12 text-secondary rounded-2xl p-3">
+                  <Icon src={icons.Banknotes} class="h-5 w-5" />
+                </div>
+              </div>
+              <p class="text-base-content/60 mt-3 text-sm">
+                Transactions identified as marketplace-related in the generated metrics.
+              </p>
+            </div>
+          </div>
+
+          <div class="card bg-base-100 shadow-lg md:col-span-2">
+            <div class="card-body">
+              <div class="text-base-content/60 text-xs tracking-[0.2em] uppercase">
+                Not processed Allegro
+              </div>
+              <div class="mt-3 flex items-end justify-between gap-4">
+                <div class="text-4xl font-semibold">{d.not_processed__allegro_transactions}</div>
+                <div class="bg-warning/15 text-warning rounded-2xl p-3">
+                  <Icon src={icons.ExclamationTriangle} class="h-5 w-5" />
+                </div>
+              </div>
+              <p class="text-base-content/60 mt-3 text-sm">
+                Coverage:{' '}
+                {d.allegro_transactions > 0
+                  ? `${Math.round(((d.allegro_transactions - d.not_processed__allegro_transactions) / d.allegro_transactions) * 100)}%`
+                  : 'n/a'}
+              </p>
+            </div>
+          </div>
+        </div>
+      {:else if hasNoData(statusData)}
+        <div
+          class="bg-base-200/60 flex flex-col items-center rounded-[2rem] px-6 py-14 text-center"
+        >
+          <div class="bg-primary/12 text-primary rounded-3xl p-4">
+            <Icon src={icons.InformationCircle} class="h-8 w-8" />
+          </div>
+          <h4 class="mt-5 text-xl font-semibold">No statistics data yet</h4>
+          <p class="text-base-content/70 mt-2 max-w-md text-sm">
+            Run a fresh statistics generation to populate this dashboard.
+          </p>
+          <button class="btn btn-primary mt-6" on:click={() => loadStats(true)} disabled={refreshLoading}>
+            <Icon
+              src={icons.ArrowPath}
+              class={`h-5 w-5 ${refreshLoading || isRunning(statusData?.status) ? 'animate-spin' : ''}`}
+            />
+            Generate stats
+          </button>
+        </div>
+      {/if}
     </div>
-  </div>
-{/if}
+  </section>
+
+  {#if !networkError && !isFailed(statusData?.status) && !hasNoData(statusData)}
+    <section class="card bg-base-100 shadow-xl">
+      <div class="card-body gap-5">
+        <div>
+          <h3 class="text-xl font-semibold">Not processed Allegro by month</h3>
+          <p class="text-base-content/70 mt-1 text-sm">
+            Monthly breakdown of marketplace-related transactions that still require processing.
+          </p>
+        </div>
+
+        <div class="divider my-0"></div>
+
+        <div class="relative h-72">
+          {#if loading || isBusy(statusData?.status)}
+            <div class="skeleton absolute inset-0 z-10 rounded-3xl"></div>
+          {/if}
+
+          <canvas
+            class:opacity-0={loading || isBusy(statusData?.status)}
+            class:opacity-100={!loading && !isBusy(statusData?.status)}
+            class="transition-opacity duration-300"
+            bind:this={notProcessedCanvas}
+          ></canvas>
+        </div>
+      </div>
+    </section>
+  {/if}
+</div>
