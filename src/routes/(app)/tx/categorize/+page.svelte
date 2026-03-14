@@ -8,14 +8,10 @@
   import { getScreeningMonth, assignCategory, applyTag } from '$lib/api/tx';
   import type { operations, components } from '$lib/api/schema';
 
-  /* ---------------- Types ---------------- */
-
   type ScreeningMonthResponse =
     operations['get_screening_month_api_tx_screening_get']['responses'][200]['content']['application/json'];
 
   type TxTag = components['schemas']['TxTag'];
-
-  /* ---------------- State ---------------- */
 
   let loading = true;
   let error: string | null = null;
@@ -28,8 +24,6 @@
   let month: number;
 
   let cursor = 0;
-
-  // select = string
   let selectedCategories: Record<string, string> = {};
 
   const PRIMARY_TAGS = new Set(['blik_done', 'allegro_done']);
@@ -37,11 +31,9 @@
 
   const TERMINAL_TAGS = new Set<TxTag>(['action_req']);
 
-  /* ---------------- Derived ---------------- */
-
   $: currentTx = data?.transactions[cursor] ?? null;
-
-  /* ---------------- Helpers ---------------- */
+  $: currentTxId = currentTx ? toIdString(currentTx.id) : null;
+  $: progressValue = data ? initialCount - data.remaining : 0;
 
   function toIdString(id: string | number): string {
     return String(id);
@@ -85,8 +77,6 @@
     month = Number(params.get('month')) || now.getMonth() + 1;
   }
 
-  /* ---------------- Data loading ---------------- */
-
   async function load() {
     loading = true;
     error = null;
@@ -107,13 +97,10 @@
     }
   }
 
-  /* ---------------- Actions ---------------- */
-
   async function applyCurrent() {
     if (!currentTx || !data) return;
 
-    const currentTxId = toIdString(currentTx.id);
-    const rawValue = selectedCategories[currentTxId];
+    const rawValue = selectedCategories[toIdString(currentTx.id)];
     const categoryId = Number(rawValue);
     if (!categoryId) return;
 
@@ -123,7 +110,7 @@
       data.transactions = data.transactions.filter((t) => t.id !== currentTx.id);
       data.remaining -= 1;
 
-      delete selectedCategories[currentTxId];
+      delete selectedCategories[toIdString(currentTx.id)];
 
       if (cursor >= data.transactions.length) {
         cursor = Math.max(0, data.transactions.length - 1);
@@ -187,12 +174,10 @@
     }
   }
 
-  /* ---------------- Navigation ---------------- */
-
   function prevTx() {
-    if (cursor > 0) {
+    if (cursor > 0 && data) {
       cursor--;
-      ensureCategoryState(data!.transactions[cursor].id);
+      ensureCategoryState(data.transactions[cursor].id);
     }
   }
 
@@ -213,8 +198,6 @@
     goto(`?year=${d.getFullYear()}&month=${d.getMonth() + 1}`);
   }
 
-  /* ---------------- Init ---------------- */
-
   onMount(() => {
     resolveYearMonth();
     load();
@@ -234,124 +217,220 @@
   }
 </script>
 
-<div class="card bg-base-100 mt-2 w-full p-4 shadow-xl">
-  <div class="text-xl font-semibold">Transaction Screening</div>
-  <div class="divider mt-2"></div>
+<svelte:head>
+  <title>Transactions Categorize — Firefly Toolkit</title>
+</svelte:head>
 
-  <!-- MONTH SELECTOR -->
-  <div class="mb-3 flex items-center justify-between">
-    <button class="btn btn-primary btn-sm" on:click={prevMonth}>
-      <Icon src={icons.ChevronDoubleLeft} class="h-5 w-5" />
-    </button>
-
-    <div class="font-semibold whitespace-nowrap">
-      <Icon src={icons.CalendarDays} class="inline-block h-5 w-5 align-middle" />
-      {year}-{String(month).padStart(2, '0')}
-    </div>
-
-    <button class="btn btn-primary btn-sm" on:click={nextMonth}>
-      <Icon src={icons.ChevronDoubleRight} class="h-5 w-5" />
-    </button>
-  </div>
-
-  {#if loading}
-    <div class="skeleton h-32 w-full"></div>
-  {:else if error}
-    <div class="alert alert-error">
-      <Icon src={icons.ExclamationTriangle} class="h-5 w-5" />
-      <span>{error}</span>
-    </div>
-  {:else if data === null || data.remaining === 0}
-    <div class="alert alert-success">
-      <Icon src={icons.CheckCircle} class="h-5 w-5" />
-      <span>No transaction left</span>
-    </div>
-  {:else if currentTx}
-    <progress
-      class="progress progress-primary mb-3"
-      value={initialCount - data.remaining}
-      max={initialCount}
-    ></progress>
-
-    <div>
-      <div class="font-semibold">#{currentTx.id} – {currentTx.description}</div>
-      <div class="text-sm opacity-70">
-        {currentTx.date} · {formatMoney(
-          currentTx.amount,
-          currentTx.currency_code,
-          currentTx.currency_symbol
-        )}
-      </div>
-      {#if currentTx.fx_amount !== null && currentTx.fx_amount !== undefined}
-        <div class="text-sm opacity-70">
-          FX: {formatMoney(currentTx.fx_amount, currentTx.fx_currency, currentTx.fx_currency)}
+<div class="mx-auto flex w-full max-w-7xl flex-col gap-6">
+  <section class="card bg-base-100 border-base-200 overflow-hidden border shadow-xl">
+    <div
+      class="from-primary/10 via-base-100 to-base-100 grid gap-5 bg-gradient-to-br px-6 py-6 lg:grid-cols-[1.3fr_0.7fr] lg:px-8"
+    >
+      <div class="flex items-start gap-4">
+        <div class="bg-primary/12 text-primary rounded-3xl p-4">
+          <Icon src={icons.DocumentMagnifyingGlass} class="h-8 w-8" />
         </div>
-      {/if}
-      {#if splitNotesLines(currentTx.notes).length > 0}
-        <div class="mt-1 text-sm opacity-80">
-          <div class="font-medium">Notes:</div>
-          <div class="mt-1 space-y-0.5">
-            {#each splitNotesLines(currentTx.notes) as noteLine}
-              <div>{noteLine}</div>
-            {/each}
+
+        <div class="space-y-2">
+          <div
+            class="bg-base-200/80 inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium tracking-[0.24em] uppercase"
+          >
+            <span class="bg-success h-2 w-2 rounded-full"></span>
+            Screening workflow
+          </div>
+          <div>
+            <h2 class="text-3xl font-semibold tracking-tight">Transaction screening</h2>
+            <p class="text-base-content/70 mt-2 max-w-2xl text-sm sm:text-base">
+              Review one transaction at a time, assign a category and mark rows that need action or
+              rule follow-up.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div
+        class="bg-base-100/80 ring-base-200 flex flex-col justify-between gap-4 rounded-3xl p-5 shadow-sm ring-1"
+      >
+        <div>
+          <div class="text-base-content/60 text-xs tracking-[0.2em] uppercase">Month</div>
+          <div class="mt-2 text-lg font-semibold">{year}-{String(month).padStart(2, '0')}</div>
+          <p class="mt-2 text-sm">
+            Move through screening months and process the pending queue for the selected period.
+          </p>
+        </div>
+
+        <div class="flex justify-end gap-2">
+          <button class="btn btn-outline btn-sm" on:click={prevMonth}>
+            <Icon src={icons.ChevronDoubleLeft} class="h-4 w-4" />
+            Previous
+          </button>
+          <button class="btn btn-outline btn-sm" on:click={nextMonth}>
+            Next
+            <Icon src={icons.ChevronDoubleRight} class="h-4 w-4" />
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card bg-base-100 shadow-xl">
+    <div class="card-body gap-5">
+      <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h3 class="text-xl font-semibold">Current transaction</h3>
+          <p class="text-base-content/70 mt-1 text-sm">
+            Step through the queue, choose a category and apply terminal tags when needed.
+          </p>
+        </div>
+
+        {#if data && data.remaining > 0}
+          <div class="text-base-content/70 text-sm">
+            {cursor + 1} / {data.transactions.length} in current queue
+          </div>
+        {/if}
+      </div>
+
+      <div class="divider my-0"></div>
+
+      {#if loading}
+        <div class="space-y-3">
+          <div class="skeleton h-6 w-48"></div>
+          <div class="skeleton h-24 w-full rounded-3xl"></div>
+          <div class="skeleton h-14 w-full rounded-2xl"></div>
+        </div>
+      {:else if error}
+        <div class="alert alert-error">
+          <Icon src={icons.ExclamationTriangle} class="h-5 w-5" />
+          <span>{error}</span>
+        </div>
+      {:else if data === null || data.remaining === 0}
+        <div
+          class="bg-base-200/60 flex flex-col items-center rounded-[2rem] px-6 py-14 text-center"
+        >
+          <div class="bg-success/12 text-success rounded-3xl p-4">
+            <Icon src={icons.CheckCircle} class="h-8 w-8" />
+          </div>
+          <h4 class="mt-5 text-xl font-semibold">No transactions left</h4>
+          <p class="text-base-content/70 mt-2 max-w-md text-sm">
+            The selected month does not have any more transactions waiting for screening.
+          </p>
+        </div>
+      {:else if currentTx && currentTxId}
+        <div class="space-y-5">
+          <progress
+            class="progress progress-primary w-full"
+            value={progressValue}
+            max={initialCount}
+          ></progress>
+
+          <article class="from-base-100 to-base-200/60 rounded-[1.75rem] bg-gradient-to-br p-[1px] shadow-sm">
+            <div class="bg-base-100 rounded-[calc(1.75rem-1px)] p-5">
+              <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                <div class="min-w-0">
+                  <div class="flex flex-wrap items-center gap-2">
+                    <h4 class="text-lg font-semibold">#{currentTx.id} - {currentTx.description}</h4>
+                  </div>
+                  <div class="text-base-content/70 mt-2 text-sm">
+                    {currentTx.date} · {formatMoney(
+                      currentTx.amount,
+                      currentTx.currency_code,
+                      currentTx.currency_symbol
+                    )}
+                  </div>
+                  {#if currentTx.fx_amount !== null && currentTx.fx_amount !== undefined}
+                    <div class="text-base-content/70 mt-1 text-sm">
+                      FX: {formatMoney(
+                        currentTx.fx_amount,
+                        currentTx.fx_currency,
+                        currentTx.fx_currency
+                      )}
+                    </div>
+                  {/if}
+                </div>
+
+                {#if currentTx.tags?.length}
+                  <div class="flex flex-wrap gap-2">
+                    {#each currentTx.tags as tag}
+                      <span
+                        class={`badge badge-sm ${isPrimary(tag) ? 'badge-primary' : 'badge-outline'}`}
+                      >
+                        {tag}
+                      </span>
+                    {/each}
+                  </div>
+                {/if}
+              </div>
+
+              {#if splitNotesLines(currentTx.notes).length > 0}
+                <div class="bg-base-200/60 mt-4 rounded-2xl px-4 py-4">
+                  <div class="text-base-content/60 text-xs tracking-[0.2em] uppercase">Notes</div>
+                  <div class="mt-2 space-y-1 text-sm">
+                    {#each splitNotesLines(currentTx.notes) as noteLine}
+                      <div>{noteLine}</div>
+                    {/each}
+                  </div>
+                </div>
+              {/if}
+
+              <div class="mt-5 grid gap-4 lg:grid-cols-[1fr_auto] lg:items-end">
+                <label class="form-control">
+                  <div class="label">
+                    <span class="label-text font-medium">Category</span>
+                  </div>
+                  <select class="select select-bordered w-full" bind:value={selectedCategories[currentTxId]}>
+                    <option value="" disabled>Pick a category</option>
+                    {#each data.categories as c}
+                      <option value={c.id}>{c.name}</option>
+                    {/each}
+                  </select>
+                </label>
+
+                <button
+                  class="btn btn-primary w-full lg:w-auto"
+                  disabled={!selectedCategories[currentTxId]}
+                  on:click={applyCurrent}
+                >
+                  <Icon src={icons.CheckCircle} class="h-5 w-5" />
+                  Apply category
+                </button>
+              </div>
+
+              <div class="mt-4 flex flex-wrap gap-3">
+                <button class="btn btn-ghost" on:click={() => tagCurrentTx('action_req')}>
+                  <Icon src={icons.ExclamationTriangle} class="h-5 w-5" />
+                  Action Required
+                </button>
+                <button class="btn btn-ghost" on:click={() => tagCurrentTx('rule_potential')}>
+                  <Icon src={icons.Sparkles} class="h-5 w-5" />
+                  Rule Potential
+                </button>
+              </div>
+            </div>
+          </article>
+
+          <div class="flex flex-col gap-3 border-t border-base-200 pt-4 sm:flex-row sm:items-center sm:justify-between">
+            <div class="text-base-content/70 text-sm">
+              Remaining: {data.remaining} of {initialCount}
+            </div>
+
+            <div class="flex items-center gap-2">
+              <button class="btn btn-outline btn-sm" disabled={cursor === 0} on:click={prevTx}>
+                <Icon src={icons.ChevronLeft} class="h-4 w-4" />
+                Prev
+              </button>
+              <span class="text-sm">{cursor + 1} / {data.transactions.length}</span>
+              <button
+                class="btn btn-outline btn-sm"
+                disabled={cursor >= data.transactions.length - 1}
+                on:click={nextTx}
+              >
+                Next
+                <Icon src={icons.ChevronRight} class="h-4 w-4" />
+              </button>
+            </div>
           </div>
         </div>
       {/if}
-
-      {#if currentTx.tags?.length}
-        <div class="mt-2 flex gap-2">
-          {#each currentTx.tags as tag}
-            <span class={`badge badge-sm ${isPrimary(tag) ? 'badge-primary' : 'badge-outline'}`}>
-              {tag}
-            </span>
-          {/each}
-        </div>
-      {/if}
-
-      <!-- CATEGORY -->
-      <div class="join mt-4">
-        <select class="select" bind:value={selectedCategories[currentTx.id]}>
-          <option value="" disabled>Pick a category</option>
-          {#each data.categories as c}
-            <option value={c.id}>{c.name}</option>
-          {/each}
-        </select>
-
-        <button
-          class="btn btn-primary join-item"
-          disabled={!selectedCategories[currentTx.id]}
-          on:click={applyCurrent}
-        >
-          Apply
-        </button>
-      </div>
-
-      <div class="join mt-3">
-        <button class="btn join-item" on:click={() => tagCurrentTx('action_req')}>
-          Action Required
-        </button>
-        <button class="btn join-item" on:click={() => tagCurrentTx('rule_potential')}>
-          Rule Potential
-        </button>
-      </div>
     </div>
-
-    <div class="mt-4 flex items-center justify-between">
-      <button class="btn btn-primary btn-sm" disabled={cursor === 0} on:click={prevTx}>
-        <Icon src={icons.ChevronLeft} class="h-5 w-5" />
-      </button>
-
-      <span class="text-sm opacity-70">
-        {cursor + 1} / {data.transactions.length}
-      </span>
-
-      <button
-        class="btn btn-primary btn-sm"
-        disabled={cursor >= data.transactions.length - 1}
-        on:click={nextTx}
-      >
-        <Icon src={icons.ChevronRight} class="h-5 w-5" />
-      </button>
-    </div>
-  {/if}
+  </section>
 </div>
