@@ -120,7 +120,7 @@
 </svelte:head>
 
 <div
-  class="drawer from-base-200 via-base-200 to-primary/10 text-base-content min-h-screen bg-gradient-to-br lg:drawer-open"
+  class="drawer from-base-200 via-base-200 to-primary/10 text-base-content lg:drawer-open min-h-screen bg-gradient-to-br"
 >
   <input id="app-drawer" type="checkbox" class="drawer-toggle" bind:checked={drawerOpen} />
 
@@ -128,7 +128,7 @@
   <div class="drawer-content flex flex-col">
     <!-- NAVBAR -->
     <div
-      class="from-base-100/95 via-base-100/90 to-primary/8 sticky top-0 z-10 border-b border-base-300/70 bg-gradient-to-r shadow-[0_10px_30px_-20px_rgba(15,23,42,0.28)] backdrop-blur"
+      class="from-base-100/95 via-base-100/90 to-primary/8 border-base-300/70 sticky top-0 z-10 border-b bg-gradient-to-r shadow-[0_10px_30px_-20px_rgba(15,23,42,0.28)] backdrop-blur"
     >
       <div class="navbar min-h-0 px-4 py-3 sm:px-6">
         <div class="flex flex-1 items-center gap-3">
@@ -152,24 +152,25 @@
 
         <div class="flex-none">
           <div class="dropdown dropdown-end">
-            <button
-              tabindex="0"
-              class="btn btn-ghost rounded-2xl px-2 sm:px-3"
-              title={meUser ? `Signed in as ${meUser.username}` : undefined}
+            <div
+              class="tooltip tooltip-bottom"
+              data-tip={meUser ? `Signed in as ${meUser.username}` : undefined}
             >
-              <div class="avatar">
-                <div class="bg-base-200 w-9 rounded-xl">
-                  <img
-                    src={`https://api.dicebear.com/9.x/initials/svg?seed=${meUser?.username}`}
-                    alt="avatar"
-                  />
+              <button tabindex="0" class="btn btn-ghost rounded-2xl px-2 sm:px-3">
+                <div class="avatar">
+                  <div class="bg-base-200 w-9 rounded-xl">
+                    <img
+                      src={`https://api.dicebear.com/9.x/initials/svg?seed=${meUser?.username}`}
+                      alt="avatar"
+                    />
+                  </div>
                 </div>
-              </div>
-              <!-- <span class="hidden text-sm font-medium sm:inline">
+                <!-- <span class="hidden text-sm font-medium sm:inline">
                 {meUser?.username ?? 'Account'}
               </span> -->
-              <Icon src={icons.ChevronDown} class="h-4 w-4 opacity-60" />
-            </button>
+                <Icon src={icons.ChevronDown} class="h-4 w-4 opacity-60" />
+              </button>
+            </div>
             <ul
               class="menu menu-sm dropdown-content bg-base-100 rounded-box border-base-200 mt-3 w-56 border p-2 shadow-xl"
             >
