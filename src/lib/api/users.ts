@@ -4,10 +4,14 @@ import type { components, operations } from '$lib/api/schema';
 
 type UserResponse = components['schemas']['UserResponse'];
 type InviteResponse = components['schemas']['InviteResponse'];
+type AuditLogItem = components['schemas']['AuditLogItem'];
+type AuditLogResponse = components['schemas']['AuditLogResponse'];
 type CreateUserPayload =
   operations['create_user_api_users_post']['requestBody']['content']['application/json'];
 type CreateUserResponse =
   operations['create_user_api_users_post']['responses'][201]['content']['application/json'];
+type AuditLogQuery =
+  operations['list_audit_log_api_users_audit_log_get']['parameters']['query'];
 
 async function expectNoContent(
   request: ReturnType<typeof apiRequest>,
@@ -146,8 +150,33 @@ export async function deleteUser(userId: string, token?: string | null): Promise
   );
 }
 
+export async function listAuditLog(
+  query?: AuditLogQuery,
+  token?: string | null
+): Promise<AuditLogResponse> {
+  const { data, error, response } = await apiRequest(
+    (api, headers) =>
+      api.GET('/api/users/audit-log', {
+        params: { query: query ?? {} },
+        headers
+      }),
+    { token }
+  );
+
+  if (!response.ok || error || !data) {
+    throw normalizeApiError(
+      error,
+      `Failed to load audit log (${response.status})`,
+      response.status
+    );
+  }
+
+  return data;
+}
+
 export const users = {
   listUsers,
+  listAuditLog,
   createUser,
   inviteUser,
   disableUser,

@@ -161,6 +161,12 @@
                     Users
                   </a>
                 </li>
+                <li>
+                  <a href="/audit-log" class="rounded-xl">
+                    <Icon src={icons.ClipboardDocumentList} class="h-5 w-5" />
+                    Audit log
+                  </a>
+                </li>
               </ul>
             </details>
           </li>

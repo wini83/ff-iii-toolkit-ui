@@ -44,7 +44,9 @@
     if (pathname.startsWith('/blik/upload')) return 'BLIK Sync / File Upload';
     if (pathname.startsWith('/blik/file')) return 'BLIK Sync / File Preview';
     if (pathname.startsWith('/blik/stats')) return 'BLIK Sync / Stats';
+    if (pathname.startsWith('/profile')) return 'Profile';
     if (pathname.startsWith('/settings/secrets')) return 'Settings / Secrets';
+    if (pathname.startsWith('/audit-log')) return 'Administration / Audit Log';
     if (pathname.startsWith('/users')) return 'Administration / Users';
     return DEFAULT_APP_TITLE;
   }
@@ -204,7 +206,7 @@
             <ul
               class="menu menu-sm dropdown-content bg-base-100 rounded-box border-base-200 mt-3 w-56 border p-2 shadow-xl"
             >
-              <li><a href="/login"><Icon src={icons.User} class="h-5 w-5" /> Profile</a></li>
+              <li><a href="/profile"><Icon src={icons.User} class="h-5 w-5" /> Profile</a></li>
               <li>
                 <a href="/settings/secrets"><Icon src={icons.Key} class="h-5 w-5" /> Secrets</a>
               </li>
