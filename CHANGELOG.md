@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.3.7](https://github.com/wini83/ff-iii-toolkit-ui/compare/v0.3.6...v0.3.7) (2026-03-14)
+
+
+### Features
+
+* new audit-log, profile (me)  endpoints ([49d38be](https://github.com/wini83/ff-iii-toolkit-ui/commit/49d38be31b734f893caa80f53c5e4a45936ba8e0))
+
 ### [0.3.6](https://github.com/wini83/ff-iii-toolkit-ui/compare/v0.3.5...v0.3.6) (2026-03-14)
 
 ### [0.3.5](https://github.com/wini83/ff-iii-toolkit-ui/compare/v0.3.4...v0.3.5) (2026-03-14)
