@@ -85,6 +85,10 @@
     }).format(date);
   }
 
+  function getAccountLabel(secret: UserSecret) {
+    return getNonEmptyString(secret.alias) ?? secret.short_id;
+  }
+
   async function loadSecrets() {
     loading = true;
     networkError = null;
@@ -231,7 +235,7 @@
           <table class="table">
             <thead>
               <tr>
-                <th>Short ID</th>
+                <th>Account</th>
                 <th>Usage</th>
                 <th>Last used</th>
                 <th>Created</th>
@@ -246,7 +250,7 @@
                       <div
                         class="from-warning/20 to-primary/10 rounded-2xl bg-gradient-to-br px-3 py-2 text-sm font-semibold"
                       >
-                        {secret.short_id}
+                        {getAccountLabel(secret)}
                       </div>
                     </div>
                   </td>
@@ -290,9 +294,9 @@
                 <div class="flex items-start justify-between gap-4">
                   <div>
                     <div class="text-base-content/60 text-xs tracking-[0.2em] uppercase">
-                      Short ID
+                      Account
                     </div>
-                    <div class="mt-2 font-mono text-sm font-semibold">{secret.short_id}</div>
+                    <div class="mt-2 text-sm font-semibold">{getAccountLabel(secret)}</div>
                   </div>
                   <span class="badge badge-soft badge-ghost">{secret.usage_count} uses</span>
                 </div>

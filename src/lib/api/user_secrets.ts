@@ -3,6 +3,7 @@ import type { components } from '$lib/api/schema';
 
 type UserSecret = components['schemas']['UserSecretResponse'];
 type CreateUserSecretRequest = components['schemas']['CreateSecretPayload'];
+type UpdateUserSecretAliasRequest = components['schemas']['UpdateSecretAliasPayload'];
 
 export async function listUserSecrets(token?: string | null): Promise<UserSecret[]> {
   const { data, error, response } = await apiRequest(
@@ -52,6 +53,28 @@ export async function deleteUserSecret(secretId: string, token?: string | null):
   }
 }
 
+export async function updateUserSecretAlias(
+  secretId: string,
+  payload: UpdateUserSecretAliasRequest,
+  token?: string | null
+): Promise<UserSecret> {
+  const { data, error, response } = await apiRequest(
+    (api, headers) =>
+      api.PATCH('/api/user-secrets/{secret_id}', {
+        params: { path: { secret_id: secretId } },
+        body: payload,
+        headers
+      }),
+    { token }
+  );
+
+  if (!response.ok || error || !data) {
+    throw normalizeApiError(error, `Failed to update user secret alias (${response.status})`);
+  }
+
+  return data;
+}
+
 function normalizeApiError(error: unknown, fallback = 'API error'): Error {
   if (typeof error === 'string') {
     const msg = error.trim();
@@ -88,5 +111,6 @@ function normalizeApiError(error: unknown, fallback = 'API error'): Error {
 export const userSecrets = {
   listUserSecrets,
   createUserSecret,
-  deleteUserSecret
+  deleteUserSecret,
+  updateUserSecretAlias
 };
