@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.3.8](https://github.com/wini83/ff-iii-toolkit-ui/compare/v0.3.7...v0.3.8) (2026-03-15)
+
+
+### Features
+
+* **user-secrets:** add aliasses to secrets ([787cc47](https://github.com/wini83/ff-iii-toolkit-ui/commit/787cc47a83c6a5431eb90dc45ee9fc7867abcdea))
+
 ### [0.3.7](https://github.com/wini83/ff-iii-toolkit-ui/compare/v0.3.6...v0.3.7) (2026-03-14)
 
 
