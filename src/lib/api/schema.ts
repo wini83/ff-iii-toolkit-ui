@@ -72,46 +72,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/blik_files/statistics": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get Statistics
-         * @deprecated
-         */
-        get: operations["get_statistics_api_blik_files_statistics_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/blik_files/statistics/refresh": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Refresh Statistics
-         * @deprecated
-         */
-        post: operations["refresh_statistics_api_blik_files_statistics_refresh_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/blik_files/statistics_v2": {
         parameters: {
             query?: never;
@@ -190,8 +150,58 @@ export interface paths {
         /** Preview Matches */
         get: operations["preview_matches_api_blik_files__encoded_id__matches_get"];
         put?: never;
-        /** Apply Matches */
-        post: operations["apply_matches_api_blik_files__encoded_id__matches_post"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/blik_files/{encoded_id}/apply": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Start Apply Job */
+        post: operations["start_apply_job_api_blik_files__encoded_id__apply_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/blik_files/{encoded_id}/apply/auto": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Auto Apply Single Matches */
+        post: operations["auto_apply_single_matches_api_blik_files__encoded_id__apply_auto_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/blik_files/apply-jobs/{job_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Apply Job */
+        get: operations["get_apply_job_api_blik_files_apply_jobs__job_id__get"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -755,59 +765,15 @@ export interface components {
             /** External Short Id */
             external_short_id: string;
         };
-        /** ApplyDecision */
-        ApplyDecision: {
-            /** Payment Id */
-            payment_id: string;
-            /** Transaction Id */
-            transaction_id: number;
-            /**
-             * Strategy
-             * @default auto
-             * @enum {string}
-             */
-            strategy: "auto" | "manual" | "force";
+        /** ApplyDecisionsPayload */
+        ApplyDecisionsPayload: {
+            /** Decisions */
+            decisions: components["schemas"]["api__models__blik_files__ApplyDecision"][];
         };
-        /** ApplyJobResponse */
-        ApplyJobResponse: {
-            /**
-             * Id
-             * Format: uuid
-             */
-            id: string;
-            /**
-             * Secret Id
-             * Format: uuid
-             */
-            secret_id: string;
-            status: components["schemas"]["JobStatus"];
-            /** Total */
-            total: number;
-            /** Applied */
-            applied: number;
-            /** Failed */
-            failed: number;
-            /**
-             * Started At
-             * Format: date-time
-             */
-            started_at: string;
-            /** Finished At */
-            finished_at: string | null;
-            /** Results */
-            results: components["schemas"]["ApplyOutcomeResponse"][];
-        };
-        /** ApplyOutcomeResponse */
-        ApplyOutcomeResponse: {
-            /** Transaction Id */
-            transaction_id: number;
-            /**
-             * Status
-             * @enum {string}
-             */
-            status: "success" | "failed";
-            /** Reason */
-            reason?: string | null;
+        /** ApplyPayload */
+        ApplyPayload: {
+            /** Decisions */
+            decisions: components["schemas"]["api__models__allegro__ApplyDecision"][];
         };
         /** AuditLogItem */
         AuditLogItem: {
@@ -932,15 +898,6 @@ export interface components {
             alias?: string | null;
             /** Secret */
             secret: string;
-        };
-        /** FileApplyResponse */
-        FileApplyResponse: {
-            /** File Id */
-            file_id: string;
-            /** Updated */
-            updated: number;
-            /** Errors */
-            errors: string[];
         };
         /** FileMatchResponse */
         FileMatchResponse: {
@@ -1081,6 +1038,8 @@ export interface components {
             date: string;
             /** Amount */
             amount: number;
+            /** Match Id */
+            match_id?: string | null;
             /** Details */
             details: string;
             /** Recipient */
@@ -1148,29 +1107,6 @@ export interface components {
             fx_amount?: number | null;
             /** Fx Currency */
             fx_currency?: string | null;
-        };
-        /** StatisticsResponse */
-        StatisticsResponse: {
-            /** Total Transactions */
-            total_transactions: number;
-            /** Single Part Transactions */
-            single_part_transactions: number;
-            /** Uncategorized Transactions */
-            uncategorized_transactions: number;
-            /** Filtered By Description Exact */
-            filtered_by_description_exact: number;
-            /** Filtered By Description Partial */
-            filtered_by_description_partial: number;
-            /** Not Processed Transactions */
-            not_processed_transactions: number;
-            /** Not Processed By Month */
-            not_processed_by_month: {
-                [key: string]: number;
-            };
-            /** Inclomplete Procesed By Month */
-            inclomplete_procesed_by_month: {
-                [key: string]: number;
-            };
         };
         /** Token */
         Token: {
@@ -1325,28 +1261,122 @@ export interface components {
              */
             timestamp?: string;
         };
-        /** ApplyPayload */
-        api__models__allegro__ApplyPayload: {
-            /** Decisions */
-            decisions: components["schemas"]["ApplyDecision"][];
+        /** ApplyDecision */
+        api__models__allegro__ApplyDecision: {
+            /** Payment Id */
+            payment_id: string;
+            /** Transaction Id */
+            transaction_id: number;
+            /**
+             * Strategy
+             * @default auto
+             * @enum {string}
+             */
+            strategy: "auto" | "manual" | "force";
+        };
+        /** ApplyJobResponse */
+        api__models__allegro__ApplyJobResponse: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Secret Id
+             * Format: uuid
+             */
+            secret_id: string;
+            status: components["schemas"]["JobStatus"];
+            /** Total */
+            total: number;
+            /** Applied */
+            applied: number;
+            /** Failed */
+            failed: number;
+            /**
+             * Started At
+             * Format: date-time
+             */
+            started_at: string;
+            /** Finished At */
+            finished_at: string | null;
+            /** Results */
+            results: components["schemas"]["api__models__allegro__ApplyOutcomeResponse"][];
+        };
+        /** ApplyOutcomeResponse */
+        api__models__allegro__ApplyOutcomeResponse: {
+            /** Transaction Id */
+            transaction_id: number;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "success" | "failed";
+            /** Reason */
+            reason?: string | null;
         };
         /** MatchResult */
         api__models__allegro__MatchResult: {
             tx: components["schemas"]["SimplifiedTx"];
             /** Matches */
             matches: components["schemas"]["AllegroPayment"][];
+            /** @default new */
             status: components["schemas"]["MatchProcessingStatus"];
         };
-        /** ApplyPayload */
-        api__models__blik_files__ApplyPayload: {
-            /** Tx Indexes */
-            tx_indexes: number[];
+        /** ApplyDecision */
+        api__models__blik_files__ApplyDecision: {
+            /** Transaction Id */
+            transaction_id: number;
+            /** Selected Match Id */
+            selected_match_id: string;
+        };
+        /** ApplyJobResponse */
+        api__models__blik_files__ApplyJobResponse: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** File Id */
+            file_id: string;
+            status: components["schemas"]["JobStatus"];
+            /** Total */
+            total: number;
+            /** Applied */
+            applied: number;
+            /** Failed */
+            failed: number;
+            /**
+             * Started At
+             * Format: date-time
+             */
+            started_at: string;
+            /** Finished At */
+            finished_at: string | null;
+            /** Results */
+            results: components["schemas"]["api__models__blik_files__ApplyOutcomeResponse"][];
+        };
+        /** ApplyOutcomeResponse */
+        api__models__blik_files__ApplyOutcomeResponse: {
+            /** Transaction Id */
+            transaction_id: number;
+            /** Selected Match Id */
+            selected_match_id?: string | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "success" | "failed";
+            /** Reason */
+            reason?: string | null;
         };
         /** MatchResult */
         api__models__blik_files__MatchResult: {
             tx: components["schemas"]["SimplifiedTx"];
             /** Matches */
             matches: components["schemas"]["SimplifiedRecord"][];
+            /** @default new */
+            status: components["schemas"]["MatchProcessingStatus"];
         };
     };
     responses: never;
@@ -1459,68 +1489,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["MeResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    get_statistics_api_blik_files_statistics_get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: {
-                access_token?: string | null;
-            };
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["StatisticsResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    refresh_statistics_api_blik_files_statistics_refresh_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: {
-                access_token?: string | null;
-            };
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["StatisticsResponse"];
                 };
             };
             /** @description Validation Error */
@@ -1697,7 +1665,7 @@ export interface operations {
             };
         };
     };
-    apply_matches_api_blik_files__encoded_id__matches_post: {
+    start_apply_job_api_blik_files__encoded_id__apply_post: {
         parameters: {
             query?: never;
             header?: never;
@@ -1710,7 +1678,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["api__models__blik_files__ApplyPayload"];
+                "application/json": components["schemas"]["ApplyDecisionsPayload"];
             };
         };
         responses: {
@@ -1720,7 +1688,75 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["FileApplyResponse"];
+                    "application/json": components["schemas"]["api__models__blik_files__ApplyJobResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    auto_apply_single_matches_api_blik_files__encoded_id__apply_auto_post: {
+        parameters: {
+            query?: {
+                limit?: number | null;
+            };
+            header?: never;
+            path: {
+                encoded_id: string;
+            };
+            cookie?: {
+                access_token?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["api__models__blik_files__ApplyJobResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_apply_job_api_blik_files_apply_jobs__job_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                job_id: string;
+            };
+            cookie?: {
+                access_token?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["api__models__blik_files__ApplyJobResponse"];
                 };
             };
             /** @description Validation Error */
@@ -2032,7 +2068,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["api__models__allegro__ApplyPayload"];
+                "application/json": components["schemas"]["ApplyPayload"];
             };
         };
         responses: {
@@ -2042,7 +2078,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ApplyJobResponse"];
+                    "application/json": components["schemas"]["api__models__allegro__ApplyJobResponse"];
                 };
             };
             /** @description Validation Error */
@@ -2077,7 +2113,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ApplyJobResponse"];
+                    "application/json": components["schemas"]["api__models__allegro__ApplyJobResponse"];
                 };
             };
             /** @description Validation Error */
@@ -2146,7 +2182,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ApplyJobResponse"];
+                    "application/json": components["schemas"]["api__models__allegro__ApplyJobResponse"];
                 };
             };
             /** @description Validation Error */

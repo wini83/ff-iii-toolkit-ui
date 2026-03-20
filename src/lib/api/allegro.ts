@@ -1,11 +1,12 @@
 import { apiRequest } from './auth';
+import { normalizeApiError } from '$lib/api/errors';
 import type { components } from '$lib/api/schema';
 
 type UserSecret = components['schemas']['UserSecretResponse'];
 type AllegroPayment = components['schemas']['AllegroPayment'];
 type AllegroMatchResponse = components['schemas']['AllegroMatchResponse'];
-type AllegroApplyPayload = components['schemas']['api__models__allegro__ApplyPayload'];
-type ApplyJobResponse = components['schemas']['ApplyJobResponse'];
+type AllegroApplyPayload = components['schemas']['ApplyPayload'];
+type ApplyJobResponse = components['schemas']['api__models__allegro__ApplyJobResponse'];
 type AllegroMetricsStatusResponse = components['schemas']['AllegroMetricsStatusResponse'];
 
 export async function listSecrets(token?: string | null): Promise<UserSecret[]> {
@@ -130,7 +131,7 @@ export async function getMetricsStatus(
   );
 
   if (!response.ok || error || !data) {
-    throw normalizeApiError(error, `Failed to load statistics (${response.status})`);
+    throw normalizeApiError(error, `Failed to load statistics (${response.status})`, response.status);
   }
 
   return data;
@@ -145,43 +146,10 @@ export async function refreshMetricsStatus(
   );
 
   if (!response.ok || error || !data) {
-    throw normalizeApiError(error, `Failed to refresh statistics (${response.status})`);
+    throw normalizeApiError(error, `Failed to refresh statistics (${response.status})`, response.status);
   }
 
   return data;
-}
-
-function normalizeApiError(error: unknown, fallback = 'API error'): Error {
-  if (typeof error === 'string') {
-    const msg = error.trim();
-    return new Error(msg || fallback);
-  }
-
-  if (Array.isArray((error as { detail?: unknown } | null)?.detail)) {
-    const msg = ((error as { detail: Array<{ msg?: unknown }> }).detail ?? [])
-      .map((d) => (typeof d?.msg === 'string' ? d.msg.trim() : ''))
-      .filter(Boolean)
-      .join('; ');
-    return new Error(msg);
-  }
-
-  if (error && typeof error === 'object') {
-    const err = error as { detail?: unknown; error?: unknown; message?: unknown };
-
-    if (typeof err.message === 'string' && err.message.trim()) {
-      return new Error(err.message.trim());
-    }
-
-    if (typeof err.error === 'string' && err.error.trim()) {
-      return new Error(err.error.trim());
-    }
-
-    if (typeof err.detail === 'string' && err.detail.trim()) {
-      return new Error(err.detail.trim());
-    }
-  }
-
-  return new Error(fallback);
 }
 
 export const allegro = {
