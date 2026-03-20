@@ -10,8 +10,8 @@
 
   type AllegroMatchResponse = components['schemas']['AllegroMatchResponse'];
   type AllegroMatchResult = components['schemas']['api__models__allegro__MatchResult'];
-  type ApplyDecision = components['schemas']['ApplyDecision'];
-  type ApplyJobResponse = components['schemas']['ApplyJobResponse'];
+  type ApplyDecision = components['schemas']['api__models__allegro__ApplyDecision'];
+  type ApplyJobResponse = components['schemas']['api__models__allegro__ApplyJobResponse'];
   type JobStatus = components['schemas']['JobStatus'];
   const PAGE_SIZE_OPTIONS = [10, 20, 50, 100] as const;
 
@@ -300,7 +300,9 @@
       selectedCandidates = new Set();
 
       if (finalJob.failed > 0 && finalJob.applied === 0) {
-        const firstReason = finalJob.results.find((r) => r.status === 'failed')?.reason ?? null;
+        const firstReason =
+          finalJob.results.find((result: ApplyJobResponse['results'][number]) => result.status === 'failed')
+            ?.reason ?? null;
         emitToast(
           'error',
           firstReason
@@ -563,7 +565,7 @@
                     <div class="flex flex-wrap items-center gap-2">
                       <h4 class="text-base font-semibold">{row.tx.description}</h4>
                       <span
-                        class={`badge badge-soft ${isRowProcessed(row) ? 'badge-neutral' : 'badge-info'}`}
+                        class={`badge badge-soft ${isRowProcessed(row) ? 'badge-secondary' : 'badge-info'}`}
                       >
                         {isRowProcessed(row) ? 'processed' : 'new'}
                       </span>
