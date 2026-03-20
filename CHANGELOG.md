@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.3.9](https://github.com/wini83/ff-iii-toolkit-ui/compare/v0.3.8...v0.3.9) (2026-03-20)
+
+
+### Features
+
+* **blik:** add async match apply flow and align api clients with new schema ([8c58f03](https://github.com/wini83/ff-iii-toolkit-ui/commit/8c58f03cc67018f9f74ed908d64a26dbf782ef3a))
+
 ### [0.3.8](https://github.com/wini83/ff-iii-toolkit-ui/compare/v0.3.7...v0.3.8) (2026-03-15)
 
 
