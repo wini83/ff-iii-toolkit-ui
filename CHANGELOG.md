@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.3.10](https://github.com/wini83/ff-iii-toolkit-ui/compare/v0.3.9...v0.3.10) (2026-03-26)
+
+
+### Features
+
+* **blik:** add async match apply flow and align api clients with new schema ([26ef47d](https://github.com/wini83/ff-iii-toolkit-ui/commit/26ef47d17660bd96372a7ff133435c4ccda4967a))
+* **citi:** add import and preview workspace ([e560cda](https://github.com/wini83/ff-iii-toolkit-ui/commit/e560cda67128f3fb4163d5b670ee957c887096ef))
+
+
+### Bug Fixes
+
+* **auth:** refresh token before protected citi preview requests ([2c0964e](https://github.com/wini83/ff-iii-toolkit-ui/commit/2c0964e46c55707feedc5a730e9b02ffb7bf4b37))
+
 ### [0.3.9](https://github.com/wini83/ff-iii-toolkit-ui/compare/v0.3.8...v0.3.9) (2026-03-20)
 
 
