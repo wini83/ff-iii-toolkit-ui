@@ -18,6 +18,13 @@
       tone: 'secondary'
     },
     {
+      href: '/tools/citi',
+      title: 'Open Citi import',
+      description: 'Upload Citi TXT, inspect parsed preview and download ZIP with CSV exports.',
+      icon: icons.DocumentArrowUp,
+      tone: 'success'
+    },
+    {
       href: '/allegro/accounts',
       title: 'Review Allegro accounts',
       description: 'Open configured marketplace accounts and jump into payments or matches.',
@@ -65,6 +72,16 @@
       ],
       icon: icons.ChartBar,
       tone: 'warning'
+    },
+    {
+      title: 'Import Tools',
+      description: 'Focused import flows for bank and file-based sources that need preview and export.',
+      hrefs: [
+        { label: 'Citi Import', href: '/tools/citi' },
+        { label: 'Citi Preview', href: '/tools/citi/preview' }
+      ],
+      icon: icons.ArchiveBoxArrowDown,
+      tone: 'success'
     },
     {
       title: 'Settings',

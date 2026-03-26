@@ -44,6 +44,8 @@
     if (pathname.startsWith('/blik/upload')) return 'BLIK Sync / File Upload';
     if (pathname.startsWith('/blik/file')) return 'BLIK Sync / File Preview';
     if (pathname.startsWith('/blik/stats')) return 'BLIK Sync / Stats';
+    if (pathname.startsWith('/tools/citi/preview')) return 'Import Tools / Citi Preview';
+    if (pathname.startsWith('/tools/citi')) return 'Import Tools / Citi Import';
     if (pathname.startsWith('/profile')) return 'Profile';
     if (pathname.startsWith('/settings/secrets')) return 'Settings / Secrets';
     if (pathname.startsWith('/audit-log')) return 'Administration / Audit Log';

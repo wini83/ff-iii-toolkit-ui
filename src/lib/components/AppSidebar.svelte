@@ -73,6 +73,37 @@
             <summary
               class="hover:bg-base-200/80 flex cursor-pointer items-center gap-3 rounded-2xl px-3 py-3 font-medium"
             >
+              <span class="bg-accent/15 text-accent rounded-2xl p-2">
+                <Icon src={icons.ArchiveBoxArrowDown} class="h-5 w-5" />
+              </span>
+              Import Tools
+            </summary>
+
+            <ul class="mt-2 space-y-1">
+              <li>
+                <a href="/tools/citi" class="rounded-xl">
+                  <Icon src={icons.DocumentArrowUp} class="h-5 w-5" />
+                  Citi Import
+                </a>
+              </li>
+              <li>
+                <a href="/tools/citi/preview" class="rounded-xl">
+                  <Icon src={icons.DocumentMagnifyingGlass} class="h-5 w-5" />
+                  Citi Preview
+                </a>
+              </li>
+            </ul>
+          </details>
+        </li>
+
+        <li>
+          <details
+            open
+            class="bg-base-100/70 rounded-[1.5rem] p-2"
+          >
+            <summary
+              class="hover:bg-base-200/80 flex cursor-pointer items-center gap-3 rounded-2xl px-3 py-3 font-medium"
+            >
               <span class="bg-secondary/12 text-secondary rounded-2xl p-2">
                 <Icon src={icons.DocumentCurrencyEuro} class="h-5 w-5" />
               </span>
