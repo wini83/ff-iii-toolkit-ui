@@ -78,7 +78,15 @@ export async function apiRequest<T>(
 
   const client = await createApiClient();
   const useAuth = options?.auth !== false;
-  const token = useAuth ? options?.token ?? getStoredToken() : null;
+  let token = useAuth ? options?.token ?? getStoredToken() : null;
+
+  if (useAuth && !token) {
+    token = await refreshAccessToken();
+    if (!token) {
+      markSessionExpired();
+      throw new Error(SESSION_EXPIRED_MSG);
+    }
+  }
 
   let result = await call(client, buildAuthHeaders(token));
   if (!useAuth || result.response.status !== 401) {
