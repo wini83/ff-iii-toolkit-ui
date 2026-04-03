@@ -8,10 +8,13 @@
 
   import AppSidebar from '$lib/components/AppSidebar.svelte';
   import { getMe } from '$lib/api/me';
+  import { userSecrets } from '$lib/api/user_secrets';
+  import type { components } from '$lib/api/schema';
 
   type MeUser = Awaited<ReturnType<typeof getMe>>;
   type Toast = { id: string; type: 'success' | 'error' | 'info' | 'warning'; msg: string };
   type ToastEventDetail = Pick<Toast, 'type' | 'msg'>;
+  type VaultStatus = components['schemas']['VaultStatusResponse'];
 
   const DEFAULT_APP_TITLE = 'Firefly Toolkit';
   const THEME_STORAGE_KEY = 'ff-toolkit-theme';
@@ -21,6 +24,11 @@
   let dynamicTitle = DEFAULT_APP_TITLE;
   let headTitle = DEFAULT_APP_TITLE;
   let theme: 'light' | 'dark' = 'light';
+  let vaultStatus: VaultStatus | null = null;
+  let vaultLoading = false;
+  let vaultUnlocking = false;
+  let vaultLocking = false;
+  let vaultPassphrase = '';
 
   // toasty trzymamy jako prosta tablica
   let toasts: Toast[] = [];
@@ -67,6 +75,98 @@
 
   function toggleTheme() {
     applyTheme(theme === 'light' ? 'dark' : 'light');
+  }
+
+  function emitToast(type: Toast['type'], msg: string) {
+    window.dispatchEvent(new CustomEvent('toast', { detail: { type, msg } }));
+  }
+
+  function getErrorMessage(error: unknown, fallback: string) {
+    if (error instanceof Error && error.message.trim()) return error.message;
+    return fallback;
+  }
+
+  function getVaultStatusMeta(status: VaultStatus | null) {
+    if (!status) {
+      return {
+        label: 'Vault unavailable',
+        icon: icons.ShieldExclamation,
+        badgeClass: 'badge-ghost',
+        buttonClass: 'btn-ghost'
+      };
+    }
+
+    if (!status.configured) {
+      return {
+        label: 'Vault setup required',
+        icon: icons.ShieldCheck,
+        badgeClass: 'badge-info',
+        buttonClass: 'btn-ghost'
+      };
+    }
+
+    if (!status.unlocked) {
+      return {
+        label: 'Vault locked',
+        icon: icons.LockClosed,
+        badgeClass: 'badge-warning',
+        buttonClass: 'btn-ghost'
+      };
+    }
+
+    return {
+      label: 'Vault unlocked',
+      icon: icons.LockOpen,
+      badgeClass: 'badge-success',
+      buttonClass: 'btn-ghost'
+    };
+  }
+
+  async function refreshVaultStatus(showToast = false) {
+    vaultLoading = true;
+
+    try {
+      vaultStatus = await userSecrets.getVaultStatus();
+    } catch (error) {
+      vaultStatus = null;
+      if (showToast) {
+        emitToast('error', getErrorMessage(error, 'Failed to load vault status'));
+      }
+    } finally {
+      vaultLoading = false;
+    }
+  }
+
+  async function unlockVaultFromLayout() {
+    if (!vaultPassphrase.trim()) return;
+
+    vaultUnlocking = true;
+
+    try {
+      const status = await userSecrets.unlockVault({ passphrase: vaultPassphrase });
+      vaultStatus = status;
+      vaultPassphrase = '';
+    } catch (error) {
+      emitToast('error', getErrorMessage(error, 'Failed to unlock vault'));
+    } finally {
+      vaultUnlocking = false;
+    }
+  }
+
+  async function lockVaultFromLayout() {
+    vaultLocking = true;
+
+    try {
+      vaultStatus = await userSecrets.lockVault();
+    } catch (error) {
+      emitToast('error', getErrorMessage(error, 'Failed to lock vault'));
+    } finally {
+      vaultLocking = false;
+    }
+  }
+
+  function openSecretsSettings() {
+    void goto('/settings/secrets');
   }
 
   async function logout() {
@@ -130,12 +230,30 @@
 
     applyTheme(preferredTheme);
     void loadCurrentUser();
+    void refreshVaultStatus();
 
     const listener = (event: Event) => handleToastEvent(event);
+    const vaultStatusListener = (event: Event) => {
+      const detail = (event as CustomEvent<unknown>).detail;
+
+      if (
+        detail &&
+        typeof detail === 'object' &&
+        'configured' in detail &&
+        'unlocked' in detail &&
+        typeof detail.configured === 'boolean' &&
+        typeof detail.unlocked === 'boolean'
+      ) {
+        vaultStatus = detail as VaultStatus;
+      }
+    };
+
     window.addEventListener('toast', listener as EventListener);
+    window.addEventListener('vault-status-changed', vaultStatusListener as EventListener);
 
     return () => {
       window.removeEventListener('toast', listener as EventListener);
+      window.removeEventListener('vault-status-changed', vaultStatusListener as EventListener);
     };
   });
 </script>
@@ -176,6 +294,105 @@
         </div>
 
         <div class="flex-none flex items-center gap-2">
+          <div class="dropdown dropdown-end">
+            <button
+              tabindex="0"
+              class="btn btn-ghost btn-sm rounded-2xl px-3"
+              aria-label="Vault status"
+              title={getVaultStatusMeta(vaultStatus).label}
+            >
+              {#if vaultLoading}
+                <span class="loading loading-spinner loading-sm"></span>
+              {:else}
+                <Icon src={getVaultStatusMeta(vaultStatus).icon} class="h-5 w-5" />
+              {/if}
+            </button>
+
+            <div
+              class="dropdown-content bg-base-100 rounded-box border-base-200 z-20 mt-3 w-80 border p-4 shadow-xl"
+            >
+              <div class="flex items-start justify-between gap-3">
+                <div>
+                  <div class="text-sm font-semibold">Vault</div>
+                  <div class="text-base-content/70 mt-1 text-xs">
+                    {getVaultStatusMeta(vaultStatus).label}
+                  </div>
+                </div>
+
+                <button class="btn btn-ghost btn-xs" disabled={vaultLoading} on:click={() => refreshVaultStatus(true)}>
+                  {#if vaultLoading}
+                    <span class="loading loading-spinner loading-xs"></span>
+                  {:else}
+                    <Icon src={icons.ArrowPath} class="h-4 w-4" />
+                  {/if}
+                  Refresh
+                </button>
+              </div>
+
+              {#if vaultStatus && !vaultStatus.configured}
+                <div class="alert alert-info mt-4">
+                  <Icon src={icons.InformationCircle} class="h-5 w-5" />
+                  <span>Vault is not configured yet.</span>
+                </div>
+
+                <button class="btn btn-primary btn-sm mt-4 w-full" on:click={openSecretsSettings}>
+                  <Icon src={icons.Key} class="h-4 w-4" />
+                  Open vault settings
+                </button>
+              {:else if vaultStatus?.unlocked}
+                <div class="alert alert-success mt-4">
+                  <Icon src={icons.LockOpen} class="h-5 w-5" />
+                  <span>Vault is unlocked for the current session.</span>
+                </div>
+
+                <div class="mt-4 flex gap-2">
+                  <button class="btn btn-outline btn-sm flex-1" disabled={vaultLocking} on:click={lockVaultFromLayout}>
+                    {#if vaultLocking}
+                      <span class="loading loading-spinner loading-sm"></span>
+                    {:else}
+                      <Icon src={icons.LockClosed} class="h-4 w-4" />
+                    {/if}
+                    Lock
+                  </button>
+                  <button class="btn btn-ghost btn-sm flex-1" on:click={openSecretsSettings}>
+                    <Icon src={icons.Key} class="h-4 w-4" />
+                    Manage
+                  </button>
+                </div>
+              {:else}
+                <fieldset class="fieldset mt-4">
+                  <legend class="fieldset-legend">Passphrase</legend>
+                  <input
+                    class="input input-bordered w-full"
+                    type="password"
+                    bind:value={vaultPassphrase}
+                    disabled={vaultUnlocking}
+                    placeholder="Enter vault passphrase"
+                  />
+                </fieldset>
+
+                <div class="mt-4 flex gap-2">
+                  <button
+                    class="btn btn-primary btn-sm flex-1"
+                    disabled={vaultUnlocking || !vaultPassphrase.trim()}
+                    on:click={unlockVaultFromLayout}
+                  >
+                    {#if vaultUnlocking}
+                      <span class="loading loading-spinner loading-sm"></span>
+                    {:else}
+                      <Icon src={icons.LockOpen} class="h-4 w-4" />
+                    {/if}
+                    Unlock
+                  </button>
+                  <button class="btn btn-ghost btn-sm flex-1" on:click={openSecretsSettings}>
+                    <Icon src={icons.Key} class="h-4 w-4" />
+                    Open settings
+                  </button>
+                </div>
+              {/if}
+            </div>
+          </div>
+
           <button
             class="btn btn-ghost btn-sm rounded-2xl px-3"
             on:click={toggleTheme}

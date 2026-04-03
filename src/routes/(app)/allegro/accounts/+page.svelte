@@ -5,13 +5,16 @@
   import * as icons from '@steeze-ui/heroicons';
 
   import { allegro } from '$lib/api/allegro';
+  import { userSecrets } from '$lib/api/user_secrets';
   import type { components } from '$lib/api/schema';
 
   type UserSecret = components['schemas']['UserSecretResponse'];
+  type VaultStatus = components['schemas']['VaultStatusResponse'];
 
   let loading = true;
   let networkError: string | null = null;
   let secrets: UserSecret[] = [];
+  let vaultStatus: VaultStatus | null = null;
 
   function getNonEmptyString(value: unknown): string | null {
     if (typeof value !== 'string') return null;
@@ -94,6 +97,13 @@
     networkError = null;
 
     try {
+      vaultStatus = await userSecrets.getVaultStatus();
+
+      if (!vaultStatus.configured || !vaultStatus.unlocked) {
+        secrets = [];
+        return;
+      }
+
       const result = await allegro.listSecrets();
       secrets = result.filter((secret) => secret.type === 'allegro');
     } catch (error: unknown) {
@@ -213,6 +223,38 @@
             <div class="skeleton h-12 w-full rounded-2xl"></div>
             <div class="skeleton h-12 w-full rounded-2xl"></div>
           </div>
+        </div>
+      {:else if vaultStatus && !vaultStatus.configured}
+        <div
+          class="bg-base-200/60 flex flex-col items-center rounded-[2rem] px-6 py-14 text-center"
+        >
+          <div class="bg-primary/15 text-primary rounded-3xl p-4">
+            <Icon src={icons.ShieldCheck} class="h-8 w-8" />
+          </div>
+          <h4 class="mt-5 text-xl font-semibold">Vault is not configured</h4>
+          <p class="text-base-content/70 mt-2 max-w-md text-sm">
+            Configure the vault in settings before accessing Allegro accounts and imported data.
+          </p>
+          <button class="btn btn-primary mt-6" on:click={openSettings}>
+            <Icon src={icons.Key} class="h-5 w-5" />
+            Open settings
+          </button>
+        </div>
+      {:else if vaultStatus && !vaultStatus.unlocked}
+        <div
+          class="bg-base-200/60 flex flex-col items-center rounded-[2rem] px-6 py-14 text-center"
+        >
+          <div class="bg-warning/15 text-warning rounded-3xl p-4">
+            <Icon src={icons.LockClosed} class="h-8 w-8" />
+          </div>
+          <h4 class="mt-5 text-xl font-semibold">Vault is locked</h4>
+          <p class="text-base-content/70 mt-2 max-w-md text-sm">
+            Unlock the vault before selecting an Allegro account for payments or matches.
+          </p>
+          <button class="btn btn-primary mt-6" on:click={openSettings}>
+            <Icon src={icons.Key} class="h-5 w-5" />
+            Unlock in settings
+          </button>
         </div>
       {:else if secrets.length === 0}
         <div
