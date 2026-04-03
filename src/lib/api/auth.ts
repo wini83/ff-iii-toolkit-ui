@@ -69,7 +69,7 @@ function buildAuthHeaders(token: string | null): HeadersInit {
 
 export async function apiRequest<T>(
   call: ApiCall<T>,
-  options?: { auth?: boolean; token?: string | null }
+  options?: { auth?: boolean; token?: string | null; retryOnUnauthorized?: boolean }
 ): Promise<ApiResponse<T>> {
   if (sessionExpired) {
     emitSessionExpiredToast();
@@ -79,6 +79,7 @@ export async function apiRequest<T>(
   const client = await createApiClient();
   const useAuth = options?.auth !== false;
   let token = useAuth ? options?.token ?? getStoredToken() : null;
+  const retryOnUnauthorized = options?.retryOnUnauthorized !== false;
 
   if (useAuth && !token) {
     token = await refreshAccessToken();
@@ -89,7 +90,7 @@ export async function apiRequest<T>(
   }
 
   let result = await call(client, buildAuthHeaders(token));
-  if (!useAuth || result.response.status !== 401) {
+  if (!useAuth || result.response.status !== 401 || !retryOnUnauthorized) {
     return result;
   }
 

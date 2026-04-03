@@ -655,6 +655,74 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/user-secrets/vault/setup": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Setup Vault */
+        post: operations["setup_vault_api_user_secrets_vault_setup_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/user-secrets/vault/unlock": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Unlock Vault */
+        post: operations["unlock_vault_api_user_secrets_vault_unlock_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/user-secrets/vault/lock": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Lock Vault */
+        post: operations["lock_vault_api_user_secrets_vault_lock_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/user-secrets/vault/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Vault Status */
+        get: operations["get_vault_status_api_user_secrets_vault_status_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/user-secrets": {
         parameters: {
             query?: never;
@@ -662,10 +730,16 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** List Secrets */
+        /**
+         * List Secrets
+         * @description Return secret metadata only; no plaintext reveal endpoint is exposed.
+         */
         get: operations["list_secrets_api_user_secrets_get"];
         put?: never;
-        /** Create Secret */
+        /**
+         * Create Secret
+         * @description Create an encrypted secret; plaintext is never returned from this API.
+         */
         post: operations["create_secret_api_user_secrets_post"];
         delete?: never;
         options?: never;
@@ -687,8 +761,8 @@ export interface paths {
         delete: operations["delete_secret_api_user_secrets__secret_id__delete"];
         options?: never;
         head?: never;
-        /** Update Secret Alias */
-        patch: operations["update_secret_alias_api_user_secrets__secret_id__patch"];
+        /** Update Secret */
+        patch: operations["update_secret_api_user_secrets__secret_id__patch"];
         trace?: never;
     };
     "/api/system/health": {
@@ -717,6 +791,23 @@ export interface paths {
         };
         /** Version Check */
         get: operations["version_check_api_system_version_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/system/transaction-snapshot": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Transaction Snapshot Status */
+        get: operations["transaction_snapshot_status_api_system_transaction_snapshot_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1039,6 +1130,8 @@ export interface components {
             type: components["schemas"]["SecretType"];
             /** Alias */
             alias?: string | null;
+            /** External Username */
+            external_username?: string | null;
             /** Secret */
             secret: string;
         };
@@ -1258,6 +1351,28 @@ export interface components {
             /** Token Type */
             token_type: string;
         };
+        /** TransactionSnapshotStatusResponse */
+        TransactionSnapshotStatusResponse: {
+            /** Ttl Seconds */
+            ttl_seconds: number;
+            /** Has Snapshot */
+            has_snapshot: boolean;
+            /** Snapshot Fetched At */
+            snapshot_fetched_at: string | null;
+            /** Expires At */
+            expires_at: string | null;
+            /** Is Stale */
+            is_stale: boolean;
+            /** Transaction Count */
+            transaction_count?: number | null;
+            /** Schema Version */
+            schema_version?: number | null;
+            /**
+             * Timestamp
+             * Format: date-time
+             */
+            timestamp?: string;
+        };
         /** TxMetricsResultResponse */
         TxMetricsResultResponse: {
             /** Single Part Transactions */
@@ -1298,10 +1413,14 @@ export interface components {
          * @enum {string}
          */
         TxTag: "blik_done" | "allegro_done" | "rule_potential" | "action_req";
-        /** UpdateSecretAliasPayload */
-        UpdateSecretAliasPayload: {
+        /** UpdateSecretPayload */
+        UpdateSecretPayload: {
             /** Alias */
             alias?: string | null;
+            /** External Username */
+            external_username?: string | null;
+            /** Secret */
+            secret?: string | null;
         };
         /** UploadResponse */
         UploadResponse: {
@@ -1373,6 +1492,8 @@ export interface components {
             type: components["schemas"]["SecretType"];
             /** Alias */
             alias?: string | null;
+            /** External Username */
+            external_username?: string | null;
             /** Usage Count */
             usage_count: number;
             /** Last Used At */
@@ -1393,6 +1514,18 @@ export interface components {
             msg: string;
             /** Error Type */
             type: string;
+        };
+        /** VaultPassphrasePayload */
+        VaultPassphrasePayload: {
+            /** Passphrase */
+            passphrase: string;
+        };
+        /** VaultStatusResponse */
+        VaultStatusResponse: {
+            /** Configured */
+            configured: boolean;
+            /** Unlocked */
+            unlocked: boolean;
         };
         /** VersionResponse */
         VersionResponse: {
@@ -2271,12 +2404,15 @@ export interface operations {
                 limit?: number;
                 offset?: number;
             };
-            header?: never;
+            header?: {
+                "X-Vault-Session-Id"?: string | null;
+            };
             path: {
                 secret_id: string;
             };
             cookie?: {
                 access_token?: string | null;
+                vault_session_id?: string | null;
             };
         };
         requestBody?: never;
@@ -2307,12 +2443,15 @@ export interface operations {
                 limit?: number;
                 offset?: number;
             };
-            header?: never;
+            header?: {
+                "X-Vault-Session-Id"?: string | null;
+            };
             path: {
                 secret_id: string;
             };
             cookie?: {
                 access_token?: string | null;
+                vault_session_id?: string | null;
             };
         };
         requestBody?: never;
@@ -2834,6 +2973,144 @@ export interface operations {
             };
         };
     };
+    setup_vault_api_user_secrets_vault_setup_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                access_token?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["VaultPassphrasePayload"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VaultStatusResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    unlock_vault_api_user_secrets_vault_unlock_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                access_token?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["VaultPassphrasePayload"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VaultStatusResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    lock_vault_api_user_secrets_vault_lock_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Vault-Session-Id"?: string | null;
+            };
+            path?: never;
+            cookie?: {
+                access_token?: string | null;
+                vault_session_id?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VaultStatusResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_vault_status_api_user_secrets_vault_status_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Vault-Session-Id"?: string | null;
+            };
+            path?: never;
+            cookie?: {
+                access_token?: string | null;
+                vault_session_id?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VaultStatusResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     list_secrets_api_user_secrets_get: {
         parameters: {
             query?: never;
@@ -2868,10 +3145,13 @@ export interface operations {
     create_secret_api_user_secrets_post: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                "X-Vault-Session-Id"?: string | null;
+            };
             path?: never;
             cookie?: {
                 access_token?: string | null;
+                vault_session_id?: string | null;
             };
         };
         requestBody: {
@@ -2931,20 +3211,23 @@ export interface operations {
             };
         };
     };
-    update_secret_alias_api_user_secrets__secret_id__patch: {
+    update_secret_api_user_secrets__secret_id__patch: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                "X-Vault-Session-Id"?: string | null;
+            };
             path: {
                 secret_id: string;
             };
             cookie?: {
                 access_token?: string | null;
+                vault_session_id?: string | null;
             };
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["UpdateSecretAliasPayload"];
+                "application/json": components["schemas"]["UpdateSecretPayload"];
             };
         };
         responses: {
@@ -3004,6 +3287,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["VersionResponse"];
+                };
+            };
+        };
+    };
+    transaction_snapshot_status_api_system_transaction_snapshot_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TransactionSnapshotStatusResponse"];
                 };
             };
         };
