@@ -816,6 +816,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/system/transaction-snapshot/refresh": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Refresh Transaction Snapshot */
+        post: operations["refresh_transaction_snapshot_api_system_transaction_snapshot_refresh_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/system/bootstrap/status": {
         parameters: {
             query?: never;
@@ -854,6 +871,11 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /**
+         * AccountType
+         * @enum {string}
+         */
+        AccountType: "asset" | "expense" | "revenue" | "liability" | "loan" | "debt" | "mortgage" | "initial-balance" | "reconciliation";
         /** AllegroMatchResponse */
         AllegroMatchResponse: {
             /** Login */
@@ -1032,18 +1054,12 @@ export interface components {
         };
         /** Body_upload_citi_text_api_tools_citi_upload_post */
         Body_upload_citi_text_api_tools_citi_upload_post: {
-            /**
-             * File
-             * Format: binary
-             */
+            /** File */
             file: string;
         };
         /** Body_upload_csv_api_blik_files_post */
         Body_upload_csv_api_blik_files_post: {
-            /**
-             * File
-             * Format: binary
-             */
+            /** File */
             file: string;
         };
         /** BootstrapPayload */
@@ -1255,6 +1271,16 @@ export interface components {
             /** New Password */
             new_password: string;
         };
+        /** SimplifiedAccountRef */
+        SimplifiedAccountRef: {
+            /** Id */
+            id: number;
+            /** Name */
+            name: string;
+            type: components["schemas"]["AccountType"];
+            /** Iban */
+            iban?: string | null;
+        };
         /**
          * SimplifiedCategory
          * @description Simplified representation of a Firefly III Category.
@@ -1343,6 +1369,8 @@ export interface components {
             fx_amount?: number | null;
             /** Fx Currency */
             fx_currency?: string | null;
+            source_account?: components["schemas"]["SimplifiedAccountRef"] | null;
+            destination_account?: components["schemas"]["SimplifiedAccountRef"] | null;
         };
         /** Token */
         Token: {
@@ -1350,6 +1378,37 @@ export interface components {
             access_token: string;
             /** Token Type */
             token_type: string;
+        };
+        /** TransactionSnapshotRefreshResponse */
+        TransactionSnapshotRefreshResponse: {
+            /**
+             * Status
+             * @constant
+             */
+            status: "ok";
+            /** Refreshed */
+            refreshed: boolean;
+            /** Ttl Seconds */
+            ttl_seconds: number;
+            /**
+             * Snapshot Fetched At
+             * Format: date-time
+             */
+            snapshot_fetched_at: string;
+            /**
+             * Expires At
+             * Format: date-time
+             */
+            expires_at: string;
+            /** Transaction Count */
+            transaction_count: number;
+            /** Schema Version */
+            schema_version: number;
+            /**
+             * Timestamp
+             * Format: date-time
+             */
+            timestamp?: string;
         };
         /** TransactionSnapshotStatusResponse */
         TransactionSnapshotStatusResponse: {
@@ -1514,6 +1573,10 @@ export interface components {
             msg: string;
             /** Error Type */
             type: string;
+            /** Input */
+            input?: unknown;
+            /** Context */
+            ctx?: Record<string, never>;
         };
         /** VaultPassphrasePayload */
         VaultPassphrasePayload: {
@@ -1526,6 +1589,8 @@ export interface components {
             configured: boolean;
             /** Unlocked */
             unlocked: boolean;
+            /** Expires At */
+            expires_at?: string | null;
         };
         /** VersionResponse */
         VersionResponse: {
@@ -3307,6 +3372,37 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["TransactionSnapshotStatusResponse"];
+                };
+            };
+        };
+    };
+    refresh_transaction_snapshot_api_system_transaction_snapshot_refresh_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Internal-Api-Key"?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TransactionSnapshotRefreshResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

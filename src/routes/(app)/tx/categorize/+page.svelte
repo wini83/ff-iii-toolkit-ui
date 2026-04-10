@@ -12,6 +12,7 @@
     operations['get_screening_month_api_tx_screening_get']['responses'][200]['content']['application/json'];
 
   type TxTag = components['schemas']['TxTag'];
+  type FireflyAccountRef = components['schemas']['SimplifiedAccountRef'];
 
   let loading = true;
   let error: string | null = null;
@@ -34,6 +35,8 @@
   $: currentTx = data?.transactions[cursor] ?? null;
   $: currentTxId = currentTx ? toIdString(currentTx.id) : null;
   $: progressValue = data ? initialCount - data.remaining : 0;
+  $: sourceAccount = currentTx ? getAccountSummary(currentTx.source_account) : null;
+  $: destinationAccount = currentTx ? getAccountSummary(currentTx.destination_account) : null;
 
   function toIdString(id: string | number): string {
     return String(id);
@@ -56,6 +59,23 @@
       .split(/\r?\n/)
       .map((line) => line.trim())
       .filter((line) => line.length > 0);
+  }
+
+  function getAccountSummary(account: FireflyAccountRef | null | undefined) {
+    if (!account) return null;
+
+    const name = account.name.trim() || `Account #${account.id}`;
+    const meta: string[] = [];
+
+    if (account.type) meta.push(account.type);
+
+    const iban = account.iban?.trim();
+    if (iban) meta.push(iban);
+
+    return {
+      name,
+      meta: meta.length > 0 ? meta.join(' · ') : null
+    };
   }
 
   function ensureCategoryState(txId: string | number) {
@@ -368,6 +388,34 @@
                     {#each splitNotesLines(currentTx.notes) as noteLine}
                       <div>{noteLine}</div>
                     {/each}
+                  </div>
+                </div>
+              {/if}
+
+              {#if sourceAccount || destinationAccount}
+                <div class="bg-base-200/60 mt-4 rounded-2xl px-4 py-4">
+                  <div class="text-base-content/60 text-xs tracking-[0.2em] uppercase">
+                    Firefly accounts
+                  </div>
+                  <div class="mt-3 grid gap-3 sm:grid-cols-2">
+                    <div class="bg-base-100 rounded-2xl px-4 py-3">
+                      <div class="text-base-content/50 text-xs uppercase">Source</div>
+                      <div class="mt-1 text-sm font-medium">{sourceAccount?.name ?? '-'}</div>
+                      {#if sourceAccount?.meta}
+                        <div class="text-base-content/60 mt-1 text-xs">{sourceAccount.meta}</div>
+                      {/if}
+                    </div>
+                    <div class="bg-base-100 rounded-2xl px-4 py-3">
+                      <div class="text-base-content/50 text-xs uppercase">Destination</div>
+                      <div class="mt-1 text-sm font-medium">
+                        {destinationAccount?.name ?? '-'}
+                      </div>
+                      {#if destinationAccount?.meta}
+                        <div class="text-base-content/60 mt-1 text-xs">
+                          {destinationAccount.meta}
+                        </div>
+                      {/if}
+                    </div>
                   </div>
                 </div>
               {/if}
