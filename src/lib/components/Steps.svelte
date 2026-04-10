@@ -1,9 +1,9 @@
 <script lang="ts">
-  import { resolve } from '$app/paths';
+  import type { Pathname } from '$app/types';
 
   type StepItem = {
     label: string;
-    href: Parameters<typeof resolve>[0] | '#';
+    href: Pathname | '#';
   };
 
   export let steps: StepItem[] = [];
@@ -17,7 +17,7 @@
         {#if step.href === '#'}
           <span>{step.label}</span>
         {:else}
-          <a href={resolve(step.href)} data-sveltekit-reload={step.href.startsWith('/blik/')}>
+          <a href={step.href} data-sveltekit-reload={step.href.startsWith('/blik/')}>
             {step.label}
           </a>
         {/if}

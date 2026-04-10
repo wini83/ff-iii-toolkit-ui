@@ -18,6 +18,12 @@ export default defineConfig(
   prettier,
   ...svelte.configs.prettier,
   {
+    files: ['src/lib/components/Steps.svelte'],
+    rules: {
+      'svelte/no-navigation-without-resolve': 'off'
+    }
+  },
+  {
     languageOptions: {
       globals: { ...globals.browser, ...globals.node }
     },
