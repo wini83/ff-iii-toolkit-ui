@@ -23,6 +23,8 @@
 
   let year: number;
   let month: number;
+  let draftYear: number;
+  let draftMonth: number;
 
   let cursor = 0;
   let selectedCategories: Record<string, string> = {};
@@ -31,6 +33,20 @@
   const isPrimary = (tag: string) => PRIMARY_TAGS.has(tag);
 
   const TERMINAL_TAGS = new Set<TxTag>(['action_req']);
+  const MONTH_OPTIONS = [
+    { value: 1, label: 'January' },
+    { value: 2, label: 'February' },
+    { value: 3, label: 'March' },
+    { value: 4, label: 'April' },
+    { value: 5, label: 'May' },
+    { value: 6, label: 'June' },
+    { value: 7, label: 'July' },
+    { value: 8, label: 'August' },
+    { value: 9, label: 'September' },
+    { value: 10, label: 'October' },
+    { value: 11, label: 'November' },
+    { value: 12, label: 'December' }
+  ] as const;
 
   $: currentTx = data?.transactions[cursor] ?? null;
   $: currentTxId = currentTx ? toIdString(currentTx.id) : null;
@@ -95,6 +111,8 @@
 
     year = Number(params.get('year')) || now.getFullYear();
     month = Number(params.get('month')) || now.getMonth() + 1;
+    draftYear = year;
+    draftMonth = month;
   }
 
   async function load() {
@@ -218,6 +236,16 @@
     goto(`?year=${d.getFullYear()}&month=${d.getMonth() + 1}`);
   }
 
+  function jumpToPeriod() {
+    const nextYear = Number.isFinite(draftYear) ? Math.trunc(draftYear) : year;
+    const nextMonth = Number.isFinite(draftMonth) ? Math.trunc(draftMonth) : month;
+
+    if (nextMonth < 1 || nextMonth > 12) return;
+    if (nextYear < 1) return;
+
+    goto(`?year=${nextYear}&month=${nextMonth}`);
+  }
+
   onMount(() => {
     resolveYearMonth();
     load();
@@ -279,15 +307,54 @@
           </p>
         </div>
 
-        <div class="flex justify-end gap-2">
-          <button class="btn btn-outline btn-sm" on:click={prevMonth}>
-            <Icon src={icons.ChevronDoubleLeft} class="h-4 w-4" />
-            Previous
-          </button>
-          <button class="btn btn-outline btn-sm" on:click={nextMonth}>
-            Next
-            <Icon src={icons.ChevronDoubleRight} class="h-4 w-4" />
-          </button>
+        <div class="grid gap-3">
+          <div class="grid gap-3 sm:grid-cols-[1fr_0.8fr_auto]">
+            <label class="form-control">
+              <div class="label py-1">
+                <span class="label-text text-xs font-medium uppercase tracking-[0.18em]">
+                  Month
+                </span>
+              </div>
+              <select class="select select-bordered select-sm w-full" bind:value={draftMonth}>
+                {#each MONTH_OPTIONS as option}
+                  <option value={option.value}>{option.label}</option>
+                {/each}
+              </select>
+            </label>
+
+            <label class="form-control">
+              <div class="label py-1">
+                <span class="label-text text-xs font-medium uppercase tracking-[0.18em]">
+                  Year
+                </span>
+              </div>
+              <input
+                class="input input-bordered input-sm w-full"
+                type="number"
+                min="1"
+                step="1"
+                bind:value={draftYear}
+              />
+            </label>
+
+            <div class="flex items-end">
+              <button class="btn btn-primary btn-sm w-full" on:click={jumpToPeriod}>
+                Go
+                <Icon src={icons.ArrowRight} class="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+
+          <div class="flex justify-end gap-2">
+            <button class="btn btn-outline btn-sm" on:click={prevMonth}>
+              <Icon src={icons.ChevronDoubleLeft} class="h-4 w-4" />
+              Previous
+            </button>
+            <button class="btn btn-outline btn-sm" on:click={nextMonth}>
+              Next
+              <Icon src={icons.ChevronDoubleRight} class="h-4 w-4" />
+            </button>
+          </div>
         </div>
       </div>
     </div>
