@@ -4,7 +4,6 @@ import type { components, operations } from '$lib/api/schema';
 
 type UserResponse = components['schemas']['UserResponse'];
 type InviteResponse = components['schemas']['InviteResponse'];
-type AuditLogItem = components['schemas']['AuditLogItem'];
 type AuditLogResponse = components['schemas']['AuditLogResponse'];
 type CreateUserPayload =
   operations['create_user_api_users_post']['requestBody']['content']['application/json'];

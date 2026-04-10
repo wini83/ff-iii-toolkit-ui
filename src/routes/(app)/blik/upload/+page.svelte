@@ -8,8 +8,6 @@
   let file: File | null = null;
   let fileName = '';
   let error = '';
-  let loading = false;
-
   async function upload(e: SubmitEvent) {
     e.preventDefault();
     error = '';
@@ -19,8 +17,6 @@
     const formData = new FormData();
     formData.append('file', file);
 
-    loading = true;
-
     try {
       const data = await blik.uploadCsv(formData);
 
@@ -29,11 +25,9 @@
       }
 
       await goto(`/blik/file/${data.id}`);
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.error('UPLOAD ERROR', e);
-      error = e.message ?? 'Błąd podczas uploadu';
-    } finally {
-      loading = false;
+      error = e instanceof Error ? e.message : 'Błąd podczas uploadu';
     }
   }
 </script>
@@ -64,7 +58,7 @@
           class="file-input file-input-bordered w-full"
           on:change={(e) => {
             const input = e.target as HTMLInputElement | null;
-            file = input?.files?.[0] ?? null; // ← BRAKOWAŁO
+            file = input?.files?.[0] ?? null;
             fileName = file?.name ?? '';
           }}
         />

@@ -98,7 +98,7 @@ export async function exportCsvZip(file_id: string): Promise<{ blob: Blob; filen
   });
 
   if (!response.ok) {
-    let message = `Failed to export Citi CSV (${response.status})`;
+    const message = `Failed to export Citi CSV (${response.status})`;
     const textResponse = response.clone();
 
     try {

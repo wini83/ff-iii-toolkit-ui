@@ -381,10 +381,6 @@
     goto(`/allegro/${secretId}/payments`);
   }
 
-  function openAccounts() {
-    goto('/allegro/accounts');
-  }
-
   onMount(() => {
     void loadMatches();
   });

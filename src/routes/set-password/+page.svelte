@@ -14,7 +14,6 @@
   let submitting = false;
   let success = false;
   let formError: string | null = null;
-  let redirectTimeout: ReturnType<typeof setTimeout> | null = null;
 
   $: token = $page.url.searchParams.get('token')?.trim() ?? '';
   $: tokenMissing = token.length === 0;
@@ -57,7 +56,7 @@
       newPassword = '';
       confirmPassword = '';
 
-      redirectTimeout = setTimeout(() => {
+      setTimeout(() => {
         goto('/login');
       }, REDIRECT_DELAY_MS);
     } catch (error: unknown) {

@@ -24,7 +24,6 @@
 
   $: preview = data.preview;
   $: error = data.previewError;
-  $: decoded_name = preview?.decoded_name ?? '';
   $: size = preview?.size ?? 0;
   $: content = (preview?.content ?? []) as PreviewRow[];
 
@@ -100,7 +99,7 @@
             </tr>
           </thead>
           <tbody>
-            {#each content as row, i}
+            {#each content as row}
               <tr>
                 <td class="whitespace-nowrap">{row.date}</td>
                 <td class="whitespace-nowrap"

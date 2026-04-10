@@ -2,7 +2,6 @@
   import { Icon } from '@steeze-ui/svelte-icon';
   import * as icons from '@steeze-ui/heroicons';
   import { onMount, onDestroy, tick } from 'svelte';
-  import { goto } from '$app/navigation';
   import {
     Chart,
     BarController,
