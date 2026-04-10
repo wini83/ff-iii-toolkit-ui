@@ -91,7 +91,11 @@ export async function getMetricsStatus(token?: string | null): Promise<BlikMetri
   );
 
   if (!response.ok || error || !data) {
-    throw normalizeApiError(error, `Failed to load statistics (${response.status})`, response.status);
+    throw normalizeApiError(
+      error,
+      `Failed to load statistics (${response.status})`,
+      response.status
+    );
   }
 
   return data;
@@ -106,7 +110,11 @@ export async function refreshMetricsStatus(
   );
 
   if (!response.ok || error || !data) {
-    throw normalizeApiError(error, `Failed to refresh statistics (${response.status})`, response.status);
+    throw normalizeApiError(
+      error,
+      `Failed to refresh statistics (${response.status})`,
+      response.status
+    );
   }
 
   return data;

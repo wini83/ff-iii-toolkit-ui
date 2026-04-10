@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
+  import { resolve } from '$app/paths';
   import { page } from '$app/stores';
   import { Icon } from '@steeze-ui/svelte-icon';
   import * as icons from '@steeze-ui/heroicons';
@@ -12,6 +13,7 @@
     operations['get_screening_month_api_tx_screening_get']['responses'][200]['content']['application/json'];
 
   type TxTag = components['schemas']['TxTag'];
+  type FireflyAccountRef = components['schemas']['SimplifiedAccountRef'];
 
   let loading = true;
   let error: string | null = null;
@@ -22,6 +24,8 @@
 
   let year: number;
   let month: number;
+  let draftYear: number;
+  let draftMonth: number;
 
   let cursor = 0;
   let selectedCategories: Record<string, string> = {};
@@ -30,10 +34,26 @@
   const isPrimary = (tag: string) => PRIMARY_TAGS.has(tag);
 
   const TERMINAL_TAGS = new Set<TxTag>(['action_req']);
+  const MONTH_OPTIONS = [
+    { value: 1, label: 'January' },
+    { value: 2, label: 'February' },
+    { value: 3, label: 'March' },
+    { value: 4, label: 'April' },
+    { value: 5, label: 'May' },
+    { value: 6, label: 'June' },
+    { value: 7, label: 'July' },
+    { value: 8, label: 'August' },
+    { value: 9, label: 'September' },
+    { value: 10, label: 'October' },
+    { value: 11, label: 'November' },
+    { value: 12, label: 'December' }
+  ] as const;
 
   $: currentTx = data?.transactions[cursor] ?? null;
   $: currentTxId = currentTx ? toIdString(currentTx.id) : null;
   $: progressValue = data ? initialCount - data.remaining : 0;
+  $: sourceAccount = currentTx ? getAccountSummary(currentTx.source_account) : null;
+  $: destinationAccount = currentTx ? getAccountSummary(currentTx.destination_account) : null;
 
   function toIdString(id: string | number): string {
     return String(id);
@@ -58,6 +78,23 @@
       .filter((line) => line.length > 0);
   }
 
+  function getAccountSummary(account: FireflyAccountRef | null | undefined) {
+    if (!account) return null;
+
+    const name = account.name.trim() || `Account #${account.id}`;
+    const meta: string[] = [];
+
+    if (account.type) meta.push(account.type);
+
+    const iban = account.iban?.trim();
+    if (iban) meta.push(iban);
+
+    return {
+      name,
+      meta: meta.length > 0 ? meta.join(' · ') : null
+    };
+  }
+
   function ensureCategoryState(txId: string | number) {
     const normalizedId = toIdString(txId);
 
@@ -75,6 +112,8 @@
 
     year = Number(params.get('year')) || now.getFullYear();
     month = Number(params.get('month')) || now.getMonth() + 1;
+    draftYear = year;
+    draftMonth = month;
   }
 
   async function load() {
@@ -190,12 +229,25 @@
 
   function prevMonth() {
     const d = new Date(year, month - 2, 1);
-    goto(`?year=${d.getFullYear()}&month=${d.getMonth() + 1}`);
+    // eslint-disable-next-line svelte/no-navigation-without-resolve
+    goto(resolve('/tx/categorize') + `?year=${d.getFullYear()}&month=${d.getMonth() + 1}`);
   }
 
   function nextMonth() {
     const d = new Date(year, month, 1);
-    goto(`?year=${d.getFullYear()}&month=${d.getMonth() + 1}`);
+    // eslint-disable-next-line svelte/no-navigation-without-resolve
+    goto(resolve('/tx/categorize') + `?year=${d.getFullYear()}&month=${d.getMonth() + 1}`);
+  }
+
+  function jumpToPeriod() {
+    const nextYear = Number.isFinite(draftYear) ? Math.trunc(draftYear) : year;
+    const nextMonth = Number.isFinite(draftMonth) ? Math.trunc(draftMonth) : month;
+
+    if (nextMonth < 1 || nextMonth > 12) return;
+    if (nextYear < 1) return;
+
+    // eslint-disable-next-line svelte/no-navigation-without-resolve
+    goto(resolve('/tx/categorize') + `?year=${nextYear}&month=${nextMonth}`);
   }
 
   onMount(() => {
@@ -259,15 +311,54 @@
           </p>
         </div>
 
-        <div class="flex justify-end gap-2">
-          <button class="btn btn-outline btn-sm" on:click={prevMonth}>
-            <Icon src={icons.ChevronDoubleLeft} class="h-4 w-4" />
-            Previous
-          </button>
-          <button class="btn btn-outline btn-sm" on:click={nextMonth}>
-            Next
-            <Icon src={icons.ChevronDoubleRight} class="h-4 w-4" />
-          </button>
+        <div class="grid gap-3">
+          <div class="grid gap-3 sm:grid-cols-[1fr_0.8fr_auto]">
+            <label class="form-control">
+              <div class="label py-1">
+                <span class="label-text text-xs font-medium tracking-[0.18em] uppercase">
+                  Month
+                </span>
+              </div>
+              <select class="select select-bordered select-sm w-full" bind:value={draftMonth}>
+                {#each MONTH_OPTIONS as option}
+                  <option value={option.value}>{option.label}</option>
+                {/each}
+              </select>
+            </label>
+
+            <label class="form-control">
+              <div class="label py-1">
+                <span class="label-text text-xs font-medium tracking-[0.18em] uppercase">
+                  Year
+                </span>
+              </div>
+              <input
+                class="input input-bordered input-sm w-full"
+                type="number"
+                min="1"
+                step="1"
+                bind:value={draftYear}
+              />
+            </label>
+
+            <div class="flex items-end">
+              <button class="btn btn-primary btn-sm w-full" on:click={jumpToPeriod}>
+                Go
+                <Icon src={icons.ArrowRight} class="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+
+          <div class="flex justify-end gap-2">
+            <button class="btn btn-outline btn-sm" on:click={prevMonth}>
+              <Icon src={icons.ChevronDoubleLeft} class="h-4 w-4" />
+              Previous
+            </button>
+            <button class="btn btn-outline btn-sm" on:click={nextMonth}>
+              Next
+              <Icon src={icons.ChevronDoubleRight} class="h-4 w-4" />
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -323,7 +414,9 @@
             max={initialCount}
           ></progress>
 
-          <article class="from-base-100 to-base-200/60 rounded-[1.75rem] bg-gradient-to-br p-[1px] shadow-sm">
+          <article
+            class="from-base-100 to-base-200/60 rounded-[1.75rem] bg-gradient-to-br p-[1px] shadow-sm"
+          >
             <div class="bg-base-100 rounded-[calc(1.75rem-1px)] p-5">
               <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                 <div class="min-w-0">
@@ -372,12 +465,43 @@
                 </div>
               {/if}
 
+              {#if sourceAccount || destinationAccount}
+                <div class="bg-base-200/60 mt-4 rounded-2xl px-4 py-4">
+                  <div class="text-base-content/60 text-xs tracking-[0.2em] uppercase">
+                    Firefly accounts
+                  </div>
+                  <div class="mt-3 grid gap-3 sm:grid-cols-2">
+                    <div class="bg-base-100 rounded-2xl px-4 py-3">
+                      <div class="text-base-content/50 text-xs uppercase">Source</div>
+                      <div class="mt-1 text-sm font-medium">{sourceAccount?.name ?? '-'}</div>
+                      {#if sourceAccount?.meta}
+                        <div class="text-base-content/60 mt-1 text-xs">{sourceAccount.meta}</div>
+                      {/if}
+                    </div>
+                    <div class="bg-base-100 rounded-2xl px-4 py-3">
+                      <div class="text-base-content/50 text-xs uppercase">Destination</div>
+                      <div class="mt-1 text-sm font-medium">
+                        {destinationAccount?.name ?? '-'}
+                      </div>
+                      {#if destinationAccount?.meta}
+                        <div class="text-base-content/60 mt-1 text-xs">
+                          {destinationAccount.meta}
+                        </div>
+                      {/if}
+                    </div>
+                  </div>
+                </div>
+              {/if}
+
               <div class="mt-5 grid gap-4 lg:grid-cols-[1fr_auto] lg:items-end">
                 <label class="form-control">
                   <div class="label">
                     <span class="label-text font-medium">Category</span>
                   </div>
-                  <select class="select select-bordered w-full" bind:value={selectedCategories[currentTxId]}>
+                  <select
+                    class="select select-bordered w-full"
+                    bind:value={selectedCategories[currentTxId]}
+                  >
                     <option value="" disabled>Pick a category</option>
                     {#each data.categories as c}
                       <option value={c.id}>{c.name}</option>
@@ -408,7 +532,9 @@
             </div>
           </article>
 
-          <div class="flex flex-col gap-3 border-t border-base-200 pt-4 sm:flex-row sm:items-center sm:justify-between">
+          <div
+            class="border-base-200 flex flex-col gap-3 border-t pt-4 sm:flex-row sm:items-center sm:justify-between"
+          >
             <div class="text-base-content/70 text-sm">
               Remaining: {data.remaining} of {initialCount}
             </div>

@@ -1,5 +1,6 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
+  import { resolve } from '$app/paths';
   import { Icon } from '@steeze-ui/svelte-icon';
   import * as icons from '@steeze-ui/heroicons';
   import Steps from '$lib/components/Steps.svelte';
@@ -8,8 +9,6 @@
   let file: File | null = null;
   let fileName = '';
   let error = '';
-  let loading = false;
-
   async function upload(e: SubmitEvent) {
     e.preventDefault();
     error = '';
@@ -19,8 +18,6 @@
     const formData = new FormData();
     formData.append('file', file);
 
-    loading = true;
-
     try {
       const data = await blik.uploadCsv(formData);
 
@@ -28,12 +25,10 @@
         throw new Error('Nieprawidłowa odpowiedź backendu');
       }
 
-      await goto(`/blik/file/${data.id}`);
-    } catch (e: any) {
+      await goto(resolve(`/blik/file/${data.id}`));
+    } catch (e: unknown) {
       console.error('UPLOAD ERROR', e);
-      error = e.message ?? 'Błąd podczas uploadu';
-    } finally {
-      loading = false;
+      error = e instanceof Error ? e.message : 'Błąd podczas uploadu';
     }
   }
 </script>
@@ -64,7 +59,7 @@
           class="file-input file-input-bordered w-full"
           on:change={(e) => {
             const input = e.target as HTMLInputElement | null;
-            file = input?.files?.[0] ?? null; // ← BRAKOWAŁO
+            file = input?.files?.[0] ?? null;
             fileName = file?.name ?? '';
           }}
         />

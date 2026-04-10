@@ -1,7 +1,9 @@
 <script lang="ts">
+  import type { Pathname } from '$app/types';
+
   type StepItem = {
     label: string;
-    href: string;
+    href: Pathname | '#';
   };
 
   export let steps: StepItem[] = [];
@@ -10,12 +12,14 @@
 
 <div class="card bg-base-100 mt-2 w-full p-6 shadow-xl">
   <ul class="steps hidden w-1/2 flex-none md:flex">
-    {#each steps as step, i}
+    {#each steps as step, i (`${step.href}-${i}`)}
       <li class="step {i <= activeIndex ? 'step-primary' : ''}">
         {#if step.href === '#'}
           <span>{step.label}</span>
         {:else}
-          <a href={step.href}>{step.label}</a>
+          <a href={step.href} data-sveltekit-reload={step.href.startsWith('/blik/')}>
+            {step.label}
+          </a>
         {/if}
       </li>
     {/each}

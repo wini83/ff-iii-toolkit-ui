@@ -1,5 +1,6 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
+  import { resolve } from '$app/paths';
   import { page } from '$app/stores';
   import { Icon } from '@steeze-ui/svelte-icon';
   import * as icons from '@steeze-ui/heroicons';
@@ -27,7 +28,8 @@
   async function syncUrl(fileId: string) {
     const next = new URL($page.url);
     next.searchParams.set('file_id', fileId);
-    await goto(`${next.pathname}?${next.searchParams.toString()}`, {
+    // eslint-disable-next-line svelte/no-navigation-without-resolve
+    await goto(resolve('/tools/citi/preview') + `?${next.searchParams.toString()}`, {
       replaceState: true,
       noScroll: true,
       keepFocus: true
@@ -111,7 +113,8 @@
           <div>
             <h2 class="text-3xl font-semibold tracking-tight">Citi Preview & Export</h2>
             <p class="text-base-content/70 mt-2 max-w-2xl text-sm sm:text-base">
-              Open a saved result by `file_id`, inspect parsed records, and export the generated ZIP package.
+              Open a saved result by `file_id`, inspect parsed records, and export the generated ZIP
+              package.
             </p>
           </div>
         </div>
@@ -123,12 +126,13 @@
         <div>
           <div class="text-base-content/60 text-xs tracking-[0.2em] uppercase">Navigation</div>
           <p class="mt-2 text-sm">
-            Import runs in a separate flow. After a successful parse, this page becomes the review and export workspace for that `file_id`.
+            Import runs in a separate flow. After a successful parse, this page becomes the review
+            and export workspace for that `file_id`.
           </p>
         </div>
 
         <div class="flex flex-wrap gap-3">
-          <a href="/tools/citi" class="btn btn-outline btn-sm">
+          <a href={resolve('/tools/citi')} class="btn btn-outline btn-sm">
             <Icon src={icons.DocumentArrowUp} class="h-4 w-4" />
             Back to import
           </a>

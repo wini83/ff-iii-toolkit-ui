@@ -1,5 +1,6 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
+  import { resolve } from '$app/paths';
   import { Icon } from '@steeze-ui/svelte-icon';
   import * as icons from '@steeze-ui/heroicons';
   import Steps from '$lib/components/Steps.svelte';
@@ -24,12 +25,11 @@
 
   $: preview = data.preview;
   $: error = data.previewError;
-  $: decoded_name = preview?.decoded_name ?? '';
   $: size = preview?.size ?? 0;
   $: content = (preview?.content ?? []) as PreviewRow[];
 
   function goToMatch() {
-    goto(`/blik/file/${file_id}/match`);
+    goto(resolve(`/blik/file/${file_id}/match`));
   }
 
   function formatAmount(v?: number) {
@@ -100,7 +100,7 @@
             </tr>
           </thead>
           <tbody>
-            {#each content as row, i}
+            {#each content as row}
               <tr>
                 <td class="whitespace-nowrap">{row.date}</td>
                 <td class="whitespace-nowrap"

@@ -1,5 +1,6 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
+  import { resolve } from '$app/paths';
   import { Icon } from '@steeze-ui/svelte-icon';
   import * as icons from '@steeze-ui/heroicons';
   import { citi } from '$lib/api/citi';
@@ -65,7 +66,8 @@
   }
 
   async function goToPreview(result: CitiImportParseResponse) {
-    await goto(`/tools/citi/preview?file_id=${encodeURIComponent(result.file_id)}`);
+    // eslint-disable-next-line svelte/no-navigation-without-resolve
+    await goto(resolve('/tools/citi/preview') + `?file_id=${encodeURIComponent(result.file_id)}`);
   }
 
   async function parseFile() {
@@ -167,26 +169,33 @@
 
 <div class="mx-auto flex w-full max-w-6xl flex-col gap-6">
   <section class="card bg-base-100 border-base-200 overflow-hidden border shadow-xl">
-    <div class="from-base-100 via-base-100 to-secondary/8 flex flex-col gap-5 bg-gradient-to-br px-6 py-6 lg:px-8">
+    <div
+      class="from-base-100 via-base-100 to-secondary/8 flex flex-col gap-5 bg-gradient-to-br px-6 py-6 lg:px-8"
+    >
       <div class="flex items-start gap-4">
         <div class="bg-secondary/12 text-secondary rounded-3xl p-4">
           <Icon src={icons.DocumentArrowUp} class="h-8 w-8" />
         </div>
         <div class="space-y-2">
-          <div class="bg-base-200/80 inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium tracking-[0.24em] uppercase">
+          <div
+            class="bg-base-200/80 inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium tracking-[0.24em] uppercase"
+          >
             <span class="bg-secondary h-2 w-2 rounded-full"></span>
             Import workspace
           </div>
           <div>
             <h2 class="text-3xl font-semibold tracking-tight">Citi Import</h2>
             <p class="text-base-content/70 mt-2 max-w-2xl text-sm sm:text-base">
-              Start with a TXT file or raw Citi text. After parsing, the app opens a dedicated preview workspace for review and export.
+              Start with a TXT file or raw Citi text. After parsing, the app opens a dedicated
+              preview workspace for review and export.
             </p>
           </div>
         </div>
       </div>
 
-      <div class="bg-base-100/80 ring-base-200 flex flex-col justify-between gap-4 rounded-3xl p-5 shadow-sm ring-1">
+      <div
+        class="bg-base-100/80 ring-base-200 flex flex-col justify-between gap-4 rounded-3xl p-5 shadow-sm ring-1"
+      >
         <div>
           <div class="text-base-content/60 text-xs tracking-[0.2em] uppercase">Flow</div>
           <div class="mt-3 space-y-3 text-sm">
@@ -205,7 +214,7 @@
           </div>
         </div>
 
-        <a href="/tools/citi/preview" class="btn btn-outline btn-sm self-start">
+        <a href={resolve('/tools/citi/preview')} class="btn btn-outline btn-sm self-start">
           <Icon src={icons.DocumentMagnifyingGlass} class="h-4 w-4" />
           Open preview directly
         </a>
@@ -246,7 +255,9 @@
 
         <div class="bg-base-200/40 rounded-[1.75rem] p-5">
           <div class="mb-4">
-            <h4 class="text-lg font-semibold">{activeMode === 'file' ? 'Upload TXT file' : 'Paste raw Citi text'}</h4>
+            <h4 class="text-lg font-semibold">
+              {activeMode === 'file' ? 'Upload TXT file' : 'Paste raw Citi text'}
+            </h4>
             <p class="text-base-content/70 mt-1 text-sm">{activeDescription}</p>
           </div>
 
@@ -271,7 +282,9 @@
                   <span>Selected file: <span class="font-medium">{selectedFileName}</span></span>
                 </div>
               {:else}
-                <div class="border-base-300 text-base-content/65 rounded-2xl border border-dashed px-4 py-6 text-sm">
+                <div
+                  class="border-base-300 text-base-content/65 rounded-2xl border border-dashed px-4 py-6 text-sm"
+                >
                   No file selected yet. Use a Citi TXT export as the parser input.
                 </div>
               {/if}
@@ -324,14 +337,16 @@
           <div>
             <div class="font-medium">Include positive transactions</div>
             <div class="text-base-content/65 text-sm">
-              Enable this only when inbound or positive rows should be included in the parsed result.
+              Enable this only when inbound or positive rows should be included in the parsed
+              result.
             </div>
           </div>
           <input
             type="checkbox"
             class="toggle toggle-secondary"
             checked={activeIncludePositive}
-            on:change={(event) => setIncludePositive((event.currentTarget as HTMLInputElement).checked)}
+            on:change={(event) =>
+              setIncludePositive((event.currentTarget as HTMLInputElement).checked)}
             aria-label="Toggle positive transactions"
           />
         </label>
@@ -348,7 +363,8 @@
             step="20"
             class="range range-secondary"
             value={activeChunkSize}
-            on:input={(event) => setChunkSize(Number((event.currentTarget as HTMLInputElement).value))}
+            on:input={(event) =>
+              setChunkSize(Number((event.currentTarget as HTMLInputElement).value))}
           />
         </div>
 
@@ -356,7 +372,9 @@
           <div class="text-base-content/60 text-xs font-medium tracking-[0.24em] uppercase">
             Current mode
           </div>
-          <div class="mt-2 text-sm font-medium">{activeMode === 'file' ? 'File upload' : 'Raw text'}</div>
+          <div class="mt-2 text-sm font-medium">
+            {activeMode === 'file' ? 'File upload' : 'Raw text'}
+          </div>
           <p class="text-base-content/70 mt-2 text-sm">
             {activeMode === 'file'
               ? 'Use this for the standard import flow from a local TXT file.'
@@ -364,7 +382,12 @@
           </p>
         </div>
 
-        <button type="button" class="btn btn-primary w-full" on:click={handleSubmit} disabled={isSubmitting}>
+        <button
+          type="button"
+          class="btn btn-primary w-full"
+          on:click={handleSubmit}
+          disabled={isSubmitting}
+        >
           {#if isSubmitting}
             <span class="loading loading-spinner loading-sm"></span>
             Parsing...
@@ -375,7 +398,8 @@
         </button>
 
         <p class="text-base-content/60 text-xs leading-relaxed">
-          After a successful parse, the app redirects to the preview page with the generated `file_id`.
+          After a successful parse, the app redirects to the preview page with the generated
+          `file_id`.
         </p>
       </div>
     </aside>

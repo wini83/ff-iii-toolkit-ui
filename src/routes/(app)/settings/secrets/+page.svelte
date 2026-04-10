@@ -650,7 +650,10 @@
                       <span class="font-medium">External username:</span>
                       {formatText(secret.external_username)}
                     </p>
-                    <p><span class="font-medium">Last used:</span> {formatDate(secret.last_used_at)}</p>
+                    <p>
+                      <span class="font-medium">Last used:</span>
+                      {formatDate(secret.last_used_at)}
+                    </p>
                     <p><span class="font-medium">Created:</span> {formatDate(secret.created_at)}</p>
                   </div>
 

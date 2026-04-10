@@ -1,5 +1,6 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
+  import { resolve } from '$app/paths';
   import Steps from '$lib/components/Steps.svelte';
 
   let fileId = '';
@@ -7,7 +8,7 @@
   function goToFile() {
     const trimmed = fileId.trim();
     if (!trimmed) return; // zero jazdy bez trzymanki
-    goto(`/blik/file/${trimmed}`);
+    goto(resolve(`/blik/file/${trimmed}`));
   }
 </script>
 

@@ -18,9 +18,12 @@ export const load: PageServerLoad = async ({ cookies, url, fetch }) => {
   const API_INTERNAL = process.env.INTERNAL_API_BASE ?? 'http://localhost:8000';
 
   try {
-    const response = await fetch(`${API_INTERNAL}/api/tools/citi/files/${encodeURIComponent(fileId)}`, {
-      headers: token ? { Authorization: `Bearer ${token}` } : {}
-    });
+    const response = await fetch(
+      `${API_INTERNAL}/api/tools/citi/files/${encodeURIComponent(fileId)}`,
+      {
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
+      }
+    );
 
     if (!response.ok) {
       const text = await response.text().catch(() => '');

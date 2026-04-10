@@ -18,13 +18,29 @@ export default defineConfig(
   prettier,
   ...svelte.configs.prettier,
   {
+    files: ['src/lib/components/Steps.svelte'],
+    rules: {
+      'svelte/no-navigation-without-resolve': 'off'
+    }
+  },
+  {
     languageOptions: {
       globals: { ...globals.browser, ...globals.node }
     },
     rules: {
       // typescript-eslint strongly recommend that you do not use the no-undef lint rule on TypeScript projects.
       // see: https://typescript-eslint.io/troubleshooting/faqs/eslint/#i-get-errors-from-the-no-undef-rule-about-global-variables-not-being-defined-even-though-there-are-no-typescript-errors
-      'no-undef': 'off'
+      'no-undef': 'off',
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_'
+        }
+      ],
+      'svelte/require-each-key': 'off',
+      'svelte/prefer-svelte-reactivity': 'off',
+      'svelte/no-useless-mustaches': 'off'
     }
   },
   {

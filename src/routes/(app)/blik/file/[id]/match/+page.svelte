@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onDestroy, onMount, tick } from 'svelte';
   import { goto } from '$app/navigation';
+  import { resolve } from '$app/paths';
   import { page } from '$app/stores';
   import { Icon } from '@steeze-ui/svelte-icon';
   import * as icons from '@steeze-ui/heroicons';
@@ -12,7 +13,8 @@
   type SimplifiedRecord = components['schemas']['SimplifiedRecord'];
   type ApplyDecision = components['schemas']['api__models__blik_files__ApplyDecision'];
   type ApplyJobResponse = components['schemas']['api__models__blik_files__ApplyJobResponse'];
-  type ApplyOutcomeResponse = components['schemas']['api__models__blik_files__ApplyOutcomeResponse'];
+  type ApplyOutcomeResponse =
+    components['schemas']['api__models__blik_files__ApplyOutcomeResponse'];
   type JobStatus = components['schemas']['JobStatus'];
 
   const POLL_INTERVAL_MS = 1_000;
@@ -43,17 +45,16 @@
 
   $: fileId = $page.params.id ?? '';
   $: oneMatches =
-    matchData?.transactions_with_one_match ??
-    rows.filter((row) => row.matches.length === 1).length;
+    matchData?.transactions_with_one_match ?? rows.filter((row) => row.matches.length === 1).length;
   $: manyMatches =
     matchData?.transactions_with_many_matches ??
     rows.filter((row) => row.matches.length > 1).length;
   $: noMatches =
-    matchData?.transactions_not_matched ??
-    rows.filter((row) => row.matches.length === 0).length;
+    matchData?.transactions_not_matched ?? rows.filter((row) => row.matches.length === 0).length;
   $: visibleRows = actionableOnly ? rows.filter(isActionableRow) : rows;
   $: processedCount = rows.filter((row) => row.status === 'already_processed').length;
-  $: applyProgressPercent = applyRunTotal > 0 ? Math.min(100, Math.round((applyRunProcessed / applyRunTotal) * 100)) : 0;
+  $: applyProgressPercent =
+    applyRunTotal > 0 ? Math.min(100, Math.round((applyRunProcessed / applyRunTotal) * 100)) : 0;
 
   function getNonEmptyString(value: unknown): string | null {
     if (typeof value !== 'string') return null;
@@ -99,11 +100,7 @@
   function emitToast(type: 'info' | 'success' | 'error', msg: string) {
     const safeMsg =
       getNonEmptyString(msg) ??
-      (type === 'error'
-        ? 'Failed to load matches'
-        : type === 'success'
-          ? 'Success'
-          : 'Info');
+      (type === 'error' ? 'Failed to load matches' : type === 'success' ? 'Success' : 'Info');
 
     window.dispatchEvent(
       new CustomEvent('toast', {
@@ -199,7 +196,9 @@
         newSuccess += 1;
         successTxIds.add(result.transaction_id);
         const selectedMatchId =
-          getNonEmptyString(result.selected_match_id) ?? selectedByTx.get(result.transaction_id) ?? null;
+          getNonEmptyString(result.selected_match_id) ??
+          selectedByTx.get(result.transaction_id) ??
+          null;
 
         if (selectedMatchId) {
           appliedMatches.add(matchKey(result.transaction_id, selectedMatchId));
@@ -376,9 +375,9 @@
       applyRunProcessed = finalJob.applied + finalJob.failed;
 
       if (finalJob.failed > 0 && finalJob.applied === 0) {
-        const firstReason = finalJob.results.find((result) => result.status === 'failed')?.reason ?? null;
-        applyProgressError =
-          firstReason ?? `Apply failed for ${finalJob.failed} item(s).`;
+        const firstReason =
+          finalJob.results.find((result) => result.status === 'failed')?.reason ?? null;
+        applyProgressError = firstReason ?? `Apply failed for ${finalJob.failed} item(s).`;
         applyProgressLabel = 'Apply finished with failures.';
       } else if (finalJob.failed > 0) {
         applyProgressLabel = `Partially applied. Applied: ${finalJob.applied}, failed: ${finalJob.failed}.`;
@@ -397,11 +396,11 @@
   }
 
   function openPreview() {
-    goto(`/blik/file/${fileId}`);
+    goto(resolve(`/blik/file/${fileId}`));
   }
 
   function openUpload() {
-    goto('/blik/upload');
+    goto(resolve('/blik/upload'));
   }
 
   onMount(() => {
@@ -456,7 +455,11 @@
         </div>
 
         <div class="flex flex-wrap justify-end gap-3">
-          <button class="btn btn-outline" on:click={() => (isStatsModalOpen = true)} disabled={!matchData}>
+          <button
+            class="btn btn-outline"
+            on:click={() => (isStatsModalOpen = true)}
+            disabled={!matchData}
+          >
             <Icon src={icons.ChartBar} class="h-5 w-5" />
             Stats
           </button>
@@ -513,7 +516,11 @@
 
         <label class="label flex cursor-pointer items-center justify-start gap-3 p-0">
           <span class="label-text text-sm">Show only actionable items</span>
-          <input type="checkbox" class="toggle toggle-sm toggle-primary" bind:checked={actionableOnly} />
+          <input
+            type="checkbox"
+            class="toggle toggle-sm toggle-primary"
+            bind:checked={actionableOnly}
+          />
         </label>
       </div>
 
@@ -531,7 +538,9 @@
           <div class="skeleton h-20 w-full rounded-3xl"></div>
         </div>
       {:else if !matchData}
-        <div class="bg-base-200/60 flex flex-col items-center rounded-[2rem] px-6 py-14 text-center">
+        <div
+          class="bg-base-200/60 flex flex-col items-center rounded-[2rem] px-6 py-14 text-center"
+        >
           <div class="bg-primary/12 text-primary rounded-3xl p-4">
             <Icon src={icons.InformationCircle} class="h-8 w-8" />
           </div>
@@ -541,7 +550,9 @@
           </p>
         </div>
       {:else if rows.length === 0}
-        <div class="bg-base-200/60 flex flex-col items-center rounded-[2rem] px-6 py-14 text-center">
+        <div
+          class="bg-base-200/60 flex flex-col items-center rounded-[2rem] px-6 py-14 text-center"
+        >
           <div class="bg-warning/15 text-warning rounded-3xl p-4">
             <Icon src={icons.Sparkles} class="h-8 w-8" />
           </div>
@@ -551,7 +562,9 @@
           </p>
         </div>
       {:else if visibleRows.length === 0}
-        <div class="bg-base-200/60 flex flex-col items-center rounded-[2rem] px-6 py-14 text-center">
+        <div
+          class="bg-base-200/60 flex flex-col items-center rounded-[2rem] px-6 py-14 text-center"
+        >
           <div class="bg-primary/12 text-primary rounded-3xl p-4">
             <Icon src={icons.Funnel} class="h-8 w-8" />
           </div>
@@ -563,7 +576,9 @@
       {:else}
         <div class="space-y-4">
           {#each visibleRows as row}
-            <article class="from-base-100 to-base-200/60 rounded-[1.75rem] bg-gradient-to-br p-[1px] shadow-sm">
+            <article
+              class="from-base-100 to-base-200/60 rounded-[1.75rem] bg-gradient-to-br p-[1px] shadow-sm"
+            >
               <div class="bg-base-100 rounded-[calc(1.75rem-1px)] p-5">
                 <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                   <div class="min-w-0">
@@ -611,10 +626,14 @@
                         : false}
                       <div
                         class={`rounded-[1.25rem] p-4 ${
-                          candidateApplied ? 'bg-success/12 ring-success/30 ring-1' : 'bg-base-200/55'
+                          candidateApplied
+                            ? 'bg-success/12 ring-success/30 ring-1'
+                            : 'bg-base-200/55'
                         }`}
                       >
-                        <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                        <div
+                          class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between"
+                        >
                           {#if !isRowProcessed(row)}
                             <label class="flex cursor-pointer items-center gap-3">
                               <input
@@ -644,10 +663,15 @@
                           <div class="flex flex-wrap items-center gap-2 sm:justify-end">
                             <span class="text-sm font-medium">{formatDate(candidate.date)}</span>
                             <span class="text-sm">
-                              {formatMoney(candidate.operation_amount, candidate.operation_currency)}
+                              {formatMoney(
+                                candidate.operation_amount,
+                                candidate.operation_currency
+                              )}
                             </span>
                             {#if !isRowProcessed(row)}
-                              <span class={`badge badge-soft ${candidateApplied ? 'badge-success' : 'badge-warning'}`}>
+                              <span
+                                class={`badge badge-soft ${candidateApplied ? 'badge-success' : 'badge-warning'}`}
+                              >
                                 {candidateApplied ? 'applied' : 'candidate'}
                               </span>
                             {/if}
@@ -664,11 +688,21 @@
                         </div>
 
                         <div class="mt-3 grid gap-2 text-sm">
-                          <div><span class="text-base-content/60">Details:</span> {candidate.details}</div>
-                          <div><span class="text-base-content/60">Sender:</span> {candidate.sender}</div>
-                          <div><span class="text-base-content/60">Recipient:</span> {candidate.recipient}</div>
+                          <div>
+                            <span class="text-base-content/60">Details:</span>
+                            {candidate.details}
+                          </div>
+                          <div>
+                            <span class="text-base-content/60">Sender:</span>
+                            {candidate.sender}
+                          </div>
+                          <div>
+                            <span class="text-base-content/60">Recipient:</span>
+                            {candidate.recipient}
+                          </div>
                           <div class="text-base-content/70 text-xs">
-                            {candidate.sender_account} {candidate.recipient_account ? `| ${candidate.recipient_account}` : ''}
+                            {candidate.sender_account}
+                            {candidate.recipient_account ? `| ${candidate.recipient_account}` : ''}
                           </div>
                         </div>
                       </div>
@@ -682,7 +716,6 @@
       {/if}
     </div>
   </section>
-
 </div>
 
 {#if matchData}
@@ -825,14 +858,18 @@
             <div class="max-h-80 overflow-y-auto px-3 py-3">
               <div class="space-y-2">
                 {#each applyUpdates as update, index (`${update.transactionId}-${index}`)}
-                  <div class="bg-base-100 flex items-center justify-between rounded-xl px-3 py-2 text-sm">
+                  <div
+                    class="bg-base-100 flex items-center justify-between rounded-xl px-3 py-2 text-sm"
+                  >
                     <div class="min-w-0">
                       <div class="font-medium">Transaction #{update.transactionId}</div>
                       {#if update.reason}
                         <div class="text-base-content/60 truncate text-xs">{update.reason}</div>
                       {/if}
                     </div>
-                    <span class={`badge badge-soft ${update.status === 'success' ? 'badge-success' : 'badge-error'}`}>
+                    <span
+                      class={`badge badge-soft ${update.status === 'success' ? 'badge-success' : 'badge-error'}`}
+                    >
                       {update.status}
                     </span>
                   </div>
@@ -845,12 +882,18 @@
     </div>
 
     <div class="modal-action">
-      <button class="btn btn-sm" on:click={() => (isApplyProgressModalOpen = false)} disabled={applying}>
+      <button
+        class="btn btn-sm"
+        on:click={() => (isApplyProgressModalOpen = false)}
+        disabled={applying}
+      >
         {applying ? 'Processing...' : 'Close'}
       </button>
     </div>
   </div>
   <form method="dialog" class="modal-backdrop">
-    <button on:click={() => !applying && (isApplyProgressModalOpen = false)} disabled={applying}>close</button>
+    <button on:click={() => !applying && (isApplyProgressModalOpen = false)} disabled={applying}
+      >close</button
+    >
   </form>
 </dialog>

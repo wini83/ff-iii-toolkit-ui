@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onDestroy, onMount } from 'svelte';
   import { goto } from '$app/navigation';
+  import { resolve } from '$app/paths';
   import { page } from '$app/stores';
   import { Icon } from '@steeze-ui/svelte-icon';
   import * as icons from '@steeze-ui/heroicons';
@@ -301,8 +302,9 @@
 
       if (finalJob.failed > 0 && finalJob.applied === 0) {
         const firstReason =
-          finalJob.results.find((result: ApplyJobResponse['results'][number]) => result.status === 'failed')
-            ?.reason ?? null;
+          finalJob.results.find(
+            (result: ApplyJobResponse['results'][number]) => result.status === 'failed'
+          )?.reason ?? null;
         emitToast(
           'error',
           firstReason
@@ -377,11 +379,7 @@
   }
 
   function openPayments() {
-    goto(`/allegro/${secretId}/payments`);
-  }
-
-  function openAccounts() {
-    goto('/allegro/accounts');
+    goto(resolve(`/allegro/${secretId}/payments`));
   }
 
   onMount(() => {
@@ -417,7 +415,9 @@
           <div>
             <h2 class="text-3xl font-semibold tracking-tight">Allegro matches</h2>
             <p class="text-base-content/70 mt-2 max-w-2xl text-sm sm:text-base">
-              Review matching candidates for the selected Allegro secret{login ? ` (${login})` : ''}.
+              Review matching candidates for the selected Allegro secret{login
+                ? ` (${login})`
+                : ''}.
             </p>
           </div>
         </div>
@@ -502,7 +502,11 @@
 
         <label class="label flex cursor-pointer items-center justify-start gap-3 p-0">
           <span class="label-text text-sm">Show only actionable items</span>
-          <input type="checkbox" class="toggle toggle-sm toggle-primary" bind:checked={actionableOnly} />
+          <input
+            type="checkbox"
+            class="toggle toggle-sm toggle-primary"
+            bind:checked={actionableOnly}
+          />
         </label>
       </div>
 
@@ -558,7 +562,9 @@
       {:else}
         <div class="space-y-4">
           {#each visibleRows as row}
-            <article class="from-base-100 to-base-200/60 rounded-[1.75rem] bg-gradient-to-br p-[1px] shadow-sm">
+            <article
+              class="from-base-100 to-base-200/60 rounded-[1.75rem] bg-gradient-to-br p-[1px] shadow-sm"
+            >
               <div class="bg-base-100 rounded-[calc(1.75rem-1px)] p-5">
                 <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                   <div class="min-w-0">
@@ -580,9 +586,7 @@
                 </div>
 
                 {#if row.matches.length === 0}
-                  <div class="bg-base-200/60 mt-4 rounded-2xl px-4 py-3 text-sm">
-                    No candidates
-                  </div>
+                  <div class="bg-base-200/60 mt-4 rounded-2xl px-4 py-3 text-sm">No candidates</div>
                 {:else}
                   <div class="mt-4 grid gap-3">
                     {#each row.matches as candidate}
@@ -594,7 +598,9 @@
                             : 'bg-base-200/55'
                         }`}
                       >
-                        <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                        <div
+                          class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between"
+                        >
                           <label class="flex cursor-pointer items-center gap-3">
                             <input
                               type="checkbox"
@@ -635,7 +641,9 @@
                           {#if candidate.details.length}
                             <div class="space-y-1">
                               {#each candidate.details as detail}
-                                <div class="text-base-content/80 text-xs leading-tight">{detail}</div>
+                                <div class="text-base-content/80 text-xs leading-tight">
+                                  {detail}
+                                </div>
                               {/each}
                             </div>
                           {:else}
@@ -651,9 +659,11 @@
           {/each}
         </div>
 
-        <div class="flex flex-col gap-3 border-t border-base-200 pt-4 sm:flex-row sm:items-center sm:justify-between">
+        <div
+          class="border-base-200 flex flex-col gap-3 border-t pt-4 sm:flex-row sm:items-center sm:justify-between"
+        >
           <div class="flex items-center gap-2.5">
-            <span class="text-base-content/60 whitespace-nowrap text-xs font-medium">
+            <span class="text-base-content/60 text-xs font-medium whitespace-nowrap">
               Rows per page
             </span>
             <select
@@ -695,7 +705,8 @@
               Payments fetched from Allegro that do not have any transaction candidate.
             </p>
           </div>
-          <span class="badge badge-outline badge-sm">{matchResponse.unmatched_payments.length}</span>
+          <span class="badge badge-outline badge-sm">{matchResponse.unmatched_payments.length}</span
+          >
         </div>
 
         <div class="divider my-0"></div>
@@ -762,7 +773,9 @@
                 <div class="bg-base-100 rounded-[calc(1.75rem-1px)] p-5">
                   <div class="flex items-start justify-between gap-4">
                     <div>
-                      <div class="text-base-content/60 text-xs tracking-[0.2em] uppercase">Date</div>
+                      <div class="text-base-content/60 text-xs tracking-[0.2em] uppercase">
+                        Date
+                      </div>
                       <div class="mt-2 text-sm font-semibold">{formatDate(payment.date)}</div>
                     </div>
                     <span
@@ -779,11 +792,13 @@
                     </div>
                     <div class="bg-base-200/60 rounded-2xl px-4 py-3">
                       <div class="text-base-content/60 text-xs uppercase">Payment ID</div>
-                      <div class="mt-1 font-mono text-sm font-medium">{payment.external_short_id}</div>
+                      <div class="mt-1 font-mono text-sm font-medium">
+                        {payment.external_short_id}
+                      </div>
                     </div>
                   </div>
 
-                  <div class="mt-4 bg-base-200/60 rounded-2xl px-4 py-3">
+                  <div class="bg-base-200/60 mt-4 rounded-2xl px-4 py-3">
                     <div class="text-base-content/60 text-xs uppercase">Details</div>
                     {#if payment.details.length}
                       <div class="mt-2 space-y-1">

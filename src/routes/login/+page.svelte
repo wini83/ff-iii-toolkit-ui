@@ -1,8 +1,15 @@
 <script lang="ts">
   import { Icon } from '@steeze-ui/svelte-icon';
   import * as icons from '@steeze-ui/heroicons';
+  import type { components } from '$lib/api/schema';
 
   export let form;
+  export let data: {
+    systemStatus?: {
+      health: components['schemas']['HealthResponse'] | null;
+      version: components['schemas']['VersionResponse'] | null;
+    };
+  };
 
   let username = '';
   let password = '';
@@ -10,6 +17,26 @@
 
   $: if (form?.error) {
     error = form.error;
+  }
+
+  function getVersionLabel() {
+    return data?.systemStatus?.version?.version ?? 'n/a';
+  }
+
+  function getStatusIcon() {
+    const health = data?.systemStatus?.health;
+    if (health?.status === 'ok' && health.database === 'ok') {
+      return icons.ShieldCheck;
+    }
+
+    return icons.ShieldExclamation;
+  }
+
+  function getStatusTooltipText() {
+    const health = data?.systemStatus?.health;
+    if (!health) return 'health: n/a | database: n/a';
+
+    return `health: ${health.status} | db: ${health.database}`;
   }
 </script>
 
@@ -35,8 +62,10 @@
         <div
           class="inline-flex items-center gap-3 rounded-full bg-white/10 px-4 py-2 text-sm backdrop-blur"
         >
-          <Icon src={icons.ShieldCheck} class="h-5 w-5" />
-          Secure access
+          <span class="tooltip tooltip-bottom inline-flex" data-tip={getStatusTooltipText()}>
+            <Icon src={getStatusIcon()} class="h-5 w-5" />
+          </span>
+          v{getVersionLabel()}
         </div>
 
         <div class="mt-8 flex items-center gap-5">

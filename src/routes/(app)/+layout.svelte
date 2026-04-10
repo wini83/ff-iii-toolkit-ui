@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
+  import { resolve } from '$app/paths';
   import { page } from '$app/stores';
 
   import { Icon } from '@steeze-ui/svelte-icon';
@@ -86,6 +87,27 @@
     return fallback;
   }
 
+  function formatDateTime(timestamp: string | null | undefined) {
+    if (!timestamp) return null;
+
+    const date = new Date(timestamp);
+    if (Number.isNaN(date.getTime())) return timestamp;
+
+    return new Intl.DateTimeFormat('pl-PL', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    }).format(date);
+  }
+
+  function getVaultExpiryText(status: VaultStatus | null) {
+    const expiry = formatDateTime(status?.expires_at);
+    return expiry ? `Vault session expires at ${expiry}` : null;
+  }
+
   function getVaultStatusMeta(status: VaultStatus | null) {
     if (!status) {
       return {
@@ -166,7 +188,7 @@
   }
 
   function openSecretsSettings() {
-    void goto('/settings/secrets');
+    void goto(resolve('/settings/secrets'));
   }
 
   async function logout() {
@@ -174,7 +196,7 @@
       await fetch('/logout', { method: 'POST' });
     } finally {
       meUser = null;
-      await goto('/login', { invalidateAll: true });
+      await goto(resolve('/login'), { invalidateAll: true });
     }
   }
 
@@ -293,7 +315,7 @@
           </div>
         </div>
 
-        <div class="flex-none flex items-center gap-2">
+        <div class="flex flex-none items-center gap-2">
           <div class="dropdown dropdown-end">
             <button
               tabindex="0"
@@ -317,9 +339,18 @@
                   <div class="text-base-content/70 mt-1 text-xs">
                     {getVaultStatusMeta(vaultStatus).label}
                   </div>
+                  {#if getVaultExpiryText(vaultStatus)}
+                    <div class="text-base-content/60 mt-1 text-xs">
+                      {getVaultExpiryText(vaultStatus)}
+                    </div>
+                  {/if}
                 </div>
 
-                <button class="btn btn-ghost btn-xs" disabled={vaultLoading} on:click={() => refreshVaultStatus(true)}>
+                <button
+                  class="btn btn-ghost btn-xs"
+                  disabled={vaultLoading}
+                  on:click={() => refreshVaultStatus(true)}
+                >
                   {#if vaultLoading}
                     <span class="loading loading-spinner loading-xs"></span>
                   {:else}
@@ -340,13 +371,12 @@
                   Open vault settings
                 </button>
               {:else if vaultStatus?.unlocked}
-                <div class="alert alert-success mt-4">
-                  <Icon src={icons.LockOpen} class="h-5 w-5" />
-                  <span>Vault is unlocked for the current session.</span>
-                </div>
-
                 <div class="mt-4 flex gap-2">
-                  <button class="btn btn-outline btn-sm flex-1" disabled={vaultLocking} on:click={lockVaultFromLayout}>
+                  <button
+                    class="btn btn-outline btn-sm flex-1"
+                    disabled={vaultLocking}
+                    on:click={lockVaultFromLayout}
+                  >
                     {#if vaultLocking}
                       <span class="loading loading-spinner loading-sm"></span>
                     {:else}
@@ -425,9 +455,13 @@
             <ul
               class="menu menu-sm dropdown-content bg-base-100 rounded-box border-base-200 mt-3 w-56 border p-2 shadow-xl"
             >
-              <li><a href="/profile"><Icon src={icons.User} class="h-5 w-5" /> Profile</a></li>
               <li>
-                <a href="/settings/secrets"><Icon src={icons.Key} class="h-5 w-5" /> Secrets</a>
+                <a href={resolve('/profile')}><Icon src={icons.User} class="h-5 w-5" /> Profile</a>
+              </li>
+              <li>
+                <a href={resolve('/settings/secrets')}>
+                  <Icon src={icons.Key} class="h-5 w-5" /> Secrets
+                </a>
               </li>
               <li>
                 <button on:click={logout}>

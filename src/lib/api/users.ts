@@ -4,14 +4,12 @@ import type { components, operations } from '$lib/api/schema';
 
 type UserResponse = components['schemas']['UserResponse'];
 type InviteResponse = components['schemas']['InviteResponse'];
-type AuditLogItem = components['schemas']['AuditLogItem'];
 type AuditLogResponse = components['schemas']['AuditLogResponse'];
 type CreateUserPayload =
   operations['create_user_api_users_post']['requestBody']['content']['application/json'];
 type CreateUserResponse =
   operations['create_user_api_users_post']['responses'][201]['content']['application/json'];
-type AuditLogQuery =
-  operations['list_audit_log_api_users_audit_log_get']['parameters']['query'];
+type AuditLogQuery = operations['list_audit_log_api_users_audit_log_get']['parameters']['query'];
 
 async function expectNoContent(
   request: ReturnType<typeof apiRequest>,

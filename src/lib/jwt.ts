@@ -4,7 +4,7 @@ export function decodeJwt(token: string) {
 
   try {
     return JSON.parse(atob(payload));
-  } catch (e) {
+  } catch {
     return null;
   }
 }

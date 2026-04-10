@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import { resolve } from '$app/paths';
   import { Icon } from '@steeze-ui/svelte-icon';
   import * as icons from '@steeze-ui/heroicons';
 
@@ -74,13 +75,13 @@
         <div>
           <div class="text-base-content/60 text-xs tracking-[0.2em] uppercase">Current scope</div>
           <p class="mt-2 text-sm">
-            This is a lightweight profile seed based on `/api/me`. More account details can be
-            added here once the backend exposes them.
+            This is a lightweight profile seed based on `/api/me`. More account details can be added
+            here once the backend exposes them.
           </p>
         </div>
 
         <div class="flex justify-end gap-3">
-          <a href="/settings/secrets" class="btn btn-ghost btn-sm">
+          <a href={resolve('/settings/secrets')} class="btn btn-ghost btn-sm">
             <Icon src={icons.Key} class="h-4 w-4" />
             Secrets
           </a>
@@ -150,7 +151,9 @@
                 </div>
 
                 <div class="bg-base-200/60 rounded-2xl px-4 py-4">
-                  <div class="text-base-content/60 text-xs tracking-[0.2em] uppercase">Username</div>
+                  <div class="text-base-content/60 text-xs tracking-[0.2em] uppercase">
+                    Username
+                  </div>
                   <div class="mt-2 text-sm font-medium">{meUser.username}</div>
                 </div>
 
