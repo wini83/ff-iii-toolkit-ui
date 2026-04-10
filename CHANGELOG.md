@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.3.12](https://github.com/wini83/ff-iii-toolkit-ui/compare/v0.3.11...v0.3.12) (2026-04-10)
+
+### Features
+
+- **layout:** show vault session expiry ([f190e34](https://github.com/wini83/ff-iii-toolkit-ui/commit/f190e34c29b2d9ffa200a64c979822704fc20c5f))
+- **login:** restore hero status and tooltip ([a3e3735](https://github.com/wini83/ff-iii-toolkit-ui/commit/a3e37358a366fb9c85f6632335752dd30c8fce25))
+- **login:** show system health and version ([6781347](https://github.com/wini83/ff-iii-toolkit-ui/commit/6781347497f735fc051095c3de2636cdae138c9b))
+- **screening:** add Firefly account support ([33f7514](https://github.com/wini83/ff-iii-toolkit-ui/commit/33f751477e6cd88ef291aa7b4179e815eff60ed3))
+- **secrets:** add vault-gated secrets management UI ([407b073](https://github.com/wini83/ff-iii-toolkit-ui/commit/407b073df5eaba3e4167f6842faa5c28207ab1b6))
+- **tx:** add direct month navigation to screening ([64a0651](https://github.com/wini83/ff-iii-toolkit-ui/commit/64a06511edfbb4d7031275d817374f4582e77b86))
+- **ui:** merge dev into main – UI improvements and CI stabilization([#14](https://github.com/wini83/ff-iii-toolkit-ui/issues/14)) ([1ca8638](https://github.com/wini83/ff-iii-toolkit-ui/commit/1ca86383357d753d62cec780b39b7093362087d9))
+
+### Bug Fixes
+
+- **ci:** make lint pass in github actions ([e0f54c3](https://github.com/wini83/ff-iii-toolkit-ui/commit/e0f54c35c0ae4fe3bb56e682c01d5a6598a71464))
+- **ui:** adjust steps lint handling ([3a4ad83](https://github.com/wini83/ff-iii-toolkit-ui/commit/3a4ad838519d38b53518bf5bbb7506b7e6951667))
+- **ui:** keep navigation lint-safe ([be3dceb](https://github.com/wini83/ff-iii-toolkit-ui/commit/be3dceb077bfb5a37ecda1df9e9f33bebec78144))
+- **ui:** restore navigation and lint cleanup ([b380842](https://github.com/wini83/ff-iii-toolkit-ui/commit/b380842d2815277f3828f24f72a4f0f40a4fd319))
+
 ### [0.3.11](https://github.com/wini83/ff-iii-toolkit-ui/compare/v0.3.10...v0.3.11) (2026-04-03)
 
 ### Features
