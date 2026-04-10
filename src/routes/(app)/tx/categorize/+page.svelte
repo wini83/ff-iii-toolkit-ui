@@ -229,12 +229,14 @@
 
   function prevMonth() {
     const d = new Date(year, month - 2, 1);
-    goto(`${resolve('/tx/categorize')}?year=${d.getFullYear()}&month=${d.getMonth() + 1}`);
+    // eslint-disable-next-line svelte/no-navigation-without-resolve
+    goto(resolve('/tx/categorize') + `?year=${d.getFullYear()}&month=${d.getMonth() + 1}`);
   }
 
   function nextMonth() {
     const d = new Date(year, month, 1);
-    goto(`${resolve('/tx/categorize')}?year=${d.getFullYear()}&month=${d.getMonth() + 1}`);
+    // eslint-disable-next-line svelte/no-navigation-without-resolve
+    goto(resolve('/tx/categorize') + `?year=${d.getFullYear()}&month=${d.getMonth() + 1}`);
   }
 
   function jumpToPeriod() {
@@ -244,7 +246,8 @@
     if (nextMonth < 1 || nextMonth > 12) return;
     if (nextYear < 1) return;
 
-    goto(`${resolve('/tx/categorize')}?year=${nextYear}&month=${nextMonth}`);
+    // eslint-disable-next-line svelte/no-navigation-without-resolve
+    goto(resolve('/tx/categorize') + `?year=${nextYear}&month=${nextMonth}`);
   }
 
   onMount(() => {

@@ -66,9 +66,8 @@
   }
 
   async function goToPreview(result: CitiImportParseResponse) {
-    await goto(
-      `${resolve('/tools/citi/preview')}?file_id=${encodeURIComponent(result.file_id)}`
-    );
+    // eslint-disable-next-line svelte/no-navigation-without-resolve
+    await goto(resolve('/tools/citi/preview') + `?file_id=${encodeURIComponent(result.file_id)}`);
   }
 
   async function parseFile() {

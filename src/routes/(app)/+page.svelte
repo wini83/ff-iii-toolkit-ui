@@ -159,7 +159,9 @@
   <section class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
     {#each quickActions as action}
       {#if action.href === '#'}
-        <div class="card bg-base-100 transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-xl">
+        <div
+          class="card bg-base-100 transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-xl"
+        >
           <div class="card-body">
             <div class="flex items-start justify-between gap-3">
               <div class={`w-fit rounded-2xl p-3 ${toneClass(action.tone)}`}>
