@@ -27,7 +27,7 @@
         <a href="/" class="flex items-center gap-3">
           <img class="mask mask-squircle w-12" src="/logo_b.png" alt="Firefly Toolkit" />
           <div>
-            <div class="text-base-content/55 text-[11px] tracking-[0.22em] uppercase">Workspace</div>
+            <!-- <div class="text-base-content/55 text-[11px] tracking-[0.22em] uppercase">Workspace</div> -->
             <div class="text-xl font-semibold tracking-tight">Firefly Toolkit</div>
           </div>
         </a>
