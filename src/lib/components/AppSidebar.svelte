@@ -35,10 +35,7 @@
 
       <ul class="menu mt-4 flex-1 gap-3 p-0">
         <li>
-          <details
-            open
-            class="bg-base-100/70 rounded-[1.5rem] p-2"
-          >
+          <details open class="bg-base-100/70 rounded-[1.5rem] p-2">
             <summary
               class="hover:bg-base-200/80 flex cursor-pointer items-center gap-3 rounded-2xl px-3 py-3 font-medium"
             >
@@ -66,10 +63,7 @@
         </li>
 
         <li>
-          <details
-            open
-            class="bg-base-100/70 rounded-[1.5rem] p-2"
-          >
+          <details open class="bg-base-100/70 rounded-[1.5rem] p-2">
             <summary
               class="hover:bg-base-200/80 flex cursor-pointer items-center gap-3 rounded-2xl px-3 py-3 font-medium"
             >
@@ -97,10 +91,7 @@
         </li>
 
         <li>
-          <details
-            open
-            class="bg-base-100/70 rounded-[1.5rem] p-2"
-          >
+          <details open class="bg-base-100/70 rounded-[1.5rem] p-2">
             <summary
               class="hover:bg-base-200/80 flex cursor-pointer items-center gap-3 rounded-2xl px-3 py-3 font-medium"
             >
@@ -140,10 +131,7 @@
         </li>
 
         <li>
-          <details
-            open
-            class="bg-base-100/70 rounded-[1.5rem] p-2"
-          >
+          <details open class="bg-base-100/70 rounded-[1.5rem] p-2">
             <summary
               class="hover:bg-base-200/80 flex cursor-pointer items-center gap-3 rounded-2xl px-3 py-3 font-medium"
             >
@@ -172,10 +160,7 @@
 
         {#if isSuperuser}
           <li>
-            <details
-              open
-              class="bg-base-100/70 rounded-[1.5rem] p-2"
-            >
+            <details open class="bg-base-100/70 rounded-[1.5rem] p-2">
               <summary
                 class="hover:bg-base-200/80 flex cursor-pointer items-center gap-3 rounded-2xl px-3 py-3 font-medium"
               >

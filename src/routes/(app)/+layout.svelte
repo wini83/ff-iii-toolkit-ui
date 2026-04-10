@@ -314,7 +314,7 @@
           </div>
         </div>
 
-        <div class="flex-none flex items-center gap-2">
+        <div class="flex flex-none items-center gap-2">
           <div class="dropdown dropdown-end">
             <button
               tabindex="0"
@@ -345,7 +345,11 @@
                   {/if}
                 </div>
 
-                <button class="btn btn-ghost btn-xs" disabled={vaultLoading} on:click={() => refreshVaultStatus(true)}>
+                <button
+                  class="btn btn-ghost btn-xs"
+                  disabled={vaultLoading}
+                  on:click={() => refreshVaultStatus(true)}
+                >
                   {#if vaultLoading}
                     <span class="loading loading-spinner loading-xs"></span>
                   {:else}
@@ -367,7 +371,11 @@
                 </button>
               {:else if vaultStatus?.unlocked}
                 <div class="mt-4 flex gap-2">
-                  <button class="btn btn-outline btn-sm flex-1" disabled={vaultLocking} on:click={lockVaultFromLayout}>
+                  <button
+                    class="btn btn-outline btn-sm flex-1"
+                    disabled={vaultLocking}
+                    on:click={lockVaultFromLayout}
+                  >
                     {#if vaultLocking}
                       <span class="loading loading-spinner loading-sm"></span>
                     {:else}

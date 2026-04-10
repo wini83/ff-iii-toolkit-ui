@@ -75,7 +75,8 @@
     },
     {
       title: 'Import Tools',
-      description: 'Focused import flows for bank and file-based sources that need preview and export.',
+      description:
+        'Focused import flows for bank and file-based sources that need preview and export.',
       hrefs: [
         { label: 'Citi Import', href: '/tools/citi' },
         { label: 'Citi Preview', href: '/tools/citi/preview' }
@@ -86,9 +87,7 @@
     {
       title: 'Settings',
       description: 'Configuration entry points for integration secrets and application setup.',
-      hrefs: [
-        { label: 'Secrets', href: '/settings/secrets' }
-      ],
+      hrefs: [{ label: 'Secrets', href: '/settings/secrets' }],
       icon: icons.Key,
       tone: 'success'
     }
@@ -137,7 +136,9 @@
         class="bg-base-100/80 ring-base-200 flex flex-col justify-between gap-4 rounded-3xl p-5 shadow-sm ring-1"
       >
         <div>
-          <div class="text-base-content/60 text-xs tracking-[0.2em] uppercase">Recommended next step</div>
+          <div class="text-base-content/60 text-xs tracking-[0.2em] uppercase">
+            Recommended next step
+          </div>
           <p class="mt-2 text-sm">
             Start with the transaction screening queue or jump into a sync workflow that needs
             attention today.

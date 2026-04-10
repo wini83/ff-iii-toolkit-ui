@@ -330,7 +330,9 @@
 
         <div class="flex flex-col items-start gap-2 sm:items-end">
           <div class="badge badge-sm">
-            generated at: {formatTimestamp(data?.time_stamp)} in {formatFetchSeconds(data?.fetch_seconds)}
+            generated at: {formatTimestamp(data?.time_stamp)} in {formatFetchSeconds(
+              data?.fetch_seconds
+            )}
           </div>
           {#if networkError}
             <div class="badge badge-error badge-sm">Load failed</div>
@@ -444,7 +446,11 @@
           <p class="text-base-content/70 mt-2 max-w-md text-sm">
             Run a fresh statistics generation to populate this dashboard.
           </p>
-          <button class="btn btn-primary mt-6" on:click={() => loadStats(true)} disabled={refreshLoading}>
+          <button
+            class="btn btn-primary mt-6"
+            on:click={() => loadStats(true)}
+            disabled={refreshLoading}
+          >
             <Icon
               src={icons.ArrowPath}
               class={`h-5 w-5 ${refreshLoading || isRunning(statusData?.status) ? 'animate-spin' : ''}`}

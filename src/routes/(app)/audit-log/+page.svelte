@@ -215,7 +215,11 @@
           <div class="label">
             <span class="label-text font-medium">Target ID</span>
           </div>
-          <input class="input input-bordered" bind:value={targetId} placeholder="UUID or target ref" />
+          <input
+            class="input input-bordered"
+            bind:value={targetId}
+            placeholder="UUID or target ref"
+          />
         </label>
 
         <label class="form-control">
@@ -293,7 +297,11 @@
             </button>
           </div>
 
-          <button class="btn btn-ghost btn-sm" disabled={loading || refreshing} on:click={() => loadAuditLog(true)}>
+          <button
+            class="btn btn-ghost btn-sm"
+            disabled={loading || refreshing}
+            on:click={() => loadAuditLog(true)}
+          >
             {#if refreshing}
               <span class="loading loading-spinner loading-sm"></span>
             {:else}
@@ -357,7 +365,10 @@
                   <td class="font-mono text-xs">{item.actor_id}</td>
                   <td class="font-mono text-xs">{item.target_id ?? '-'}</td>
                   <td class="max-w-xl">
-                    <pre class="bg-base-200/60 max-h-40 overflow-auto rounded-2xl p-3 text-xs whitespace-pre-wrap">{formatMeta(item.meta)}</pre>
+                    <pre
+                      class="bg-base-200/60 max-h-40 overflow-auto rounded-2xl p-3 text-xs whitespace-pre-wrap">{formatMeta(
+                        item.meta
+                      )}</pre>
                   </td>
                 </tr>
               {/each}
@@ -373,7 +384,9 @@
               <div class="bg-base-100 rounded-[calc(1.75rem-1px)] p-5">
                 <div class="flex flex-wrap items-start justify-between gap-3">
                   <div>
-                    <div class="text-base-content/60 text-xs tracking-[0.2em] uppercase">Created</div>
+                    <div class="text-base-content/60 text-xs tracking-[0.2em] uppercase">
+                      Created
+                    </div>
                     <div class="mt-2 text-sm font-semibold">{formatDateTime(item.created_at)}</div>
                   </div>
                   <span class="badge badge-soft badge-primary">{item.action}</span>
@@ -392,7 +405,9 @@
 
                   <div class="bg-base-200/60 rounded-2xl px-4 py-3">
                     <div class="text-base-content/60 text-xs uppercase">Metadata</div>
-                    <pre class="mt-2 overflow-auto text-xs whitespace-pre-wrap">{formatMeta(item.meta)}</pre>
+                    <pre class="mt-2 overflow-auto text-xs whitespace-pre-wrap">{formatMeta(
+                        item.meta
+                      )}</pre>
                   </div>
                 </div>
               </div>

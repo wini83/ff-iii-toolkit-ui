@@ -21,7 +21,11 @@ export async function uploadTextFile(
   );
 
   if (!response.ok || error || !data) {
-    throw normalizeApiError(error, `Failed to upload Citi file (${response.status})`, response.status);
+    throw normalizeApiError(
+      error,
+      `Failed to upload Citi file (${response.status})`,
+      response.status
+    );
   }
 
   return data;
@@ -41,13 +45,20 @@ export async function parseRawText(
   );
 
   if (!response.ok || error || !data) {
-    throw normalizeApiError(error, `Failed to parse Citi text (${response.status})`, response.status);
+    throw normalizeApiError(
+      error,
+      `Failed to parse Citi text (${response.status})`,
+      response.status
+    );
   }
 
   return data;
 }
 
-export async function getFile(file_id: string, token?: string | null): Promise<CitiImportParseResponse> {
+export async function getFile(
+  file_id: string,
+  token?: string | null
+): Promise<CitiImportParseResponse> {
   const { data, error, response } = await apiRequest(
     (api, headers) =>
       api.GET('/api/tools/citi/files/{file_id}', {
@@ -58,7 +69,11 @@ export async function getFile(file_id: string, token?: string | null): Promise<C
   );
 
   if (!response.ok || error || !data) {
-    throw normalizeApiError(error, `Failed to load Citi file (${response.status})`, response.status);
+    throw normalizeApiError(
+      error,
+      `Failed to load Citi file (${response.status})`,
+      response.status
+    );
   }
 
   return data;
@@ -98,7 +113,10 @@ export async function exportCsvZip(file_id: string): Promise<{ blob: Blob; filen
   }
 
   const blob = await response.blob();
-  const filename = parseFilename(response.headers.get('content-disposition'), `citi-${file_id}.zip`);
+  const filename = parseFilename(
+    response.headers.get('content-disposition'),
+    `citi-${file_id}.zip`
+  );
 
   return { blob, filename };
 }

@@ -111,7 +111,8 @@
           <div>
             <h2 class="text-3xl font-semibold tracking-tight">Citi Preview & Export</h2>
             <p class="text-base-content/70 mt-2 max-w-2xl text-sm sm:text-base">
-              Open a saved result by `file_id`, inspect parsed records, and export the generated ZIP package.
+              Open a saved result by `file_id`, inspect parsed records, and export the generated ZIP
+              package.
             </p>
           </div>
         </div>
@@ -123,7 +124,8 @@
         <div>
           <div class="text-base-content/60 text-xs tracking-[0.2em] uppercase">Navigation</div>
           <p class="mt-2 text-sm">
-            Import runs in a separate flow. After a successful parse, this page becomes the review and export workspace for that `file_id`.
+            Import runs in a separate flow. After a successful parse, this page becomes the review
+            and export workspace for that `file_id`.
           </p>
         </div>
 

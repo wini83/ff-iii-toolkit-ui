@@ -37,7 +37,8 @@
     <div>
       <h3 class="card-title">Preview Workspace</h3>
       <p class="text-base-content/70 text-sm">
-        Open a saved result by `file_id`, review parsed rows, and export the CSV package when needed.
+        Open a saved result by `file_id`, review parsed rows, and export the CSV package when
+        needed.
       </p>
     </div>
 
@@ -74,7 +75,11 @@
         </div>
 
         <div class="flex w-full flex-col gap-2 sm:w-auto sm:min-w-64">
-          <button class="btn btn-primary" on:click={onExport} disabled={!currentFileId || exporting}>
+          <button
+            class="btn btn-primary"
+            on:click={onExport}
+            disabled={!currentFileId || exporting}
+          >
             {#if exporting}
               <span class="loading loading-spinner loading-sm"></span>
               Exporting...
@@ -133,7 +138,9 @@
           <div>
             <div class="font-medium">Parser warnings detected</div>
             <div class="text-sm">
-              Review the report before exporting. {warnings.length} warning{warnings.length === 1 ? '' : 's'} flagged.
+              Review the report before exporting. {warnings.length} warning{warnings.length === 1
+                ? ''
+                : 's'} flagged.
             </div>
           </div>
         </div>
@@ -142,7 +149,9 @@
       {#if previewRows.length === 0}
         <div role="alert" class="alert alert-info">
           <Icon src={icons.InformationCircle} class="h-5 w-5" />
-          <span>The file was parsed successfully, but the backend did not return any preview rows.</span>
+          <span
+            >The file was parsed successfully, but the backend did not return any preview rows.</span
+          >
         </div>
       {:else}
         <div class="w-full overflow-x-auto">
@@ -196,9 +205,7 @@
       <div class="mb-5 flex items-start justify-between gap-3">
         <div>
           <h3 class="text-lg font-semibold">Preview Report</h3>
-          <p class="text-base-content/70 text-sm">
-            Summary for the currently loaded Citi preview.
-          </p>
+          <p class="text-base-content/70 text-sm">Summary for the currently loaded Citi preview.</p>
         </div>
         <button
           class="btn btn-ghost btn-circle btn-sm"

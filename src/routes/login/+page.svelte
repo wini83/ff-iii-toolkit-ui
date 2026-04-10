@@ -59,11 +59,10 @@
       </div>
 
       <div class="relative z-10">
-        <div class="inline-flex items-center gap-3 rounded-full bg-white/10 px-4 py-2 text-sm backdrop-blur">
-          <span
-            class="tooltip tooltip-bottom inline-flex"
-            data-tip={getStatusTooltipText()}
-          >
+        <div
+          class="inline-flex items-center gap-3 rounded-full bg-white/10 px-4 py-2 text-sm backdrop-blur"
+        >
+          <span class="tooltip tooltip-bottom inline-flex" data-tip={getStatusTooltipText()}>
             <Icon src={getStatusIcon()} class="h-5 w-5" />
           </span>
           v{getVersionLabel()}

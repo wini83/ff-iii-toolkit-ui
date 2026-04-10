@@ -311,7 +311,7 @@
           <div class="grid gap-3 sm:grid-cols-[1fr_0.8fr_auto]">
             <label class="form-control">
               <div class="label py-1">
-                <span class="label-text text-xs font-medium uppercase tracking-[0.18em]">
+                <span class="label-text text-xs font-medium tracking-[0.18em] uppercase">
                   Month
                 </span>
               </div>
@@ -324,7 +324,7 @@
 
             <label class="form-control">
               <div class="label py-1">
-                <span class="label-text text-xs font-medium uppercase tracking-[0.18em]">
+                <span class="label-text text-xs font-medium tracking-[0.18em] uppercase">
                   Year
                 </span>
               </div>
@@ -410,7 +410,9 @@
             max={initialCount}
           ></progress>
 
-          <article class="from-base-100 to-base-200/60 rounded-[1.75rem] bg-gradient-to-br p-[1px] shadow-sm">
+          <article
+            class="from-base-100 to-base-200/60 rounded-[1.75rem] bg-gradient-to-br p-[1px] shadow-sm"
+          >
             <div class="bg-base-100 rounded-[calc(1.75rem-1px)] p-5">
               <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                 <div class="min-w-0">
@@ -492,7 +494,10 @@
                   <div class="label">
                     <span class="label-text font-medium">Category</span>
                   </div>
-                  <select class="select select-bordered w-full" bind:value={selectedCategories[currentTxId]}>
+                  <select
+                    class="select select-bordered w-full"
+                    bind:value={selectedCategories[currentTxId]}
+                  >
                     <option value="" disabled>Pick a category</option>
                     {#each data.categories as c}
                       <option value={c.id}>{c.name}</option>
@@ -523,7 +528,9 @@
             </div>
           </article>
 
-          <div class="flex flex-col gap-3 border-t border-base-200 pt-4 sm:flex-row sm:items-center sm:justify-between">
+          <div
+            class="border-base-200 flex flex-col gap-3 border-t pt-4 sm:flex-row sm:items-center sm:justify-between"
+          >
             <div class="text-base-content/70 text-sm">
               Remaining: {data.remaining} of {initialCount}
             </div>

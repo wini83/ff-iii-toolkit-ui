@@ -74,8 +74,8 @@
         <div>
           <div class="text-base-content/60 text-xs tracking-[0.2em] uppercase">Current scope</div>
           <p class="mt-2 text-sm">
-            This is a lightweight profile seed based on `/api/me`. More account details can be
-            added here once the backend exposes them.
+            This is a lightweight profile seed based on `/api/me`. More account details can be added
+            here once the backend exposes them.
           </p>
         </div>
 
@@ -150,7 +150,9 @@
                 </div>
 
                 <div class="bg-base-200/60 rounded-2xl px-4 py-4">
-                  <div class="text-base-content/60 text-xs tracking-[0.2em] uppercase">Username</div>
+                  <div class="text-base-content/60 text-xs tracking-[0.2em] uppercase">
+                    Username
+                  </div>
                   <div class="mt-2 text-sm font-medium">{meUser.username}</div>
                 </div>
 
