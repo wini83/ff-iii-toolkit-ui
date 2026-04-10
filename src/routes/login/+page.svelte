@@ -19,39 +19,24 @@
     error = form.error;
   }
 
-  function formatTimestamp(timestamp: string | undefined) {
-    if (!timestamp) return 'n/a';
-
-    const date = new Date(timestamp);
-    if (Number.isNaN(date.getTime())) return timestamp;
-
-    return new Intl.DateTimeFormat('en-GB', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit'
-    }).format(date);
+  function getVersionLabel() {
+    return data?.systemStatus?.version?.version ?? 'n/a';
   }
 
-  function getHealthBadgeClass(status: string | null | undefined) {
-    if (status === 'ok') return 'badge-success';
-    if (status === 'degraded') return 'badge-warning';
-    if (status === 'error') return 'badge-error';
-    return 'badge-ghost';
-  }
-
-  function getSystemStatusLabel() {
+  function getStatusIcon() {
     const health = data?.systemStatus?.health;
-    const version = data?.systemStatus?.version?.version;
+    if (health?.status === 'ok' && health.database === 'ok') {
+      return icons.ShieldCheck;
+    }
 
-    if (!health && !version) return 'System status unavailable';
+    return icons.ShieldExclamation;
+  }
 
-    return [
-      health ? `Health: ${health.status}` : 'Health: n/a',
-      version ? `Version: ${version}` : 'Version: n/a'
-    ].join(' · ');
+  function getStatusTooltipText() {
+    const health = data?.systemStatus?.health;
+    if (!health) return 'health: n/a | database: n/a';
+
+    return `health: ${health.status} | db: ${health.database}`;
   }
 </script>
 
@@ -74,11 +59,14 @@
       </div>
 
       <div class="relative z-10">
-        <div
-          class="inline-flex items-center gap-3 rounded-full bg-white/10 px-4 py-2 text-sm backdrop-blur"
-        >
-          <Icon src={icons.ShieldCheck} class="h-5 w-5" />
-          Secure access
+        <div class="inline-flex items-center gap-3 rounded-full bg-white/10 px-4 py-2 text-sm backdrop-blur">
+          <span
+            class="tooltip tooltip-bottom inline-flex"
+            data-tip={getStatusTooltipText()}
+          >
+            <Icon src={getStatusIcon()} class="h-5 w-5" />
+          </span>
+          v{getVersionLabel()}
         </div>
 
         <div class="mt-8 flex items-center gap-5">
@@ -159,42 +147,6 @@
 
           <div class="bg-base-200/60 rounded-2xl px-4 py-3 text-sm">
             Access is provided through administrator-created accounts.
-          </div>
-
-          <div class="bg-base-200/60 rounded-2xl px-4 py-4 text-sm">
-            <div class="flex items-start justify-between gap-3">
-              <div>
-                <div class="text-base-content/60 text-xs tracking-[0.2em] uppercase">
-                  System status
-                </div>
-                <div class="mt-2 font-medium">{getSystemStatusLabel()}</div>
-              </div>
-
-              {#if data?.systemStatus?.health}
-                <span class={`badge ${getHealthBadgeClass(data.systemStatus.health.status)}`}>
-                  {data.systemStatus.health.status}
-                </span>
-              {/if}
-            </div>
-
-            <div class="mt-3 grid gap-2 text-xs">
-              <div class="flex items-center justify-between gap-3">
-                <span class="text-base-content/60">Database</span>
-                <span class={`badge badge-sm ${data?.systemStatus?.health?.database === 'ok' ? 'badge-success' : data?.systemStatus?.health ? 'badge-error' : 'badge-ghost'}`}>
-                  {data?.systemStatus?.health?.database ?? 'n/a'}
-                </span>
-              </div>
-              <div class="flex items-center justify-between gap-3">
-                <span class="text-base-content/60">Bootstrapped</span>
-                <span class={`badge badge-sm ${data?.systemStatus?.health ? 'badge-info' : 'badge-ghost'}`}>
-                  {data?.systemStatus?.health ? (data.systemStatus.health.bootstrapped ? 'yes' : 'no') : 'n/a'}
-                </span>
-              </div>
-              <div class="flex items-center justify-between gap-3">
-                <span class="text-base-content/60">Version timestamp</span>
-                <span class="text-base-content/80">{formatTimestamp(data?.systemStatus?.version?.timestamp)}</span>
-              </div>
-            </div>
           </div>
 
           {#if error}
