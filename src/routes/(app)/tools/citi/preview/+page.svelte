@@ -1,5 +1,6 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
+  import { resolve } from '$app/paths';
   import { page } from '$app/stores';
   import { Icon } from '@steeze-ui/svelte-icon';
   import * as icons from '@steeze-ui/heroicons';
@@ -27,7 +28,7 @@
   async function syncUrl(fileId: string) {
     const next = new URL($page.url);
     next.searchParams.set('file_id', fileId);
-    await goto(`${next.pathname}?${next.searchParams.toString()}`, {
+    await goto(`${resolve('/tools/citi/preview')}?${next.searchParams.toString()}`, {
       replaceState: true,
       noScroll: true,
       keepFocus: true
@@ -130,7 +131,7 @@
         </div>
 
         <div class="flex flex-wrap gap-3">
-          <a href="/tools/citi" class="btn btn-outline btn-sm">
+          <a href={resolve('/tools/citi')} class="btn btn-outline btn-sm">
             <Icon src={icons.DocumentArrowUp} class="h-4 w-4" />
             Back to import
           </a>

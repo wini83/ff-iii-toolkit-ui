@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onDestroy, onMount, tick } from 'svelte';
   import { goto } from '$app/navigation';
+  import { resolve } from '$app/paths';
   import { page } from '$app/stores';
   import { Icon } from '@steeze-ui/svelte-icon';
   import * as icons from '@steeze-ui/heroicons';
@@ -395,11 +396,11 @@
   }
 
   function openPreview() {
-    goto(`/blik/file/${fileId}`);
+    goto(resolve(`/blik/file/${fileId}`));
   }
 
   function openUpload() {
-    goto('/blik/upload');
+    goto(resolve('/blik/upload'));
   }
 
   onMount(() => {

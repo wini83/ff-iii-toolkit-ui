@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { resolve } from '$app/paths';
   import { Icon } from '@steeze-ui/svelte-icon';
   import * as icons from '@steeze-ui/heroicons';
 
@@ -146,7 +147,7 @@
         </div>
 
         <div class="flex flex-wrap justify-end gap-3">
-          <a href="/tx/categorize" class="btn btn-primary">
+          <a href={resolve('/tx/categorize')} class="btn btn-primary">
             <Icon src={icons.DocumentMagnifyingGlass} class="h-5 w-5" />
             Open screening
           </a>
@@ -157,28 +158,48 @@
 
   <section class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
     {#each quickActions as action}
-      <a
-        href={action.href}
-        class="card bg-base-100 transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-xl"
-        aria-disabled={action.href === '#' ? 'true' : undefined}
-      >
-        <div class="card-body">
-          <div class="flex items-start justify-between gap-3">
-            <div class={`w-fit rounded-2xl p-3 ${toneClass(action.tone)}`}>
-              <Icon src={action.icon} class="h-5 w-5" />
+      {#if action.href === '#'}
+        <div class="card bg-base-100 transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-xl">
+          <div class="card-body">
+            <div class="flex items-start justify-between gap-3">
+              <div class={`w-fit rounded-2xl p-3 ${toneClass(action.tone)}`}>
+                <Icon src={action.icon} class="h-5 w-5" />
+              </div>
+              {#if 'badge' in action}
+                <span class="badge badge-outline badge-sm">{action.badge}</span>
+              {/if}
             </div>
-            {#if 'badge' in action}
-              <span class="badge badge-outline badge-sm">{action.badge}</span>
-            {/if}
-          </div>
-          <h3 class="mt-3 text-lg font-semibold">{action.title}</h3>
-          <p class="text-base-content/65 text-sm">{action.description}</p>
-          <div class="text-primary mt-4 inline-flex items-center gap-2 text-sm font-medium">
-            {'badge' in action ? 'Coming soon' : 'Open'}
-            <Icon src={'badge' in action ? icons.Clock : icons.ArrowRight} class="h-4 w-4" />
+            <h3 class="mt-3 text-lg font-semibold">{action.title}</h3>
+            <p class="text-base-content/65 text-sm">{action.description}</p>
+            <div class="text-primary mt-4 inline-flex items-center gap-2 text-sm font-medium">
+              {'badge' in action ? 'Coming soon' : 'Open'}
+              <Icon src={'badge' in action ? icons.Clock : icons.ArrowRight} class="h-4 w-4" />
+            </div>
           </div>
         </div>
-      </a>
+      {:else}
+        <a
+          href={resolve(action.href)}
+          class="card bg-base-100 transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-xl"
+        >
+          <div class="card-body">
+            <div class="flex items-start justify-between gap-3">
+              <div class={`w-fit rounded-2xl p-3 ${toneClass(action.tone)}`}>
+                <Icon src={action.icon} class="h-5 w-5" />
+              </div>
+              {#if 'badge' in action}
+                <span class="badge badge-outline badge-sm">{action.badge}</span>
+              {/if}
+            </div>
+            <h3 class="mt-3 text-lg font-semibold">{action.title}</h3>
+            <p class="text-base-content/65 text-sm">{action.description}</p>
+            <div class="text-primary mt-4 inline-flex items-center gap-2 text-sm font-medium">
+              {'badge' in action ? 'Coming soon' : 'Open'}
+              <Icon src={'badge' in action ? icons.Clock : icons.ArrowRight} class="h-4 w-4" />
+            </div>
+          </div>
+        </a>
+      {/if}
     {/each}
   </section>
 
@@ -210,10 +231,8 @@
               </div>
 
               <div class="mt-5 flex flex-wrap gap-2">
-                {#each section.hrefs as link}
-                  <a href={link.href} class="btn btn-ghost btn-sm">
-                    {link.label}
-                  </a>
+                {#each section.hrefs as link (link.href)}
+                  <a href={resolve(link.href)} class="btn btn-ghost btn-sm">{link.label}</a>
                 {/each}
               </div>
             </div>

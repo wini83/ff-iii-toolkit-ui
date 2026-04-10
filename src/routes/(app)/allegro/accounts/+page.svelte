@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
+  import { resolve } from '$app/paths';
   import { Icon } from '@steeze-ui/svelte-icon';
   import * as icons from '@steeze-ui/heroicons';
 
@@ -115,15 +116,15 @@
   }
 
   function openPayments(secretId: string) {
-    goto(`/allegro/${secretId}/payments`);
+    goto(resolve(`/allegro/${secretId}/payments`));
   }
 
   function openMatches(secretId: string) {
-    goto(`/allegro/${secretId}/matches`);
+    goto(resolve(`/allegro/${secretId}/matches`));
   }
 
   function openSettings() {
-    goto('/settings/secrets');
+    goto(resolve('/settings/secrets'));
   }
 
   onMount(() => {

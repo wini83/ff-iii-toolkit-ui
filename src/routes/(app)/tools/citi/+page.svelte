@@ -1,5 +1,6 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
+  import { resolve } from '$app/paths';
   import { Icon } from '@steeze-ui/svelte-icon';
   import * as icons from '@steeze-ui/heroicons';
   import { citi } from '$lib/api/citi';
@@ -65,7 +66,9 @@
   }
 
   async function goToPreview(result: CitiImportParseResponse) {
-    await goto(`/tools/citi/preview?file_id=${encodeURIComponent(result.file_id)}`);
+    await goto(
+      `${resolve('/tools/citi/preview')}?file_id=${encodeURIComponent(result.file_id)}`
+    );
   }
 
   async function parseFile() {
@@ -212,7 +215,7 @@
           </div>
         </div>
 
-        <a href="/tools/citi/preview" class="btn btn-outline btn-sm self-start">
+        <a href={resolve('/tools/citi/preview')} class="btn btn-outline btn-sm self-start">
           <Icon src={icons.DocumentMagnifyingGlass} class="h-4 w-4" />
           Open preview directly
         </a>

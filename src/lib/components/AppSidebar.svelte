@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { resolve } from '$app/paths';
   import { Icon } from '@steeze-ui/svelte-icon';
   import * as icons from '@steeze-ui/heroicons';
 
@@ -24,7 +25,7 @@
           ✕
         </button>
 
-        <a href="/" class="flex items-center gap-3">
+        <a href={resolve('/')} class="flex items-center gap-3">
           <img class="mask mask-squircle w-12" src="/logo_b.png" alt="Firefly Toolkit" />
           <div>
             <!-- <div class="text-base-content/55 text-[11px] tracking-[0.22em] uppercase">Workspace</div> -->
@@ -47,13 +48,13 @@
 
             <ul class="mt-2 space-y-1">
               <li>
-                <a href="/tx/categorize" class="rounded-xl">
+                <a href={resolve('/tx/categorize')} class="rounded-xl">
                   <Icon src={icons.DocumentMagnifyingGlass} class="h-5 w-5" />
                   Categorize
                 </a>
               </li>
               <li>
-                <a href="/tx/stats" class="rounded-xl">
+                <a href={resolve('/tx/stats')} class="rounded-xl">
                   <Icon src={icons.ChartBar} class="h-5 w-5" />
                   Stats
                 </a>
@@ -75,13 +76,13 @@
 
             <ul class="mt-2 space-y-1">
               <li>
-                <a href="/tools/citi" class="rounded-xl">
+                <a href={resolve('/tools/citi')} class="rounded-xl">
                   <Icon src={icons.DocumentArrowUp} class="h-5 w-5" />
                   Citi Import
                 </a>
               </li>
               <li>
-                <a href="/tools/citi/preview" class="rounded-xl">
+                <a href={resolve('/tools/citi/preview')} class="rounded-xl">
                   <Icon src={icons.DocumentMagnifyingGlass} class="h-5 w-5" />
                   Citi Preview
                 </a>
@@ -103,25 +104,25 @@
 
             <ul class="mt-2 space-y-1">
               <li>
-                <a href="/blik/upload" class="rounded-xl">
+                <a href={resolve('/blik/upload')} class="rounded-xl" data-sveltekit-reload="true">
                   <Icon src={icons.InboxArrowDown} class="h-5 w-5" />
                   File Upload
                 </a>
               </li>
               <li>
-                <a href="/blik/file" class="rounded-xl">
+                <a href={resolve('/blik/file')} class="rounded-xl" data-sveltekit-reload="true">
                   <Icon src={icons.DocumentCurrencyEuro} class="h-5 w-5" />
                   File Preview
                 </a>
               </li>
               <li>
-                <a href="/blik/file" class="rounded-xl">
+                <a href={resolve('/blik/file')} class="rounded-xl" data-sveltekit-reload="true">
                   <Icon src={icons.Bolt} class="h-5 w-5" />
                   Match & Update
                 </a>
               </li>
               <li>
-                <a href="/blik/stats" class="rounded-xl">
+                <a href={resolve('/blik/stats')} class="rounded-xl">
                   <Icon src={icons.ChartPie} class="h-5 w-5" />
                   Stats
                 </a>
@@ -143,13 +144,13 @@
 
             <ul class="mt-2 space-y-1">
               <li>
-                <a href="/allegro/accounts" class="rounded-xl">
+                <a href={resolve('/allegro/accounts')} class="rounded-xl">
                   <Icon src={icons.Key} class="h-5 w-5" />
                   Accounts
                 </a>
               </li>
               <li>
-                <a href="/allegro/stats" class="rounded-xl">
+                <a href={resolve('/allegro/stats')} class="rounded-xl">
                   <Icon src={icons.ChartBar} class="h-5 w-5" />
                   Stats
                 </a>
@@ -172,13 +173,13 @@
 
               <ul class="mt-2 space-y-1">
                 <li>
-                  <a href="/users" class="rounded-xl">
+                  <a href={resolve('/users')} class="rounded-xl">
                     <Icon src={icons.Users} class="h-5 w-5" />
                     Users
                   </a>
                 </li>
                 <li>
-                  <a href="/audit-log" class="rounded-xl">
+                  <a href={resolve('/audit-log')} class="rounded-xl">
                     <Icon src={icons.ClipboardDocumentList} class="h-5 w-5" />
                     Audit log
                   </a>

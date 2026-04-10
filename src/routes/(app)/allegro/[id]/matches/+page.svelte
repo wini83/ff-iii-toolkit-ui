@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onDestroy, onMount } from 'svelte';
   import { goto } from '$app/navigation';
+  import { resolve } from '$app/paths';
   import { page } from '$app/stores';
   import { Icon } from '@steeze-ui/svelte-icon';
   import * as icons from '@steeze-ui/heroicons';
@@ -378,7 +379,7 @@
   }
 
   function openPayments() {
-    goto(`/allegro/${secretId}/payments`);
+    goto(resolve(`/allegro/${secretId}/payments`));
   }
 
   onMount(() => {

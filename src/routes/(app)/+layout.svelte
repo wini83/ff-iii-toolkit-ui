@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
+  import { resolve } from '$app/paths';
   import { page } from '$app/stores';
 
   import { Icon } from '@steeze-ui/svelte-icon';
@@ -187,7 +188,7 @@
   }
 
   function openSecretsSettings() {
-    void goto('/settings/secrets');
+    void goto(resolve('/settings/secrets'));
   }
 
   async function logout() {
@@ -195,7 +196,7 @@
       await fetch('/logout', { method: 'POST' });
     } finally {
       meUser = null;
-      await goto('/login', { invalidateAll: true });
+      await goto(resolve('/login'), { invalidateAll: true });
     }
   }
 
@@ -454,9 +455,13 @@
             <ul
               class="menu menu-sm dropdown-content bg-base-100 rounded-box border-base-200 mt-3 w-56 border p-2 shadow-xl"
             >
-              <li><a href="/profile"><Icon src={icons.User} class="h-5 w-5" /> Profile</a></li>
               <li>
-                <a href="/settings/secrets"><Icon src={icons.Key} class="h-5 w-5" /> Secrets</a>
+                <a href={resolve('/profile')}><Icon src={icons.User} class="h-5 w-5" /> Profile</a>
+              </li>
+              <li>
+                <a href={resolve('/settings/secrets')}>
+                  <Icon src={icons.Key} class="h-5 w-5" /> Secrets
+                </a>
               </li>
               <li>
                 <button on:click={logout}>

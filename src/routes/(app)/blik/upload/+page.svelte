@@ -1,5 +1,6 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
+  import { resolve } from '$app/paths';
   import { Icon } from '@steeze-ui/svelte-icon';
   import * as icons from '@steeze-ui/heroicons';
   import Steps from '$lib/components/Steps.svelte';
@@ -24,7 +25,7 @@
         throw new Error('Nieprawidłowa odpowiedź backendu');
       }
 
-      await goto(`/blik/file/${data.id}`);
+      await goto(resolve(`/blik/file/${data.id}`));
     } catch (e: unknown) {
       console.error('UPLOAD ERROR', e);
       error = e instanceof Error ? e.message : 'Błąd podczas uploadu';

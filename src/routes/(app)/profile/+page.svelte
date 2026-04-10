@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import { resolve } from '$app/paths';
   import { Icon } from '@steeze-ui/svelte-icon';
   import * as icons from '@steeze-ui/heroicons';
 
@@ -80,7 +81,7 @@
         </div>
 
         <div class="flex justify-end gap-3">
-          <a href="/settings/secrets" class="btn btn-ghost btn-sm">
+          <a href={resolve('/settings/secrets')} class="btn btn-ghost btn-sm">
             <Icon src={icons.Key} class="h-4 w-4" />
             Secrets
           </a>

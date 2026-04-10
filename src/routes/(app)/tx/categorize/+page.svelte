@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
+  import { resolve } from '$app/paths';
   import { page } from '$app/stores';
   import { Icon } from '@steeze-ui/svelte-icon';
   import * as icons from '@steeze-ui/heroicons';
@@ -228,12 +229,12 @@
 
   function prevMonth() {
     const d = new Date(year, month - 2, 1);
-    goto(`?year=${d.getFullYear()}&month=${d.getMonth() + 1}`);
+    goto(`${resolve('/tx/categorize')}?year=${d.getFullYear()}&month=${d.getMonth() + 1}`);
   }
 
   function nextMonth() {
     const d = new Date(year, month, 1);
-    goto(`?year=${d.getFullYear()}&month=${d.getMonth() + 1}`);
+    goto(`${resolve('/tx/categorize')}?year=${d.getFullYear()}&month=${d.getMonth() + 1}`);
   }
 
   function jumpToPeriod() {
@@ -243,7 +244,7 @@
     if (nextMonth < 1 || nextMonth > 12) return;
     if (nextYear < 1) return;
 
-    goto(`?year=${nextYear}&month=${nextMonth}`);
+    goto(`${resolve('/tx/categorize')}?year=${nextYear}&month=${nextMonth}`);
   }
 
   onMount(() => {
