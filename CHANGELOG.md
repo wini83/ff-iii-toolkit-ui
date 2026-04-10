@@ -3,7 +3,6 @@
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
 ### [0.3.11](https://github.com/wini83/ff-iii-toolkit-ui/compare/v0.3.10...v0.3.11) (2026-04-03)
-
 ### Features
 
 - **secrets:** add vault-gated secrets management UI ([29e24e9](https://github.com/wini83/ff-iii-toolkit-ui/commit/29e24e9e410b1e01d070637fe998acafc55a80c7))
