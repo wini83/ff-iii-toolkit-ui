@@ -1,6 +1,7 @@
 import { fail, redirect, type Actions } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { propagateBackendAuthCookies, setAccessTokenCookie } from '$lib/server/auth-cookies';
+import { system } from '$lib/api/system';
 
 /**
  * Nie sprawdzamy żadnej konfiguracji runtime.
@@ -8,7 +9,17 @@ import { propagateBackendAuthCookies, setAccessTokenCookie } from '$lib/server/a
  * Jeśli nie – request się wywali i to jest OK.
  */
 export const load: PageServerLoad = async () => {
-  return {};
+  const [healthResult, versionResult] = await Promise.allSettled([
+    system.getHealth(),
+    system.getVersion()
+  ]);
+
+  return {
+    systemStatus: {
+      health: healthResult.status === 'fulfilled' ? healthResult.value : null,
+      version: versionResult.status === 'fulfilled' ? versionResult.value : null
+    }
+  };
 };
 
 export const actions: Actions = {

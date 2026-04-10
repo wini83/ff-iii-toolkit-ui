@@ -1,8 +1,15 @@
 <script lang="ts">
   import { Icon } from '@steeze-ui/svelte-icon';
   import * as icons from '@steeze-ui/heroicons';
+  import type { components } from '$lib/api/schema';
 
   export let form;
+  export let data: {
+    systemStatus?: {
+      health: components['schemas']['HealthResponse'] | null;
+      version: components['schemas']['VersionResponse'] | null;
+    };
+  };
 
   let username = '';
   let password = '';
@@ -10,6 +17,41 @@
 
   $: if (form?.error) {
     error = form.error;
+  }
+
+  function formatTimestamp(timestamp: string | undefined) {
+    if (!timestamp) return 'n/a';
+
+    const date = new Date(timestamp);
+    if (Number.isNaN(date.getTime())) return timestamp;
+
+    return new Intl.DateTimeFormat('en-GB', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    }).format(date);
+  }
+
+  function getHealthBadgeClass(status: string | null | undefined) {
+    if (status === 'ok') return 'badge-success';
+    if (status === 'degraded') return 'badge-warning';
+    if (status === 'error') return 'badge-error';
+    return 'badge-ghost';
+  }
+
+  function getSystemStatusLabel() {
+    const health = data?.systemStatus?.health;
+    const version = data?.systemStatus?.version?.version;
+
+    if (!health && !version) return 'System status unavailable';
+
+    return [
+      health ? `Health: ${health.status}` : 'Health: n/a',
+      version ? `Version: ${version}` : 'Version: n/a'
+    ].join(' · ');
   }
 </script>
 
@@ -117,6 +159,42 @@
 
           <div class="bg-base-200/60 rounded-2xl px-4 py-3 text-sm">
             Access is provided through administrator-created accounts.
+          </div>
+
+          <div class="bg-base-200/60 rounded-2xl px-4 py-4 text-sm">
+            <div class="flex items-start justify-between gap-3">
+              <div>
+                <div class="text-base-content/60 text-xs tracking-[0.2em] uppercase">
+                  System status
+                </div>
+                <div class="mt-2 font-medium">{getSystemStatusLabel()}</div>
+              </div>
+
+              {#if data?.systemStatus?.health}
+                <span class={`badge ${getHealthBadgeClass(data.systemStatus.health.status)}`}>
+                  {data.systemStatus.health.status}
+                </span>
+              {/if}
+            </div>
+
+            <div class="mt-3 grid gap-2 text-xs">
+              <div class="flex items-center justify-between gap-3">
+                <span class="text-base-content/60">Database</span>
+                <span class={`badge badge-sm ${data?.systemStatus?.health?.database === 'ok' ? 'badge-success' : data?.systemStatus?.health ? 'badge-error' : 'badge-ghost'}`}>
+                  {data?.systemStatus?.health?.database ?? 'n/a'}
+                </span>
+              </div>
+              <div class="flex items-center justify-between gap-3">
+                <span class="text-base-content/60">Bootstrapped</span>
+                <span class={`badge badge-sm ${data?.systemStatus?.health ? 'badge-info' : 'badge-ghost'}`}>
+                  {data?.systemStatus?.health ? (data.systemStatus.health.bootstrapped ? 'yes' : 'no') : 'n/a'}
+                </span>
+              </div>
+              <div class="flex items-center justify-between gap-3">
+                <span class="text-base-content/60">Version timestamp</span>
+                <span class="text-base-content/80">{formatTimestamp(data?.systemStatus?.version?.timestamp)}</span>
+              </div>
+            </div>
           </div>
 
           {#if error}
