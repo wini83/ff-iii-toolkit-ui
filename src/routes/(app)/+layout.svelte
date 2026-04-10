@@ -86,6 +86,27 @@
     return fallback;
   }
 
+  function formatDateTime(timestamp: string | null | undefined) {
+    if (!timestamp) return null;
+
+    const date = new Date(timestamp);
+    if (Number.isNaN(date.getTime())) return timestamp;
+
+    return new Intl.DateTimeFormat('pl-PL', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    }).format(date);
+  }
+
+  function getVaultExpiryText(status: VaultStatus | null) {
+    const expiry = formatDateTime(status?.expires_at);
+    return expiry ? `Vault session expires at ${expiry}` : null;
+  }
+
   function getVaultStatusMeta(status: VaultStatus | null) {
     if (!status) {
       return {
@@ -317,6 +338,11 @@
                   <div class="text-base-content/70 mt-1 text-xs">
                     {getVaultStatusMeta(vaultStatus).label}
                   </div>
+                  {#if getVaultExpiryText(vaultStatus)}
+                    <div class="text-base-content/60 mt-1 text-xs">
+                      {getVaultExpiryText(vaultStatus)}
+                    </div>
+                  {/if}
                 </div>
 
                 <button class="btn btn-ghost btn-xs" disabled={vaultLoading} on:click={() => refreshVaultStatus(true)}>
@@ -340,11 +366,6 @@
                   Open vault settings
                 </button>
               {:else if vaultStatus?.unlocked}
-                <div class="alert alert-success mt-4">
-                  <Icon src={icons.LockOpen} class="h-5 w-5" />
-                  <span>Vault is unlocked for the current session.</span>
-                </div>
-
                 <div class="mt-4 flex gap-2">
                   <button class="btn btn-outline btn-sm flex-1" disabled={vaultLocking} on:click={lockVaultFromLayout}>
                     {#if vaultLocking}
