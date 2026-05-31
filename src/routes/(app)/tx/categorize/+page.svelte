@@ -6,7 +6,7 @@
   import { Icon } from '@steeze-ui/svelte-icon';
   import * as icons from '@steeze-ui/heroicons';
 
-  import { getScreeningMonth, assignCategory, applyTag } from '$lib/api/tx';
+  import { getScreeningMonth, assignCategory, applyTag, getCategorySuggestions } from '$lib/api/tx';
   import type { operations, components } from '$lib/api/schema';
 
   type ScreeningMonthResponse =
@@ -14,13 +14,19 @@
 
   type TxTag = components['schemas']['TxTag'];
   type FireflyAccountRef = components['schemas']['SimplifiedAccountRef'];
+  type CategorySuggestion = components['schemas']['CategorySuggestionDto'];
 
   let loading = true;
   let error: string | null = null;
   let initialized = false;
+  let applyingCategory = false;
 
   let data: ScreeningMonthResponse | null = null;
   let initialCount = 0;
+  let categorySuggestions: CategorySuggestion[] = [];
+  let categorySuggestionsLoading = false;
+  let categorySuggestionsError: string | null = null;
+  let categorySuggestionsRequestId = 0;
 
   let year: number;
   let month: number;
@@ -54,6 +60,9 @@
   $: progressValue = data ? initialCount - data.remaining : 0;
   $: sourceAccount = currentTx ? getAccountSummary(currentTx.source_account) : null;
   $: destinationAccount = currentTx ? getAccountSummary(currentTx.destination_account) : null;
+  $: currentCategoryName = currentTx?.category?.trim() ?? '';
+  $: normalizedCurrentCategoryName = currentCategoryName.toLowerCase();
+  $: displayedCategorySuggestions = categorySuggestions.slice(0, 3);
 
   function toIdString(id: string | number): string {
     return String(id);
@@ -106,6 +115,64 @@
     }
   }
 
+  function clearCategorySuggestions() {
+    categorySuggestions = [];
+    categorySuggestionsError = null;
+    categorySuggestionsLoading = false;
+  }
+
+  function formatSuggestionConfidence(score: number) {
+    const normalizedScore = score > 1 ? score : score * 100;
+    const percent = Math.max(0, Math.min(100, Math.round(normalizedScore)));
+
+    return `${percent}%`;
+  }
+
+  function isCurrentCategorySuggestion(suggestion: CategorySuggestion) {
+    if (!normalizedCurrentCategoryName) return false;
+
+    return suggestion.category_name.trim().toLowerCase() === normalizedCurrentCategoryName;
+  }
+
+  async function loadCategorySuggestions(txId: number | string | null) {
+    const requestId = ++categorySuggestionsRequestId;
+
+    if (txId === null) {
+      clearCategorySuggestions();
+      return;
+    }
+
+    categorySuggestionsLoading = true;
+    categorySuggestionsError = null;
+
+    try {
+      const response = await getCategorySuggestions(Number(txId));
+
+      if (requestId !== categorySuggestionsRequestId) return;
+
+      categorySuggestions = response.suggestions.slice(0, 3);
+    } catch (e) {
+      if (requestId !== categorySuggestionsRequestId) return;
+
+      categorySuggestions = [];
+      categorySuggestionsError = e instanceof Error ? e.message : 'Failed to load suggestions';
+    } finally {
+      if (requestId === categorySuggestionsRequestId) {
+        categorySuggestionsLoading = false;
+      }
+    }
+  }
+
+  async function onCategoryApplied() {
+    if (!data || !data.transactions[cursor]) {
+      clearCategorySuggestions();
+      return;
+    }
+
+    ensureCategoryState(data.transactions[cursor].id);
+    await loadCategorySuggestions(data.transactions[cursor].id);
+  }
+
   function resolveYearMonth() {
     const params = $page.url.searchParams;
     const now = new Date();
@@ -128,6 +195,9 @@
         cursor = 0;
         selectedCategories = {};
         ensureCategoryState(data.transactions[0].id);
+        await loadCategorySuggestions(data.transactions[0].id);
+      } else {
+        clearCategorySuggestions();
       }
     } catch (e) {
       error = (e as Error).message;
@@ -136,12 +206,11 @@
     }
   }
 
-  async function applyCurrent() {
+  async function applyCategory(categoryId: number) {
     if (!currentTx || !data) return;
+    if (applyingCategory) return;
 
-    const rawValue = selectedCategories[toIdString(currentTx.id)];
-    const categoryId = Number(rawValue);
-    if (!categoryId) return;
+    applyingCategory = true;
 
     try {
       await assignCategory(Number(currentTx.id), categoryId);
@@ -157,22 +226,43 @@
 
       if (data.transactions[cursor]) {
         ensureCategoryState(data.transactions[cursor].id);
+        await loadCategorySuggestions(data.transactions[cursor].id);
       }
+
+      await onCategoryApplied();
 
       window.dispatchEvent(
         new CustomEvent('toast', {
-          detail: { type: 'success', msg: 'Category assigned' }
+          detail: { type: 'success', msg: 'Category applied' }
         })
       );
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to assign category';
+      const message = err instanceof Error ? err.message : 'Failed to apply category';
 
       window.dispatchEvent(
         new CustomEvent('toast', {
           detail: { type: 'error', msg: message }
         })
       );
+    } finally {
+      applyingCategory = false;
     }
+  }
+
+  async function applyCurrent() {
+    if (!currentTx || !data) return;
+
+    const rawValue = selectedCategories[toIdString(currentTx.id)];
+    const categoryId = Number(rawValue);
+    if (!categoryId) return;
+
+    await applyCategory(categoryId);
+  }
+
+  async function applySuggestedCategory(suggestion: CategorySuggestion) {
+    if (!currentTx || !data) return;
+
+    await applyCategory(Number(suggestion.category_id));
   }
 
   async function tagCurrentTx(tag: TxTag) {
@@ -217,6 +307,7 @@
     if (cursor > 0 && data) {
       cursor--;
       ensureCategoryState(data.transactions[cursor].id);
+      void loadCategorySuggestions(data.transactions[cursor].id);
     }
   }
 
@@ -224,6 +315,7 @@
     if (data && cursor < data.transactions.length - 1) {
       cursor++;
       ensureCategoryState(data.transactions[cursor].id);
+      void loadCategorySuggestions(data.transactions[cursor].id);
     }
   }
 
@@ -528,6 +620,73 @@
                   <Icon src={icons.Sparkles} class="h-5 w-5" />
                   Rule Potential
                 </button>
+              </div>
+
+              <div class="bg-base-200/60 mt-5 rounded-[1.5rem] p-4">
+                <div class="flex items-center justify-between gap-3">
+                  <div>
+                    <div
+                      class="text-base-content/60 text-[11px] font-medium tracking-[0.22em] uppercase"
+                    >
+                      Category suggestions
+                    </div>
+                    <p class="text-base-content/60 mt-1 text-xs">
+                      Review the top matches for this transaction.
+                    </p>
+                  </div>
+                </div>
+
+                {#if categorySuggestionsLoading}
+                  <div class="mt-4 space-y-2">
+                    <div class="skeleton h-14 w-full rounded-2xl"></div>
+                    <div class="skeleton h-14 w-full rounded-2xl"></div>
+                    <div class="skeleton h-14 w-full rounded-2xl"></div>
+                  </div>
+                {:else if categorySuggestionsError}
+                  <div class="alert alert-error mt-4 py-3">
+                    <Icon src={icons.ExclamationTriangle} class="h-5 w-5" />
+                    <span>{categorySuggestionsError}</span>
+                  </div>
+                {:else if displayedCategorySuggestions.length === 0}
+                  <div class="text-base-content/60 bg-base-100 mt-4 rounded-2xl px-4 py-4 text-sm">
+                    No category suggestions yet
+                  </div>
+                {:else}
+                  <div class="mt-4 space-y-2">
+                    {#each displayedCategorySuggestions as suggestion}
+                      <div
+                        class={`flex items-start gap-3 rounded-2xl border px-4 py-3 ${
+                          isCurrentCategorySuggestion(suggestion)
+                            ? 'border-primary bg-primary/5'
+                            : 'border-base-300 bg-base-100'
+                        }`}
+                      >
+                        <div class="min-w-0 flex-1">
+                          <div class="flex flex-wrap items-center gap-2">
+                            <div class="truncate font-medium">{suggestion.category_name}</div>
+                            <span class="badge badge-outline badge-sm">
+                              {formatSuggestionConfidence(suggestion.score)}
+                            </span>
+                            {#if isCurrentCategorySuggestion(suggestion)}
+                              <span class="badge badge-primary badge-sm">Current</span>
+                            {/if}
+                          </div>
+                          <div class="text-base-content/60 mt-1 text-xs leading-snug">
+                            {suggestion.reason}
+                          </div>
+                        </div>
+
+                        <button
+                          class="btn btn-primary btn-xs shrink-0"
+                          disabled={applyingCategory}
+                          on:click={() => applySuggestedCategory(suggestion)}
+                        >
+                          Apply
+                        </button>
+                      </div>
+                    {/each}
+                  </div>
+                {/if}
               </div>
             </div>
           </article>
