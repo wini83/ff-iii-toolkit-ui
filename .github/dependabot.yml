@@ -12,6 +12,12 @@ updates:
           - '@sveltejs/*'
           - 'vite*'
           - 'vitest*'
+          - '@tailwindcss/vite'
+      formatting:
+        patterns:
+          - 'prettier*'
+          - 'prettier-plugin-svelte*'
+          - 'prettier-plugin-tailwindcss*'
       testing-library:
         patterns:
           - '@testing-library/*'
