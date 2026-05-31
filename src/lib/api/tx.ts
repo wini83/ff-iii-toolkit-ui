@@ -4,6 +4,7 @@ import type { operations, components } from '$lib/api/schema';
 
 type TxTag = components['schemas']['TxTag'];
 type TxMetricsStatusResponse = components['schemas']['TxMetricsStatusResponse'];
+type CategorySuggestionsResponse = components['schemas']['CategorySuggestionsResponse'];
 
 type ScreeningMonthResponse =
   operations['get_screening_month_api_tx_screening_get']['responses'][200]['content']['application/json'];
@@ -64,6 +65,33 @@ export async function assignCategory(
   }
 
   throw new Error('Unexpected response from assignCategory');
+}
+
+export async function getCategorySuggestions(
+  txId: number,
+  token?: string | null
+): Promise<CategorySuggestionsResponse> {
+  const { data, error, response } = await apiRequest(
+    (api, headers) =>
+      api.GET('/api/tx/{tx_id}/category-suggestions', {
+        params: {
+          path: {
+            tx_id: txId
+          }
+        },
+        headers
+      }),
+    { token }
+  );
+
+  if (!response.ok || error || !data) {
+    if (error) {
+      throw normalizeApiError(error);
+    }
+    throw new Error(`Failed to load category suggestions (${response.status})`);
+  }
+
+  return data;
 }
 
 /* -----------------------------
