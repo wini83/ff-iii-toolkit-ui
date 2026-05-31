@@ -7,14 +7,10 @@ updates:
       interval: weekly
     open-pull-requests-limit: 5
     groups:
-      sveltejs:
+      frontend-core:
         patterns:
           - '@sveltejs/*'
-      vite:
-        patterns:
           - 'vite*'
-      vitest:
-        patterns:
           - 'vitest*'
       testing-library:
         patterns:
