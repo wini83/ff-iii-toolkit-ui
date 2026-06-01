@@ -4,10 +4,9 @@ All notable changes to this project will be documented in this file. See [standa
 
 ### [0.3.13](https://github.com/wini83/ff-iii-toolkit-ui/compare/v0.3.12...v0.3.13) (2026-06-01)
 
-
 ### Features
 
-* add category suggestions to tx categorize view ([20c5acd](https://github.com/wini83/ff-iii-toolkit-ui/commit/20c5acda8d7be039f74c4d092b2149fb51682f8b))
+- add category suggestions to tx categorize view ([20c5acd](https://github.com/wini83/ff-iii-toolkit-ui/commit/20c5acda8d7be039f74c4d092b2149fb51682f8b))
 
 ### [0.3.12](https://github.com/wini83/ff-iii-toolkit-ui/compare/v0.3.11...v0.3.12) (2026-04-10)
 
