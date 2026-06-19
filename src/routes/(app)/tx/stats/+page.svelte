@@ -189,7 +189,7 @@
   }
 
   function updateUiFromStatus(status: TxMetricsStatusResponse | null) {
-    const result = isDone(status?.status) ? status?.result ?? null : null;
+    const result = isDone(status?.status) ? (status?.result ?? null) : null;
     data = result;
 
     if (!result) {

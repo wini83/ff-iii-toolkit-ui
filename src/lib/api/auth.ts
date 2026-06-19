@@ -78,7 +78,7 @@ export async function apiRequest<T>(
 
   const client = await createApiClient();
   const useAuth = options?.auth !== false;
-  let token = useAuth ? options?.token ?? getStoredToken() : null;
+  let token = useAuth ? (options?.token ?? getStoredToken()) : null;
   const retryOnUnauthorized = options?.retryOnUnauthorized !== false;
 
   if (useAuth && !token) {
