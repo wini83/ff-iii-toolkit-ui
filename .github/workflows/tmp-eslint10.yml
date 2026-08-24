@@ -1,0 +1,30 @@
+name: Temporary ESLint 10 update
+
+on:
+  push:
+    branches:
+      - chore/eslint-10
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: chore/eslint-10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm install --save-dev @eslint/js@^10.0.1
+      - run: rm .github/workflows/tmp-eslint10.yml
+      - run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add package.json package-lock.json .github/workflows/tmp-eslint10.yml
+          git commit -m "deps(ui): bump @eslint/js to 10.0.1"
+          git push
