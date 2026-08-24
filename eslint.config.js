@@ -24,14 +24,6 @@ export default defineConfig(
     }
   },
   {
-    files: ['src/routes/(app)/+layout.svelte'],
-    rules: {
-      // ESLint 10 enables no-useless-assignment in eslint:recommended, but legacy Svelte
-      // reactive `$:` assignments are not modeled like ordinary JavaScript assignments.
-      'no-useless-assignment': 'off'
-    }
-  },
-  {
     languageOptions: {
       globals: { ...globals.browser, ...globals.node }
     },
