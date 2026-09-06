@@ -55,7 +55,7 @@
     "@steeze-ui/svelte-icon": "^1.6.2",
     "@sveltejs/adapter-node": "^5.5.7",
     "chart.js": "^4.5.1",
-    "daisyui": "^5.7.22",
+    "daisyui": "^5.7.28",
     "openapi-fetch": "^0.17.0",
     "svelte-hero-icons": "^5.2.0"
   }
