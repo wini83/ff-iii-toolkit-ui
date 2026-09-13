@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.3.14](https://github.com/wini83/ff-iii-toolkit-ui/compare/v0.3.12...v0.3.14) (2026-09-13)
+
+
+### Features
+
+* add category suggestions to tx categorize view ([20c5acd](https://github.com/wini83/ff-iii-toolkit-ui/commit/20c5acda8d7be039f74c4d092b2149fb51682f8b))
+* **release:** automate release flow ([#75](https://github.com/wini83/ff-iii-toolkit-ui/issues/75)) ([3b1d225](https://github.com/wini83/ff-iii-toolkit-ui/commit/3b1d22569ad6fa7ee15ae2292a9e6402e3150bc9))
+
 ### [0.3.13](https://github.com/wini83/ff-iii-toolkit-ui/compare/v0.3.12...v0.3.13) (2026-06-01)
 
 ### Features
