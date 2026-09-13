@@ -300,8 +300,7 @@
                   bind:value={rawText}
                   rows="13"
                   class="textarea textarea-bordered min-h-64 w-full"
-                  placeholder="Paste raw Citi text here..."
-                ></textarea>
+                  placeholder="Paste raw Citi text here..."></textarea>
               </div>
 
               <div class="text-base-content/60 text-sm">

@@ -19,7 +19,7 @@
   let offset = 0;
 
   $: secretId = $page.params.id;
-  $: accountLogin = payments.length > 0 ? payments[0]?.allegro_login ?? null : null;
+  $: accountLogin = payments.length > 0 ? (payments[0]?.allegro_login ?? null) : null;
   $: currentPage = Math.floor(offset / pageSize) + 1;
   $: hasNextPage = payments.length === pageSize;
 

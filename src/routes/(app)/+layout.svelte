@@ -22,8 +22,8 @@
   // prosty state dla drawer
   let drawerOpen = false;
   let meUser: MeUser | null = null;
-  let dynamicTitle = DEFAULT_APP_TITLE;
-  let headTitle = DEFAULT_APP_TITLE;
+  let dynamicTitle: string;
+  let headTitle: string;
   let theme: 'light' | 'dark' = 'light';
   let vaultStatus: VaultStatus | null = null;
   let vaultLoading = false;

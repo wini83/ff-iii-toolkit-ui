@@ -252,7 +252,7 @@
   }
 
   function updateUiFromStatus(status: BlikMetricsStatusResponse | null) {
-    const result = isDone(status?.status) ? status?.result ?? null : null;
+    const result = isDone(status?.status) ? (status?.result ?? null) : null;
     data = result;
 
     if (!result) {
